@@ -11,10 +11,10 @@ import java.net.URLEncoder;
  */
 public class Utils {
 //    将文字转码
-    public static String UrlEncoder(String value){
+    public static String UrlEncoder(String value,String charsetName){
         String reslut = null;
         try {
-            reslut = URLEncoder.encode(value,"UTF-8");
+            reslut = URLEncoder.encode(value,charsetName);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }

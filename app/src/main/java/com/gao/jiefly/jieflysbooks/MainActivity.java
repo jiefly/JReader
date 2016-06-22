@@ -2,30 +2,21 @@ package com.gao.jiefly.jieflysbooks;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.gao.jiefly.jieflysbooks.Model.Book;
 import com.gao.jiefly.jieflysbooks.Model.DataModelImpl;
 import com.gao.jiefly.jieflysbooks.Model.onDataStateListener;
-import com.gao.jiefly.jieflysbooks.Utils.Utils;
 
 import java.io.BufferedInputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -40,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);
-        String search = Utils.UrlEncoder("完美世界");
 
     }
 
@@ -48,17 +38,101 @@ public class MainActivity extends AppCompatActivity {
     public void onClick() {
         new DataModelImpl(new onDataStateListener() {
             @Override
+            public void onSuccess(Book result) {
+
+            }
+
+            @Override
+            public void onFailed() {
+
+            }
+        }).getBookSuscribe("完美世界");
+        /*new DataModelImpl(new onDataStateListener() {
+            @Override
             public void onSuccess(String result) {
                 Observable.just(result)
+                        .map(new Func1<String, Map<Integer, String>>() {
+                            @Override
+                            public Map<Integer, String> call(String s) {
+                                Pattern p = Pattern.compile("<title>(.*?)</title>");
+                                Matcher m = p.matcher(s);
+                                if (m.find()) {
+                                    Pattern pattern = Pattern.compile(".*?搜索.*?");
+                                    Map<Integer, String> result = new HashMap<Integer, String>();
+                                    if (pattern.matcher(m.group()).find()) {
+//                                        1：搜索结果
+//                                        0：直接抵达小说页面
+                                        result.put(1, s);
+                                    } else {
+                                        result.put(0, s);
+                                    }
+                                    return result;
+                                }
+                                return null;
+                            }
+                        })
+                        .map(new Func1<Map<Integer, String>, String>() {
+                            @Override
+                            public String call(Map<Integer, String> integerStringMap) {
+                                if (integerStringMap.containsKey(1))
+                                    return integerStringMap.get(1);
+                               return
+                            }
+                        })
+                        .map(new Func1<String, String>() {
+                            @Override
+                            public String call(String s) {
+                                Pattern p = Pattern.compile("<div class=\"list-lastupdate\"(.*?)<li>(.*?)</li>");
+                                Matcher m = p.matcher(s);
+                                if (m.find())
+                                    return m.group(2);
+                                return null;
+                            }
+                        })
+                        .map(new Func1<String, Book>() {
+                            @Override
+                            public Book call(String s) {
+                                Pattern p = Pattern.compile("<span class=\"class\">(.*?)</span><span class=\"name\"><a href=\"(.*?)\">(.*?)</a><small> / <a href=\"(.*?)\">(.*?)</a></small></span><span class=\"other\">(.*?)<small>14012K</small><small>(.*?)</small><small>(.*?)</small></span>");
+                                Matcher m = p.matcher(s);
+                                Book book = new Book();
+                                if (m.find()) {
+                                    book.setBookStyle(m.group(1));
+                                    book.setBookUrl(m.group(2));
+                                    book.setBookName(m.group(3));
+                                    book.setBookNewTopicUrl(m.group(4));
+                                    book.setBookNewTopicTitle(m.group(5));
+                                    book.setBookAuthor(m.group(6));
+                                    book.setBookLastUpdate(m.group(7));
+                                    book.setBookStatu(m.group(8));
+                                }
+                                return book;
+                            }
+                        })
+                        .map(new Func1<Book, String>() {
+                            @Override
+                            public String call(Book book) {
+                                return book.toString();
+                            }
+                        })
+                        .subscribeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Action1<String>() {
+                            @Override
+                            public void call(String s) {
+                                mIdTest.setText(s);
+                                Log.e("jielf", s);
+                            }
+                        });*/
+                /*Observable.just(result)
                         .subscribeOn(AndroidSchedulers.mainThread())
                         .map(new Func1<String, String>() {
                             @Override
                             public String call(String s) {
-                                Pattern p = Pattern.compile("id=\"newscontent\"(.*?)</div>");
+//                                Pattern p = Pattern.compile("id=\"newscontent\"(.*?)</div>");
+                                Pattern p = Pattern.compile("<ul class=\"clrfix\">(.*?)</ul>");
                                 Matcher m = p.matcher(s);
                                 while (m.find())
                                     return m.toMatchResult().group(1);
-                                return null;
+                                return s;
                             }
                         })
                         .flatMap(new Func1<String, Observable<String>>() {
@@ -73,19 +147,28 @@ public class MainActivity extends AppCompatActivity {
                                 return Observable.from(list);
                             }
                         })
-                        .flatMap(new Func1<String, Observable<String>>() {
+                        .flatMap(new Func1<String, Observable<Book>>() {
                             @Override
-                            public Observable<String> call(String s) {
-                                Pattern pattern = Pattern.compile("span>(.*?)</span>");
+                            public Observable<Book> call(String s) {
+                                Pattern pattern = Pattern.compile("<span class=\"class\">(.*?)</span><span class=\"name\"><a href=\"(.*?)\">(.*?)</a><small> <a href=\"(.*?)\">(.*?)</a></small></span><span class=\"other\">(.*?)<small>(.*?)</small><i>(.*?)</i></span>");
                                 Matcher m = pattern.matcher(s);
-                                List<String> list = new ArrayList<>();
-                                while (m.find())
-                                    list.add(m.group(1)+"\n");
+                                List<Book> list = new ArrayList<>();
+                                while (m.find()){
+                                    Book book = new Book();
+                                    book.setBookStyle(m.group(1));
+                                    book.setBookUrl(m.group(2));
+                                    book.setBookName(m.group(3));
+                                    book.setBookNewTopicUrl(m.group(4));
+                                    book.setBookNewTopicTitle(m.group(5));
+                                    book.setBookAuthor(m.group(6));
+                                    list.add(book);
+                                }
+//                               list.add(m.group(1)+":"+m.group(2)+"\n");
 //                                Log.e("jiefly", list.size()+"");
                                 return Observable.from(list);
                             }
                         })
-                        .subscribe(new Subscriber<String>() {
+                        .subscribe(new Subscriber<Book>() {
                             @Override
                             public void onCompleted() {
 
@@ -97,17 +180,18 @@ public class MainActivity extends AppCompatActivity {
                             }
 
                             @Override
-                            public void onNext(String s) {
-                                mIdTest.append(s+"\n");
+                            public void onNext(Book book) {
+                                mIdTest.append(book.toString()
+                                );
                             }
-                        });
+                        });*/
             }
 
-            @Override
+            /*@Override
             public void onFailed() {
 
             }
-        }).getDate("");
+        }).getBookSuscribe("黑铁之堡");*/
 
 
     }
@@ -181,8 +265,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });*/
 
-    class WebCon{
-        public String getWebCon(String pageURL,String encoding) {
+    class WebCon {
+        public String getWebCon(String pageURL, String encoding) {
             StringBuffer sb = new StringBuffer();
             GZIPInputStream gzip_in = null;
             byte[] buf = new byte[1024];
@@ -190,7 +274,7 @@ public class MainActivity extends AppCompatActivity {
                 URL url = new URL(pageURL);
                 //获得连接的编码形式！
                 URLConnection uc = url.openConnection();
-                System.err.println("--------------编码为 ：" + uc.getContentEncoding()+"--------");
+                System.err.println("--------------编码为 ：" + uc.getContentEncoding() + "--------");
                 gzip_in = new GZIPInputStream(new BufferedInputStream(
                         url.openStream()));
                 int num;
@@ -204,4 +288,4 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-}
+

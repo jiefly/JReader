@@ -6,6 +6,6 @@ package com.gao.jiefly.jieflysbooks.Model;
  * Fighting_jiiiiie
  */
 public interface onDataStateListener {
-    void onSuccess(String result);
+    void onSuccess(Book result);
     void onFailed();
 }
