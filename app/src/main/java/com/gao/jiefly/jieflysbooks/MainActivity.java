@@ -2,7 +2,9 @@ package com.gao.jiefly.jieflysbooks;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.gao.jiefly.jieflysbooks.Model.Book;
@@ -17,13 +19,19 @@ import java.util.zip.GZIPInputStream;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements onDataStateListener {
 
     @InjectView(R.id.id_test)
     TextView mIdTest;
     @InjectView(R.id.button)
     Button mButton;
+    @InjectView(R.id.editText)
+    EditText mEditText;
 
 
     @Override
@@ -34,19 +42,15 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    DataModelImpl dataModel;
+
     @OnClick(R.id.button)
     public void onClick() {
-        new DataModelImpl(new onDataStateListener() {
-            @Override
-            public void onSuccess(Book result) {
+        String s = mEditText.getText().toString();
+        dataModel = new DataModelImpl(this);
+        dataModel.getBookSuscribe(s);
 
-            }
 
-            @Override
-            public void onFailed() {
-
-            }
-        }).getBookSuscribe("完美世界");
         /*new DataModelImpl(new onDataStateListener() {
             @Override
             public void onSuccess(String result) {
@@ -185,7 +189,33 @@ public class MainActivity extends AppCompatActivity {
                                 );
                             }
                         });*/
+    }
+
+    @Override
+    public void onSuccess(Book result) {
+        Log.d("jiefly", "success");
+        final String s = dataModel.getBookTopic(result.getBookNewTopicUrl());
+//        mIdTest.setText(s);
+        Observable.create(new Observable.OnSubscribe<String>() {
+            @Override
+            public void call(Subscriber<? super String> subscriber) {
+                subscriber.onNext(s);
             }
+        })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<String>() {
+                    @Override
+                    public void call(String s) {
+                        mIdTest.setText(s);
+                    }
+                });
+    }
+
+    @Override
+    public void onFailed() {
+
+    }
 
             /*@Override
             public void onFailed() {
@@ -194,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
         }).getBookSuscribe("黑铁之堡");*/
 
 
-    }
+}
 
                 /*OkHttpClient okHttpClient = new OkHttpClient();
                 Response response = null;
@@ -265,27 +295,27 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });*/
 
-    class WebCon {
-        public String getWebCon(String pageURL, String encoding) {
-            StringBuffer sb = new StringBuffer();
-            GZIPInputStream gzip_in = null;
-            byte[] buf = new byte[1024];
-            try {
-                URL url = new URL(pageURL);
-                //获得连接的编码形式！
-                URLConnection uc = url.openConnection();
-                System.err.println("--------------编码为 ：" + uc.getContentEncoding() + "--------");
-                gzip_in = new GZIPInputStream(new BufferedInputStream(
-                        url.openStream()));
-                int num;
-                while ((num = gzip_in.read(buf, 0, buf.length)) != -1) {
-                    sb.append(new String(buf, encoding));
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+class WebCon {
+    public String getWebCon(String pageURL, String encoding) {
+        StringBuffer sb = new StringBuffer();
+        GZIPInputStream gzip_in = null;
+        byte[] buf = new byte[1024];
+        try {
+            URL url = new URL(pageURL);
+            //获得连接的编码形式！
+            URLConnection uc = url.openConnection();
+            System.err.println("--------------编码为 ：" + uc.getContentEncoding() + "--------");
+            gzip_in = new GZIPInputStream(new BufferedInputStream(
+                    url.openStream()));
+            int num;
+            while ((num = gzip_in.read(buf, 0, buf.length)) != -1) {
+                sb.append(new String(buf, encoding));
             }
-            return sb.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        return sb.toString();
     }
+}
 
 

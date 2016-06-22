@@ -12,8 +12,6 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import rx.Observable;
-
 /**
  * Created by jiefly on 2016/6/21.
  * Email:jiefly1993@gmail.com
@@ -75,9 +73,41 @@ public class DataModelImpl implements DataModel {
     }
 
     @Override
-    public Observable<String> getBookTopic(String url) {
+    public String getBookTopic(final String url) {
+        final StringBuilder stringBuilder = new StringBuilder();
+        /*new Thread(new Runnable() {
+            @Override
+            public void run() {
 
-        return null;
+            }
+        }).start();*/
+        Log.e("jiefly",url);
+        URL urlBookTopic;
+        String lines;
+        try {
+            BufferedReader bufferedReader;
+            HttpURLConnection connection;
+            urlBookTopic = new URL(url);
+
+            connection = (HttpURLConnection) urlBookTopic.openConnection();
+            bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "gbk"));
+            while ((lines = bufferedReader.readLine()) != null)
+                stringBuilder.append(lines);
+            Log.d("jiefly",stringBuilder.toString());
+            String tmp = Utils.delHTMLTag(stringBuilder.toString());
+            Log.d("jiefly",tmp);
+            Pattern p = Pattern.compile("下一章书签([\\w\\W]*)推荐上一章");
+            final Matcher m = p.matcher(tmp);
+            if (m.find())
+                Log.e("jiefly---",m.group(1));
+            if (stringBuilder.length()>0)
+                stringBuilder.delete(0,stringBuilder.length());
+            stringBuilder.append(m.group(1));
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return stringBuilder.toString();
 
     }
 
@@ -88,7 +118,7 @@ public class DataModelImpl implements DataModel {
         String tmp;
         if (m.find()) {
             tmp = m.group();
-            Log.e("jiefly", tmp);
+//            Log.e("jiefly", tmp);
         } else {
             mOnDataStateListener.onFailed();
             return null;
@@ -134,8 +164,8 @@ public class DataModelImpl implements DataModel {
             book.setBookStyle(m.group(1));
             book.setBookUrl("http://www.uctxt.com/"+m.group(2));
             book.setBookName(m.group(3));
-            book.setBookNewTopicUrl(m.group(4));
-            book.setBookNewTopicTitle("http://www.uctxt.com"+m.group(5));
+            book.setBookNewTopicUrl("http://www.uctxt.com"+m.group(4));
+            book.setBookNewTopicTitle(m.group(5));
             book.setBookAuthor(m.group(6));
             book.setBookTotalWords(Integer.parseInt(m.group(7).replaceAll("K", ""))*1000);
             book.setBookLastUpdate(m.group(8));
