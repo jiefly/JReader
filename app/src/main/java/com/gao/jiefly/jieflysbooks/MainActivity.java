@@ -1,5 +1,7 @@
 package com.gao.jiefly.jieflysbooks;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -8,6 +10,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.gao.jiefly.jieflysbooks.Model.Book;
+import com.gao.jiefly.jieflysbooks.Model.CustomDatabaseHelper;
 import com.gao.jiefly.jieflysbooks.Model.DataModelImpl;
 import com.gao.jiefly.jieflysbooks.Model.onDataStateListener;
 
@@ -195,6 +198,27 @@ public class MainActivity extends AppCompatActivity implements onDataStateListen
     public void onSuccess(Book result) {
         Log.d("jiefly", "success");
         final String s = dataModel.getBookTopic(result.getBookNewTopicUrl());
+        CustomDatabaseHelper databaseHelper = new CustomDatabaseHelper(getApplicationContext(),"bookStore.db",null,1);
+        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        db.delete("Book","author = ?",new String[]{"辰东"});
+        /*ContentValues contentValues = new ContentValues();
+        contentValues.put("author",result.getBookAuthor());
+        contentValues.put("name",result.getBookName());
+        contentValues.put("recentTopic",result.getBookNewTopic());
+        contentValues.put("recentTopicUrl",result.getBookNewTopicUrl());
+        contentValues.put("bookUrl",result.getBookUrl());
+        db.insert("Book",null,contentValues);
+*/
+        /*
+        * 查询数据
+        * */
+        Cursor cursor = db.query("Book",null,null,null,null,null,null);
+        if (cursor.moveToFirst()){
+            do {
+                String author = cursor.getString(cursor.getColumnIndex("author"));
+                Log.e("jiefly----db",author);
+            }while (cursor.moveToNext());
+        }
 //        mIdTest.setText(s);
         Observable.create(new Observable.OnSubscribe<String>() {
             @Override

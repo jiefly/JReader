@@ -39,6 +39,7 @@ public class DataModelImpl implements DataModel {
                     Log.e("jielfy", url.toString());
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "gbk"));
+//                    connection.disconnect();
                     String lines;
                     while ((lines = bufferedReader.readLine()) != null)
                         sb.append(lines);
