@@ -5,7 +5,7 @@
 	android:layout_height="match_parent">
 	<fragment android:layout_width="match_parent"
 	          android:id="@+id/id_test_fragment"
-	          android:name="com.gao.jiefly.jieflysbooks.View.FragmentReaderImpl"
+	          android:name="com.gao.jiefly.jieflysbooks.View.FragmentReaderContainer"
 	          android:layout_height="match_parent">
 	</fragment>
 

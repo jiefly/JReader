@@ -16,9 +16,12 @@ import com.gao.jiefly.jieflysbooks.Model.Book;
 import com.gao.jiefly.jieflysbooks.Model.DataModelImpl;
 import com.gao.jiefly.jieflysbooks.R;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import rx.Observable;
+import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
@@ -29,45 +32,38 @@ import rx.schedulers.Schedulers;
  */
 @SuppressLint("ValidFragment")
 public class FragmentReaderContainer extends Fragment implements ViewPager.OnPageChangeListener {
-    FragmentReaderImpl[] mFragments = new FragmentReaderImpl[3];
+    //    FragmentReaderImpl[] mFragments = new FragmentReaderImpl[3];
+    List<FragmentReaderImpl> mFragmentReaderList;
     Book mBook;
     DataModelImpl mDataModel;
     Observable mObservable = null;
+    ViewPager viewPager;
+    {
+        mFragmentReaderList = new ArrayList<>();
+        mFragmentReaderList.add(new FragmentReaderImpl());
+        mFragmentReaderList.add(new FragmentReaderImpl());
+        mFragmentReaderList.add(new FragmentReaderImpl());
+    }
 
-    @SuppressLint("ValidFragment")
-    public FragmentReaderContainer(Book book) {
+
+    public void setBook(Book book) {
         mBook = book;
     }
 
-    public FragmentReaderContainer(){
-        this(new Book());
-    }
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_read_container, container, false);
-        FragmentReaderImpl fragmentReader = new FragmentReaderImpl();
-        mFragments[0] = fragmentReader;
-        mFragments[1] = fragmentReader;
-        mFragments[2] = fragmentReader;
-        ViewPager viewPager = (ViewPager) view.findViewById(R.id.id_fragment_view_pager);
-        viewPager.setAdapter(new CustomFragmentPagerAdapter(getChildFragmentManager(), mFragments));
+         viewPager = (ViewPager) view.findViewById(R.id.id_fragment_view_pager);
+        viewPager.setAdapter(new CustomFragmentPagerAdapter(getChildFragmentManager()));
         viewPager.addOnPageChangeListener(this);
-        Observable.just(mBook.getBookNewTopicUrl())
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .observeOn(Schedulers.io())
-                .map(new Func1<String, String>() {
-                    @Override
-                    public String call(String s) {
-                        if (mDataModel != null)
-                            mDataModel = new DataModelImpl(null);
-                        assert mDataModel != null;
-                        return mDataModel.getBookTopic(s);
-                    }
-                });
+
         return view;
     }
+
 
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -75,16 +71,33 @@ public class FragmentReaderContainer extends Fragment implements ViewPager.OnPag
     }
 
     @Override
-    public void onPageSelected(int position) {
-        final int mPostion = position;
-        if (mObservable != null) {
-            mObservable.subscribe(new Action1() {
-                @Override
-                public void call(Object content) {
-                    (mFragments[mPostion]).showContent((String) content);
-                }
-            });
-        }
+    public void onPageSelected(final int position) {
+        Observable.just(mBook.getBookNewTopicUrl())
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(Schedulers.io())
+                .map(new Func1<String, String>() {
+                    @Override
+                    public String call(String s) {
+                        if (mDataModel == null)
+                            mDataModel = new DataModelImpl(null);
+                        return mDataModel.getBookTopic(s);
+                    }
+                }).subscribe(new Subscriber<String>() {
+            @Override
+            public void onCompleted() {
+
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.e("jiefly",e.getMessage());
+            }
+
+            @Override
+            public void onNext(String s) {
+                mFragmentReaderList.get(position).showContent(s);
+            }
+        });
     }
 
     @Override
@@ -93,26 +106,19 @@ public class FragmentReaderContainer extends Fragment implements ViewPager.OnPag
     }
 
     class CustomFragmentPagerAdapter extends FragmentPagerAdapter {
-        private FragmentReaderImpl[] mFragments;
 
-        public CustomFragmentPagerAdapter(FragmentManager fm, FragmentReaderImpl[] mFragments) {
+        public CustomFragmentPagerAdapter(FragmentManager fm) {
             super(fm);
-            if (mFragments.length != 3) {
-                Log.e("CustomFragmentAdapter", "Fragment size must be 3");
-            } else
-                this.mFragments = mFragments;
         }
 
         @Override
         public Fragment getItem(int position) {
-            Fragment fragment = mFragments[position % 3];
-            Log.e("jiefly","ooo");
-            return fragment;
+            return mFragmentReaderList.get(position);
         }
 
         @Override
         public int getCount() {
-            return mFragments.length;
+            return mFragmentReaderList.size();
         }
     }
 }

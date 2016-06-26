@@ -36,7 +36,7 @@ public class DataModelImpl implements DataModel {
                     //http://so.biquge.la/cse/search?q=%E5%AE%8C%E7%BE%8E%E4%B8%96%E7%95%8C&click=1&s=7138806708853866527&nsid=
 //                    http://www.uctxt.com/toplist/lastupdate-1
                     URL url = new URL("http://www.uctxt.com/modules/article/search.php?searchkey=" + Utils.UrlEncoder(bookName, "gbk"));
-                    Log.e("jielfy", url.toString());
+//                    Log.e("jielfy", url.toString());
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "gbk"));
 //                    connection.disconnect();
@@ -82,7 +82,7 @@ public class DataModelImpl implements DataModel {
 
             }
         }).start();*/
-        Log.e("jiefly",url);
+//        Log.e("jiefly",url);
         URL urlBookTopic;
         String lines;
         try {
@@ -94,9 +94,9 @@ public class DataModelImpl implements DataModel {
             bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "gbk"));
             while ((lines = bufferedReader.readLine()) != null)
                 stringBuilder.append(lines);
-            Log.d("jiefly",stringBuilder.toString());
+//            Log.d("jiefly",stringBuilder.toString());
             String tmp = Utils.delHTMLTag(stringBuilder.toString());
-            Log.d("jiefly",tmp);
+//            Log.d("jiefly",tmp);
             Pattern p = Pattern.compile("下一章书签([\\w\\W]*)推荐上一章");
             final Matcher m = p.matcher(tmp);
             if (m.find())
@@ -104,10 +104,11 @@ public class DataModelImpl implements DataModel {
             if (stringBuilder.length()>0)
                 stringBuilder.delete(0,stringBuilder.length());
             stringBuilder.append(m.group(1));
-
+//            stringBuilder.append(tmp);
         } catch (IOException e) {
             e.printStackTrace();
         }
+//        Log.e("jiefly---",stringBuilder.toString());
         return stringBuilder.toString();
 
     }

@@ -10,6 +10,10 @@ import android.widget.TextView;
 
 import com.gao.jiefly.jieflysbooks.R;
 
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+
 /**
  * Created by jiefly on 2016/6/23.
  * Email:jiefly1993@gmail.com
@@ -22,14 +26,23 @@ public class FragmentReaderImpl extends Fragment implements FragmentReader {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_read,container,false);
+        View view = inflater.inflate(R.layout.fragment_read, container, false);
         tvShowContent = (TextView) view.findViewById(R.id.id_fragment_tv);
         return view;
     }
 
     @Override
     public void showContent(String content) {
-        tvShowContent.setText(content);
+        if (tvShowContent != null){
+            Observable.just(content)
+                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Action1<String>() {
+                        @Override
+                        public void call(String s) {
+                            tvShowContent.setText(s);
+                        }
+                    });
+        }
     }
 
     @Override

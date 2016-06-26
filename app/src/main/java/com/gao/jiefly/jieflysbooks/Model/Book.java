@@ -14,32 +14,8 @@ public class Book {
     private String bookNewTopicUrl = null;
     private String bookLastUpdate = null;
     private String bookStatu = null;
-
-    public int getBookTotalWords() {
-        return bookTotalWords;
-    }
-
-    public void setBookTotalWords(int bookTotalWords) {
-        this.bookTotalWords = bookTotalWords;
-    }
-
     private int bookTotalWords;
 
-    public String getBookStatu() {
-        return bookStatu;
-    }
-
-    public void setBookStatu(String bookStatu) {
-        this.bookStatu = bookStatu;
-    }
-
-    public String getBookLastUpdate() {
-        return bookLastUpdate;
-    }
-
-    public void setBookLastUpdate(String bookLastUpdate) {
-        this.bookLastUpdate = bookLastUpdate;
-    }
 
     @Override
 
@@ -56,6 +32,24 @@ public class Book {
                 .append("总字数：").append(bookTotalWords).append("\n")
                 .append("小说状态：").append(bookStatu).append("\n");
         return stringBuilder.toString();
+    }
+    public int getBookTotalWords() {
+        return bookTotalWords;
+    }
+    public void setBookTotalWords(int bookTotalWords) {
+        this.bookTotalWords = bookTotalWords;
+    }
+    public String getBookStatu() {
+        return bookStatu;
+    }
+    public void setBookStatu(String bookStatu) {
+        this.bookStatu = bookStatu;
+    }
+    public String getBookLastUpdate() {
+        return bookLastUpdate;
+    }
+    public void setBookLastUpdate(String bookLastUpdate) {
+        this.bookLastUpdate = bookLastUpdate;
     }
     public String getBookStyle() {
         return bookStyle;
@@ -113,12 +107,5 @@ public class Book {
 
     public void setBookNewTopicUrl(String bookNewTopicUrl) {
         this.bookNewTopicUrl = bookNewTopicUrl;
-    }
-
-    class BookTopic{
-        String content;
-        String currentTopicUrl;
-        String nextTopicUrl;
-        String prevTopicUrl;
     }
 }
