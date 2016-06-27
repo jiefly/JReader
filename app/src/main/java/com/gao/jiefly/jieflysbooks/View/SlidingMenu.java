@@ -25,6 +25,14 @@ public class SlidingMenu extends HorizontalScrollView {
 
     private int mMneuWidth;
 
+   /* private int mLastX = 0;
+    private int mLaseY = 0;
+
+    private int mLastInterceptX = 0;
+    private int mLastInterceptY = 0;
+
+    private Scroller mScroller;
+    private VelocityTracker mVelocityTracker;*/
 
     private boolean isFirst = false;
 
@@ -35,9 +43,12 @@ public class SlidingMenu extends HorizontalScrollView {
         windowManager.getDefaultDisplay().getMetrics(displayMetrics);
         mScreenWidth = displayMetrics.widthPixels;
         //dp -> px
-        mMenuRightPadding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, context.getResources().getDisplayMetrics());
+        mMenuRightPadding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, mMneuWidth, context.getResources().getDisplayMetrics());
 
-
+       /* if (mScroller == null) {
+            mScroller = new Scroller(getContext());
+            mVelocityTracker = VelocityTracker.obtain();
+        }*/
     }
 
 
@@ -79,7 +90,6 @@ public class SlidingMenu extends HorizontalScrollView {
                     this.smoothScrollTo(0, 0);
                 }
                 return true;
-
         }
         return super.onTouchEvent(ev);
     }

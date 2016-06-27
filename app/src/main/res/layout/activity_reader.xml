@@ -4,31 +4,43 @@
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:paddingBottom="@dimen/activity_vertical_margin"
-	android:paddingLeft="@dimen/activity_horizontal_margin"
-	android:paddingRight="@dimen/activity_horizontal_margin"
-	android:paddingTop="@dimen/activity_vertical_margin"
 	tools:context="com.gao.jiefly.jieflysbooks.View.ReaderActivity">
-	<HorizontalScrollView
+	<com.gao.jiefly.jieflysbooks.View.SlidingMenu
 		android:layout_width="match_parent"
-
-		android:layout_height="match_parent">
+		android:layout_height="match_parent"
+		android:layout_alignParentLeft="true" android:layout_alignParentStart="true"
+		android:layout_alignParentTop="true" android:scrollbars="none">
 		<LinearLayout
+
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
 			android:orientation="horizontal">
 			<LinearLayout
 				android:id="@+id/id_reader_left"
 
-				android:layout_width="200dp"
+				android:layout_width="match_parent"
 
 				android:layout_height="match_parent"
 				android:background="#0d0"
 				android:orientation="vertical">
+				<RelativeLayout android:layout_width="match_parent"
+				                android:layout_height="50dp">
+					<TextView android:layout_width="wrap_content"
+					          android:layout_height="match_parent"
+					          android:text="目录"
+					          android:textSize="30sp"
+					          android:layout_alignParentStart="true"
+					          android:textStyle="bold" android:layout_alignParentLeft="true"/>
+					<Button android:id="@+id/id_reader_left_order_btn"
+					        android:layout_width="wrap_content"
+					        android:layout_height="wrap_content"
+					        android:layout_alignParentEnd="true"
+					        android:layout_alignParentRight="true"/>
+				</RelativeLayout>
 				<android.support.v7.widget.RecyclerView
+					android:id="@+id/id_reader_left_recycle_view"
 					android:layout_width="match_parent"
-					android:layout_height="wrap_content">
-
+					android:layout_height="wrap_content" android:padding="10dp">
 				</android.support.v7.widget.RecyclerView>
 
 			</LinearLayout>
@@ -42,31 +54,36 @@
 				android:orientation="vertical">
 				<TextView
 					android:id="@+id/id_reader_topic_title"
-
-
+					android:text="第一百章：hello world"
 					android:layout_width="match_parent"
-					android:layout_height="0dp"
-					android:layout_weight="1"/>
+					android:layout_height="wrap_content"
+					android:gravity="center_vertical|start"
+					android:layout_gravity="center_vertical|start"
+					/>
 				<ScrollView
 					android:layout_width="match_parent"
 					android:layout_height="0dp"
-					android:layout_weight="20">
-
+					android:layout_weight="1"
+					android:background="#0a0">
 					<TextView
 						android:id="@+id/id_reader_topic_content"
+						android:background="#909"
+						android:text=""
 						android:layout_width="match_parent"
-						android:layout_height="wrap_content"/>
-
+						android:layout_height="match_parent"/>
 				</ScrollView>
 
 				<TextView
 					android:id="@+id/id_reader_phone_info"
 					android:layout_width="match_parent"
-					android:layout_height="0dp"
-					android:layout_weight="1"/>
+					android:layout_height="wrap_content"
+					android:layout_gravity="center_vertical|start"
+					android:text="测试测试测试测试测试"
+				    android:gravity="center_vertical|start"
+					/>
 			</LinearLayout>
 		</LinearLayout>
 
-	</HorizontalScrollView>
+	</com.gao.jiefly.jieflysbooks.View.SlidingMenu>
 
 </RelativeLayout>
