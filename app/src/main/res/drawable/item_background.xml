@@ -32,7 +32,7 @@
 
 	<!-- 填充 -->
 	<solid
-		android:color="#7e482f4b"/><!-- 填充的颜色 -->
+		android:color="#7e273c75"/><!-- 填充的颜色 -->
 
 <!--	 描边
 	<stroke

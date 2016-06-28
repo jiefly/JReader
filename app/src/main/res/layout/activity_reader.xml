@@ -50,7 +50,7 @@
 				android:layout_width="match_parent"
 
 				android:layout_height="match_parent"
-				android:background="#818b81"
+				android:background="#c1a3c1"
 				android:orientation="vertical">
 				<TextView
 					android:id="@+id/id_reader_topic_title"
@@ -63,11 +63,9 @@
 				<ScrollView
 					android:layout_width="match_parent"
 					android:layout_height="0dp"
-					android:layout_weight="1"
-					android:background="#0a0">
+					android:layout_weight="1">
 					<TextView
 						android:id="@+id/id_reader_topic_content"
-						android:background="#909"
 						android:text=""
 						android:layout_width="match_parent"
 						android:layout_height="match_parent"/>

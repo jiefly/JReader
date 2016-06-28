@@ -1,8 +1,12 @@
 package com.gao.jiefly.jieflysbooks.Utils;
 
+import com.gao.jiefly.jieflysbooks.Model.Chapter;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -89,5 +93,16 @@ public class Utils {
         return htmlStr.trim(); // 返回文本字符串
     }
 
+    public static List<Chapter> getChapterListFromHtml(String srcString){
+        List<Chapter> result = new LinkedList<>();
+        String regexGetChapterList = "<dd><a href=\"(.*?)\">(.*?)</a></dd>";
+        Pattern pattern = Pattern.compile(regexGetChapterList);
+        Matcher matcher = pattern.matcher(srcString);
+        int index = 0;
+        while (matcher.find()){
+            result.add(new Chapter(matcher.group(1),matcher.group(2),index++));
+        }
+        return result;
+    }
 
 }

@@ -1,11 +1,13 @@
 package com.gao.jiefly.jieflysbooks.View;
 
+import android.app.Activity;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.*;
+import android.view.LayoutInflater;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -25,16 +27,16 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
-public class ReaderActivity extends AppCompatActivity {
+public class ReaderActivity extends Activity {
     List<String> data = new ArrayList<>();
     @InjectView(R.id.id_reader_left_order_btn)
     Button mIdReaderLeftOrderBtn;
-    /*@InjectView(R.id.id_reader_topic_title)
-    TextView mIdReaderTopicTitle;*/
+    @InjectView(R.id.id_reader_topic_title)
+    TextView mIdReaderTopicTitle;
     @InjectView(R.id.id_reader_topic_content)
     TextView mIdReaderTopicContent;
-    /*@InjectView(R.id.id_reader_phone_info)
-    TextView mIdReaderPhoneInfo;*/
+    @InjectView(R.id.id_reader_phone_info)
+    TextView mIdReaderPhoneInfo;
 
     DataModelImpl mDataModel;
     Book mBook;
@@ -45,6 +47,9 @@ public class ReaderActivity extends AppCompatActivity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_reader);
         ButterKnife.inject(this);
+        Bundle bundle = this.getIntent().getBundleExtra("bookbundle");
+        mBook = (Book) bundle.getSerializable("book");
+        Log.d("readerActivity",mBook.toString());
         initData();
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.id_reader_left_recycle_view);
         RecyclerView.LayoutManager manager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
@@ -54,8 +59,6 @@ public class ReaderActivity extends AppCompatActivity {
             recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
             recyclerView.setAdapter(new CustomRecycleAdapter());
         }
-        mBook = new Book();
-        mBook.setBookNewTopicUrl("http://www.uctxt.com/book/1/1269/4662467.html");
         Observable.just(mBook.getBookNewTopicUrl())
                 .observeOn(Schedulers.io())
                 .map(new Func1<String, String>() {
@@ -87,6 +90,7 @@ public class ReaderActivity extends AppCompatActivity {
                             @Override
                             public void call(String s) {
                                 mIdReaderTopicContent.setText(s);
+                                mIdReaderTopicTitle.setText(mBook.getBookNewTopicTitle());
                             }
                         });
             }

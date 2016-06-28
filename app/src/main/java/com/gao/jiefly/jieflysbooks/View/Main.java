@@ -1,6 +1,7 @@
 package com.gao.jiefly.jieflysbooks.View;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,7 +19,7 @@ import com.gao.jiefly.jieflysbooks.Model.DataModelImpl;
 import com.gao.jiefly.jieflysbooks.Model.onDataStateListener;
 import com.gao.jiefly.jieflysbooks.R;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import rx.Observable;
@@ -33,35 +34,56 @@ import rx.schedulers.Schedulers;
  * Fighting_jiiiiie
  */
 public class Main extends Activity implements View, onDataStateListener {
-    private List<Book> data = new ArrayList<>();
+    private List<Book> data = new LinkedList<>();
     DataModelImpl dataModel;
     BookListRecycleViewAdapter adapter;
+    Book book;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         dataModel = new DataModelImpl(this);
-        dataModel.getBookSuscribe("完美世界");
-        Book book = new Book();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                dataModel.getBookSuscribe("完美世界");
+                dataModel.getBookSuscribe("飞天");
+                dataModel.getBookSuscribe("寒门状元");
+                dataModel.getBookSuscribe("黑铁之堡");
+                dataModel.getBookSuscribe("一念永恒");
+                dataModel.getBookSuscribe("巫神记");
+                dataModel.getBookSuscribe("五行天");
+            }
+        }).start();
+        /*book = new Book();
         book.setBookAuthor("jiefly");
         book.setBookName("hello world");
         book.setBookLastUpdate("2016.6.23");
         book.setBookNewTopicTitle("这是一个测试");
         book.setBookNewTopicUrl("");
 
-        for (int i = 10; i > 0; i--)
+        for (int i = 10; i > 0; i--) {
             data.add(book);
+        }*/
+
 
         adapter = new BookListRecycleViewAdapter();
 
         adapter.setOnItemClickListener(new OnItemClickListener() {
             @Override
-            public void onItemClick(android.view.View view, int position) {
-                Toast.makeText(getApplicationContext(), position + "click", Toast.LENGTH_SHORT).show();
+            public void onItemClick(android.view.View view, final int position) {
+                Toast.makeText(getApplicationContext(), position - 1 + "click", Toast.LENGTH_SHORT).show();
                 if (data.get(position - 1) != null && data.get(position - 1).getBookNewTopicUrl().startsWith("http://")) {
-                    Observable.just(data.get(position - 1).getBookNewTopicUrl())
+                    Observable.just(data.get(position - 1))
                             .observeOn(Schedulers.io())
+                            .map(new Func1<Book, String>() {
+                                @Override
+                                public String call(Book book) {
+
+                                    return book.getBookNewTopicUrl();
+                                }
+                            })
                             .map(new Func1<String, String>() {
                                 @Override
                                 public String call(String s) {
@@ -72,7 +94,13 @@ public class Main extends Activity implements View, onDataStateListener {
                             .subscribe(new Action1<String>() {
                                 @Override
                                 public void call(String s) {
-                                    Log.e("jiefly", s);
+//                                    Log.e("jiefly", s);
+                                    Intent intent = new Intent();
+                                    intent.setClass(Main.this, ReaderActivity.class);
+                                    Bundle bundle = new Bundle();
+                                    bundle.putSerializable("book", data.get(position -1));
+                                    intent.putExtra("bookbundle", bundle);
+                                    startActivity(intent);
                                 }
                             });
                 }
@@ -121,7 +149,7 @@ public class Main extends Activity implements View, onDataStateListener {
                     @Override
                     public void call(Book book) {
                         data.add(book);
-                        adapter.notifyItemInserted(2);
+                        adapter.notifyItemInserted(0);
                     }
                 });
     }
@@ -133,6 +161,7 @@ public class Main extends Activity implements View, onDataStateListener {
 
     public interface OnItemClickListener {
         void onItemClick(android.view.View view, int position);
+
         void onItemLongClick(android.view.View view, int position);
     }
 

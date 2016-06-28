@@ -1,11 +1,14 @@
 package com.gao.jiefly.jieflysbooks.Model;
 
+import java.io.Serializable;
+
 /**
  * Created by jiefly on 2016/6/21.
  * Email:jiefly1993@gmail.com
  * Fighting_jiiiiie
  */
-public class Book {
+public class Book implements Serializable{
+    private static final long serialVersionUID = -7060210544600464481L;
     private String bookName = null;
     private String bookAuthor = null;
     private String bookNewTopic;

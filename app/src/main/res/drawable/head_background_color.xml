@@ -8,9 +8,9 @@
 
 	 <!--渐变-->
 	<gradient
-		android:startColor="#a1a4a7"
-		android:centerColor="#4da235"
-		android:endColor="#bd0707"
+		android:startColor="#b1d0ee"
+		android:centerColor="#8e998b"
+		android:endColor="#75808183"
 		android:angle="45"
 		/>
 	<!--	 间隔
