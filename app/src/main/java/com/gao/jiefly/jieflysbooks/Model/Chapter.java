@@ -6,6 +6,10 @@ package com.gao.jiefly.jieflysbooks.Model;
  * Fighting_jiiiiie
  */
 public class Chapter {
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     private String url;
     private String name;
     private int index;

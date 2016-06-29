@@ -93,4 +93,8 @@ public class SlidingMenu extends HorizontalScrollView {
         }
         return super.onTouchEvent(ev);
     }
+
+    public void showContent(){
+        this.smoothScrollTo(mMneuWidth,0);
+    }
 }

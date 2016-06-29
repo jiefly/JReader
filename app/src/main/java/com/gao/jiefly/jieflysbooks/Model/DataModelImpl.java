@@ -6,6 +6,7 @@ import com.gao.jiefly.jieflysbooks.Utils.Utils;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,7 +22,16 @@ public class DataModelImpl implements DataModel {
     public DataModelImpl(onDataStateListener onDataStateListener) {
         mOnDataStateListener = onDataStateListener;
     }
-
+    public List<Chapter> getChapterList(String url) throws MalformedURLException {
+        URL urll = new URL(url);
+        String srcHtml = new BaseHttpURLClient().getWebResourse(urll);
+        List<Chapter> result = Utils.getChapterListFromHtml(srcHtml);
+        for (Chapter c:result){
+//            拼接好地址
+            c.setUrl(url+"/"+c.getUrl());
+        }
+        return result;
+    }
     @Override
     public void getBookSuscribe(final String bookName) {
         try {
@@ -35,7 +45,6 @@ public class DataModelImpl implements DataModel {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-
         /*new Thread(new Runnable() {
             @Override
             public void run() {

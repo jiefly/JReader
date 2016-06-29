@@ -6,20 +6,26 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.gao.jiefly.jieflysbooks.Model.Book;
+import com.gao.jiefly.jieflysbooks.Model.Chapter;
 import com.gao.jiefly.jieflysbooks.Model.DataModelImpl;
 import com.gao.jiefly.jieflysbooks.R;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.OnClick;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -40,6 +46,13 @@ public class ReaderActivity extends Activity {
 
     DataModelImpl mDataModel;
     Book mBook;
+    List<Chapter> mChapterList = new LinkedList<>();
+
+    CustomRecycleAdapter mRecycleAdapter = null;
+    @InjectView(R.id.id_reader_layout)
+    SlidingMenu mIdReaderLayout;
+    @InjectView(R.id.id_reader_scroll_view)
+    ScrollView mIdReaderScrollView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,80 +62,148 @@ public class ReaderActivity extends Activity {
         ButterKnife.inject(this);
         Bundle bundle = this.getIntent().getBundleExtra("bookbundle");
         mBook = (Book) bundle.getSerializable("book");
-        Log.d("readerActivity",mBook.toString());
-        initData();
+        Log.d("readerActivity", mBook.toString());
+//        initData();
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.id_reader_left_recycle_view);
         RecyclerView.LayoutManager manager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
 
         if (recyclerView != null) {
             recyclerView.setLayoutManager(manager);
             recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
-            recyclerView.setAdapter(new CustomRecycleAdapter());
+            mRecycleAdapter = new CustomRecycleAdapter();
+            mRecycleAdapter.setOnItemClickListener(new OnItemClickListener() {
+                @Override
+                public void onItemClick(View view, int position) {
+                    Observable.just(mChapterList.get(position))
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(new Action1<Chapter>() {
+                                @Override
+                                public void call(Chapter chapter) {
+                                    setContentText(chapter.getUrl());
+                                    mIdReaderTopicTitle.setText(chapter.getName());
+                                    mIdReaderLayout.showContent();
+                                    mIdReaderScrollView.scrollTo(0, 0);
+                                }
+                            });
+                }
+            });
+            recyclerView.setAdapter(mRecycleAdapter);
         }
-        Observable.just(mBook.getBookNewTopicUrl())
+        setContentText(mBook.getBookNewTopicUrl());
+        mIdReaderTopicTitle.setText(mBook.getBookNewTopicTitle());
+    }
+
+    private void setContentText(String url) {
+        Observable.just(url)
                 .observeOn(Schedulers.io())
                 .map(new Func1<String, String>() {
                     @Override
                     public String call(String s) {
                         if (mDataModel == null)
                             mDataModel = new DataModelImpl(null);
+                        initData();
                         return mDataModel.getBookTopic(s);
                     }
                 })
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<String>() {
-            @Override
-            public void onCompleted() {
+                    @Override
+                    public void onCompleted() {
 
-            }
+                    }
 
-            @Override
-            public void onError(Throwable e) {
-                Log.e("jiefly", e.getMessage());
-            }
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e("jiefly", e.getMessage());
+                    }
 
-            @Override
-            public void onNext(String s) {
+                    @Override
+                    public void onNext(String s) {
 //                mIdReaderTopicContent.setText(s);
-                Observable.just(s)
-                        .subscribeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Action1<String>() {
-                            @Override
-                            public void call(String s) {
-                                mIdReaderTopicContent.setText(s);
-                                mIdReaderTopicTitle.setText(mBook.getBookNewTopicTitle());
-                            }
-                        });
-            }
-        });
+                        Observable.just(s)
+                                .subscribeOn(AndroidSchedulers.mainThread())
+                                .subscribe(new Action1<String>() {
+                                    @Override
+                                    public void call(String s) {
+                                        mIdReaderTopicContent.setText(s);
+
+                                    }
+                                });
+                    }
+                });
+    }
+    //    ture :正序排列
+//    false: 倒序排列
+    private boolean orderBy = true;
+    @OnClick(R.id.id_reader_left_order_btn)
+    public void onClick() {
+        orderBy = !orderBy;
     }
 
+    public interface OnItemClickListener {
+        void onItemClick(View view, int position);
+    }
 
     private void initData() {
-        for (int i = 100; i > 0; i--)
-            data.add("hello" + i);
+        Observable.just(mBook)
+                .subscribeOn(Schedulers.io())
+                .map(new Func1<Book, List<Chapter>>() {
+                    @Override
+                    public List<Chapter> call(Book book) {
+                        List<Chapter> result = null;
+                        try {
+                            result = mDataModel.getChapterList(book.getBookUrl());
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        }
+
+                        return result;
+                    }
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<List<Chapter>>() {
+                    @Override
+                    public void call(List<Chapter> chapters) {
+                        mChapterList = chapters;
+                        mRecycleAdapter.notifyItemChanged(0);
+                    }
+                });
+        /*for (int i = 100; i > 0; i--)
+            data.add("hello" + i);*/
     }
 
     class CustomRecycleAdapter extends RecyclerView.Adapter<CustomRecycleAdapter.ViewHolder> {
+        OnItemClickListener mListener = null;
+
+        public void setOnItemClickListener(OnItemClickListener listener) {
+            mListener = listener;
+        }
+
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             return new ViewHolder(LayoutInflater.from(ReaderActivity.this).inflate(R.layout.reader_item, parent, false));
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-            holder.mTextView.setText(data.get(position));
+        public void onBindViewHolder(ViewHolder holder, final int position) {
+            holder.mTextView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mListener.onItemClick(v, position);
+                }
+            });
+            holder.mTextView.setText(mChapterList.get(position).getName());
         }
 
         @Override
         public int getItemCount() {
-            return data.size();
+            return mChapterList.size();
         }
 
         class ViewHolder extends RecyclerView.ViewHolder {
             TextView mTextView;
 
-            public ViewHolder(android.view.View itemView) {
+            public ViewHolder(View itemView) {
                 super(itemView);
                 mTextView = (TextView) itemView.findViewById(R.id.reader_item_tv);
             }

@@ -5,7 +5,7 @@ package com.gao.jiefly.jieflysbooks.Model;
  * Email:jiefly1993@gmail.com
  * Fighting_jiiiiie
  */
-public class BookTopic {
+public class BookChapter {
     String content;
     String currentTopicName;
     String nextTopicName;
@@ -13,7 +13,7 @@ public class BookTopic {
     String currentTopicUrl;
     String nextTopicUrl;
     String prevTopicUrl;
-    public BookTopic(String content,String currentTopicUrl,String nextTopicUrl,String prevTopicUrl){
+    public BookChapter(String content, String currentTopicUrl, String nextTopicUrl, String prevTopicUrl){
         this.content = content;
         this.currentTopicUrl = currentTopicUrl;
         this.nextTopicUrl = nextTopicUrl;

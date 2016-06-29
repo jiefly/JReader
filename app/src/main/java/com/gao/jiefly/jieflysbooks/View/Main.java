@@ -1,20 +1,28 @@
 package com.gao.jiefly.jieflysbooks.View;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gao.jiefly.jieflysbooks.Model.Book;
+import com.gao.jiefly.jieflysbooks.Model.CustomDatabaseHelper;
 import com.gao.jiefly.jieflysbooks.Model.DataModelImpl;
 import com.gao.jiefly.jieflysbooks.Model.onDataStateListener;
 import com.gao.jiefly.jieflysbooks.R;
@@ -34,53 +42,50 @@ import rx.schedulers.Schedulers;
  * Fighting_jiiiiie
  */
 public class Main extends Activity implements View, onDataStateListener {
+    private int cursorPosition;
     private List<Book> data = new LinkedList<>();
     DataModelImpl dataModel;
     BookListRecycleViewAdapter adapter;
-    Book book;
+    PopupWindow mPopupWindow = null;
+    EditText etAddBookName;
+    CustomDatabaseHelper databaseHelper;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         dataModel = new DataModelImpl(this);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                dataModel.getBookSuscribe("完美世界");
-                dataModel.getBookSuscribe("飞天");
-                dataModel.getBookSuscribe("寒门状元");
-                dataModel.getBookSuscribe("黑铁之堡");
-                dataModel.getBookSuscribe("一念永恒");
-                dataModel.getBookSuscribe("巫神记");
-                dataModel.getBookSuscribe("五行天");
-            }
-        }).start();
+        databaseHelper = new CustomDatabaseHelper(getApplicationContext(), "bookStore.db", null, 1);
         /*book = new Book();
         book.setBookAuthor("jiefly");
         book.setBookName("hello world");
         book.setBookLastUpdate("2016.6.23");
         book.setBookNewTopicTitle("这是一个测试");
         book.setBookNewTopicUrl("");
-
         for (int i = 10; i > 0; i--) {
             data.add(book);
         }*/
-
+        addData();
 
         adapter = new BookListRecycleViewAdapter();
 
         adapter.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(android.view.View view, final int position) {
-                Toast.makeText(getApplicationContext(), position - 1 + "click", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), position + "click", Toast.LENGTH_SHORT).show();
+                if (position == 0) {
+                    if (mPopupWindow == null) {
+                        initPopupWindow();
+                    }
+                    mPopupWindow.showAtLocation(((ViewGroup) Main.this.findViewById(android.R.id.content)).getChildAt(0), Gravity.NO_GRAVITY, 0, 0);
+                    return;
+                }
                 if (data.get(position - 1) != null && data.get(position - 1).getBookNewTopicUrl().startsWith("http://")) {
                     Observable.just(data.get(position - 1))
                             .observeOn(Schedulers.io())
                             .map(new Func1<Book, String>() {
                                 @Override
                                 public String call(Book book) {
-
                                     return book.getBookNewTopicUrl();
                                 }
                             })
@@ -98,7 +103,7 @@ public class Main extends Activity implements View, onDataStateListener {
                                     Intent intent = new Intent();
                                     intent.setClass(Main.this, ReaderActivity.class);
                                     Bundle bundle = new Bundle();
-                                    bundle.putSerializable("book", data.get(position -1));
+                                    bundle.putSerializable("book", data.get(position - 1));
                                     intent.putExtra("bookbundle", bundle);
                                     startActivity(intent);
                                 }
@@ -118,6 +123,60 @@ public class Main extends Activity implements View, onDataStateListener {
             recyclerView.setLayoutManager(manager);
             recyclerView.setAdapter(adapter);
         }
+    }
+
+    private void addData() {
+        SQLiteDatabase db = databaseHelper.getReadableDatabase();
+        /*
+        * 查询数据
+        * */
+        Cursor cursor = db.query("Book", null, null, null, null, null, null);
+        data.clear();
+        if (cursor.moveToFirst()) {
+            do {
+                Book book = new Book();
+                book.setBookAuthor(cursor.getString(cursor.getColumnIndex("author")));
+                book.setBookName(cursor.getString(cursor.getColumnIndex("name")));
+                book.setBookNewTopicTitle(cursor.getString(cursor.getColumnIndex("recentTopic")));
+                book.setBookNewTopicUrl(cursor.getString(cursor.getColumnIndex("recentTopicUrl")));
+                book.setBookUrl(cursor.getString(cursor.getColumnIndex("recentTopicUrl")));
+                data.add(book);
+                Log.e("jiefly----db", book.toString());
+            } while (cursor.moveToNext());
+        }
+       /* if (data.size() > 0)
+            adapter.notifyItemInserted(0);*/
+    }
+
+    private void initPopupWindow() {
+        android.view.View popupWindow = LayoutInflater.from(Main.this).inflate(R.layout.add_book_popupwindow, null);
+        mPopupWindow = new PopupWindow(popupWindow, WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT);
+        mPopupWindow.setFocusable(true);
+        etAddBookName = (EditText) popupWindow.findViewById(R.id.id_popup_book_name_et);
+//                        取消
+        Button btnCancle = (Button) popupWindow.findViewById(R.id.id_popup_cancle_btn);
+        btnCancle.setOnClickListener(new android.view.View.OnClickListener() {
+            @Override
+            public void onClick(android.view.View v) {
+                mPopupWindow.dismiss();
+            }
+        });
+//                        确定
+        Button btnConfirm = (Button) popupWindow.findViewById(R.id.id_popup_confirm_btn);
+        btnConfirm.setOnClickListener(new android.view.View.OnClickListener() {
+            @Override
+            public void onClick(android.view.View v) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        dataModel.getBookSuscribe(etAddBookName.getText().toString());
+                        Log.e("jieflyu",etAddBookName.getText().toString());
+                    }
+                }).start();
+                mPopupWindow.dismiss();
+
+            }
+        });
     }
 
     @Override
@@ -144,14 +203,21 @@ public class Main extends Activity implements View, onDataStateListener {
     @Override
     public void onSuccess(Book result) {
         Observable.just(result)
-                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
                 .subscribe(new Action1<Book>() {
                     @Override
-                    public void call(Book book) {
-                        data.add(book);
-                        adapter.notifyItemInserted(0);
+                    public void call(Book result) {
+                        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put("author", result.getBookAuthor());
+                        contentValues.put("name", result.getBookName());
+                        contentValues.put("recentTopic", result.getBookNewTopic());
+                        contentValues.put("recentTopicUrl", result.getBookNewTopicUrl());
+                        contentValues.put("bookUrl", result.getBookUrl());
+                        db.insert("Book", null, contentValues);
                     }
                 });
+        adapter.notifyItemChanged(0);
     }
 
     @Override
@@ -204,16 +270,18 @@ public class Main extends Activity implements View, onDataStateListener {
         public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
             if (holder instanceof HeadViewHolder) {
                 HeadViewHolder headViewHolder = (HeadViewHolder) holder;
+                final int finalPosition = position;
                 headViewHolder.btnAddBook.setOnClickListener(new android.view.View.OnClickListener() {
                     @Override
                     public void onClick(android.view.View v) {
-                        Log.e("jiefly", "add book button clicked!");
+                        mListener.onItemClick(v, finalPosition);
                     }
                 });
                 headViewHolder.ivHead.setImageDrawable(getDrawable(R.drawable.head_canvas));
             } else if (holder instanceof ItemViewHolder) {
-                position--;
+                position -= 1;
                 final ItemViewHolder itemViewHolder = (ItemViewHolder) holder;
+                Log.e("onBindViewHolder", position + "<--->" + data.get(position));
                 itemViewHolder.tvBookAuthor.setText(data.get(position).getBookAuthor());
                 itemViewHolder.tvBookName.setText(data.get(position).getBookName());
                 itemViewHolder.tvRecentUpdateTopic.setText(data.get(position).getBookNewTopicTitle());

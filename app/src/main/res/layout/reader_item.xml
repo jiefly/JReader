@@ -9,6 +9,6 @@
 	          android:layout_marginBottom="10dp"
 	          android:gravity="center_vertical|start"
 	          android:text="test"
-	android:textSize="30sp"/>
+	android:textSize="18sp"/>
 
 </LinearLayout>

@@ -8,6 +8,7 @@
 	<com.gao.jiefly.jieflysbooks.View.SlidingMenu
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
+		android:id="@+id/id_reader_layout"
 		android:layout_alignParentLeft="true" android:layout_alignParentStart="true"
 		android:layout_alignParentTop="true" android:scrollbars="none">
 		<LinearLayout
@@ -21,19 +22,20 @@
 				android:layout_width="match_parent"
 
 				android:layout_height="match_parent"
-				android:background="#0d0"
+				android:background="#9d997b"
 				android:orientation="vertical">
 				<RelativeLayout android:layout_width="match_parent"
 				                android:layout_height="50dp">
 					<TextView android:layout_width="wrap_content"
 					          android:layout_height="match_parent"
 					          android:text="目录"
-					          android:textSize="30sp"
+					          android:textSize="20sp"
 					          android:layout_alignParentStart="true"
 					          android:textStyle="bold" android:layout_alignParentLeft="true"/>
 					<Button android:id="@+id/id_reader_left_order_btn"
 					        android:layout_width="wrap_content"
 					        android:layout_height="wrap_content"
+					        android:text="倒序"
 					        android:layout_alignParentEnd="true"
 					        android:layout_alignParentRight="true"/>
 				</RelativeLayout>
@@ -63,7 +65,9 @@
 				<ScrollView
 					android:layout_width="match_parent"
 					android:layout_height="0dp"
-					android:layout_weight="1">
+					android:layout_weight="1"
+				    android:id="@+id/id_reader_scroll_view"
+				>
 					<TextView
 						android:id="@+id/id_reader_topic_content"
 						android:text=""
