@@ -1,6 +1,6 @@
 package com.gao.jiefly.jieflysbooks.View;
 
-import com.gao.jiefly.jieflysbooks.Model.Book;
+import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 
 import java.util.List;
 

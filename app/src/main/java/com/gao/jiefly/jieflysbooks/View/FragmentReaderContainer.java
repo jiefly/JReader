@@ -12,7 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.gao.jiefly.jieflysbooks.Model.Book;
+import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.DataModelImpl;
 import com.gao.jiefly.jieflysbooks.R;
 
@@ -80,7 +80,7 @@ public class FragmentReaderContainer extends Fragment implements ViewPager.OnPag
                     public String call(String s) {
                         if (mDataModel == null)
                             mDataModel = new DataModelImpl(null);
-                        return mDataModel.getBookTopic(s);
+                        return mDataModel.getBookChapter(s);
                     }
                 }).subscribe(new Subscriber<String>() {
             @Override

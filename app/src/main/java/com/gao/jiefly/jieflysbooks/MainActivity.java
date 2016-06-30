@@ -9,10 +9,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.gao.jiefly.jieflysbooks.Model.Book;
+import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.CustomDatabaseHelper;
 import com.gao.jiefly.jieflysbooks.Model.DataModelImpl;
-import com.gao.jiefly.jieflysbooks.Model.onDataStateListener;
+import com.gao.jiefly.jieflysbooks.Model.listener.onDataStateListener;
 
 import java.io.BufferedInputStream;
 import java.net.URL;
@@ -197,7 +197,7 @@ public class MainActivity extends AppCompatActivity implements onDataStateListen
     @Override
     public void onSuccess(Book result) {
         Log.d("jiefly", "success");
-        final String s = dataModel.getBookTopic(result.getBookNewTopicUrl());
+        final String s = dataModel.getBookChapter(result.getBookNewTopicUrl());
         CustomDatabaseHelper databaseHelper = new CustomDatabaseHelper(getApplicationContext(),"bookStore.db",null,1);
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
         db.delete("Book","author = ?",new String[]{"辰东"});

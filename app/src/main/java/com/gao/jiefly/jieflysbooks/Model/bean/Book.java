@@ -1,4 +1,4 @@
-package com.gao.jiefly.jieflysbooks.Model;
+package com.gao.jiefly.jieflysbooks.Model.bean;
 
 import java.io.Serializable;
 

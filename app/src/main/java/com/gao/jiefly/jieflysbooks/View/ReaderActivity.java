@@ -13,11 +13,13 @@ import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.gao.jiefly.jieflysbooks.Model.Book;
-import com.gao.jiefly.jieflysbooks.Model.Chapter;
 import com.gao.jiefly.jieflysbooks.Model.DataModelImpl;
+import com.gao.jiefly.jieflysbooks.Model.bean.Book;
+import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
+import com.gao.jiefly.jieflysbooks.Model.loader.ChapterLoader;
 import com.gao.jiefly.jieflysbooks.R;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -102,7 +104,7 @@ public class ReaderActivity extends Activity {
                         if (mDataModel == null)
                             mDataModel = new DataModelImpl(null);
                         initData();
-                        return mDataModel.getBookTopic(s);
+                        return mDataModel.getBookChapter(s);
                     }
                 })
                 .subscribeOn(AndroidSchedulers.mainThread())
@@ -132,12 +134,35 @@ public class ReaderActivity extends Activity {
                     }
                 });
     }
+
     //    ture :正序排列
 //    false: 倒序排列
     private boolean orderBy = true;
+
     @OnClick(R.id.id_reader_left_order_btn)
     public void onClick() {
-        orderBy = !orderBy;
+//        orderBy = !orderBy;
+        Observable.just("http://www.uctxt.com/book/1/1269/392324.html")
+                .map(new Func1<String, Chapter>() {
+                    @Override
+                    public Chapter call(String s) {
+                        try {
+                            return ChapterLoader.build(getBaseContext()).getLoaderResult(s);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        return new Chapter(s);
+                    }
+                }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Chapter>() {
+                    @Override
+                    public void call(Chapter chapter) {
+                        mIdReaderTopicContent.setText(chapter.getContent());
+                        mIdReaderLayout.showContent();
+                        mIdReaderScrollView.scrollTo(0, 0);
+                    }
+                });
     }
 
     public interface OnItemClickListener {

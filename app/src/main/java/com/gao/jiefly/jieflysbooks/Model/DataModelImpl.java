@@ -2,6 +2,10 @@ package com.gao.jiefly.jieflysbooks.Model;
 
 import android.util.Log;
 
+import com.gao.jiefly.jieflysbooks.Model.bean.Book;
+import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
+import com.gao.jiefly.jieflysbooks.Model.download.BaseHttpURLClient;
+import com.gao.jiefly.jieflysbooks.Model.listener.onDataStateListener;
 import com.gao.jiefly.jieflysbooks.Utils.Utils;
 
 import java.net.MalformedURLException;
@@ -17,21 +21,25 @@ import java.util.regex.Pattern;
  */
 public class DataModelImpl implements DataModel {
     StringBuilder sb = new StringBuilder();
+
     onDataStateListener mOnDataStateListener = null;
 
     public DataModelImpl(onDataStateListener onDataStateListener) {
         mOnDataStateListener = onDataStateListener;
     }
+
+    @Override
     public List<Chapter> getChapterList(String url) throws MalformedURLException {
         URL urll = new URL(url);
         String srcHtml = new BaseHttpURLClient().getWebResourse(urll);
         List<Chapter> result = Utils.getChapterListFromHtml(srcHtml);
-        for (Chapter c:result){
+        for (Chapter c : result) {
 //            拼接好地址
-            c.setUrl(url+"/"+c.getUrl());
+            c.setUrl(url + "/" + c.getUrl());
         }
         return result;
     }
+
     @Override
     public void getBookSuscribe(final String bookName) {
         try {
@@ -91,6 +99,25 @@ public class DataModelImpl implements DataModel {
         }).start();*/
     }
 
+    @Override
+    public String getBookChapter(final String url) {
+        String result;
+        try {
+            result = new BaseHttpURLClient().getWebResourse(new URL(url));
+            String tmp = Utils.delHTMLTag(result);
+            Pattern p = Pattern.compile("下一章书签([\\w\\W]*)推荐上一章");
+            final Matcher m = p.matcher(tmp);
+            if (m.find())
+                Log.e("jiefly---", m.group(1));
+            if (sb.length() > 0)
+                sb.delete(0, sb.length());
+            sb.append(m.group(1));
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        return sb.toString();
+    }
+
     private void findBookInfo() {
         Pattern p = Pattern.compile("<title>(.*?)</title>");
         Matcher m = p.matcher(sb.toString());
@@ -115,58 +142,6 @@ public class DataModelImpl implements DataModel {
         mOnDataStateListener.onSuccess(book);
     }
 
-    @Override
-    public String getBookTopic(final String url) {
-        final StringBuilder stringBuilder = new StringBuilder();
-
-            String result;
-            try {
-                result = new BaseHttpURLClient().getWebResourse(new URL(url));
-                String tmp = Utils.delHTMLTag(result);
-//            Log.d("jiefly",tmp);
-                Pattern p = Pattern.compile("下一章书签([\\w\\W]*)推荐上一章");
-                final Matcher m = p.matcher(tmp);
-                if (m.find())
-                    Log.e("jiefly---", m.group(1));
-                if (sb.length() > 0)
-                    sb.delete(0, sb.length());
-                sb.append(m.group(1));
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
-
-
-        return sb.toString();
-        /*URL urlBookTopic;
-        String lines;
-        try {
-            BufferedReader bufferedReader;
-            HttpURLConnection connection;
-            urlBookTopic = new URL(url);
-
-            connection = (HttpURLConnection) urlBookTopic.openConnection();
-            bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "gbk"));
-            while ((lines = bufferedReader.readLine()) != null)
-                stringBuilder.append(lines);
-//            Log.d("jiefly",stringBuilder.toString());
-            String tmp = Utils.delHTMLTag(stringBuilder.toString());
-//            Log.d("jiefly",tmp);
-            Pattern p = Pattern.compile("下一章书签([\\w\\W]*)推荐上一章");
-            final Matcher m = p.matcher(tmp);
-            if (m.find())
-                Log.e("jiefly---", m.group(1));
-            if (stringBuilder.length() > 0)
-                stringBuilder.delete(0, stringBuilder.length());
-            stringBuilder.append(m.group(1));
-//            stringBuilder.append(tmp);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-//        Log.e("jiefly---",stringBuilder.toString());
-        return stringBuilder.toString();*/
-
-    }
-
     private Book findBookInfoInDetail() {
         Book book = new Book();
         Pattern p = Pattern.compile("<div class=\"book-about clrfix\"(.*?) <dl class=\"chapter-list clrfix\">");
@@ -179,9 +154,6 @@ public class DataModelImpl implements DataModel {
             mOnDataStateListener.onFailed();
             return null;
         }
-        /*tmp = tmp.replaceAll(" ","");
-        Log.e("jiefly",tmp);*/
-//        onclick="recom\((.*?)\);"(.*?)<a href="(.*?)">(.*?)</a>(.*?)span class="r">状态：<i>(.*?)</i>字数：<i>937610</i>更新时间：<i>(.*?)</i></span>
         p = Pattern.compile("<div class=\"l\"><h1>(.*?)</h1><em>作者.(.*?)</em></div>(.*?)onClick=\"recom*\\((.*?)\\);\"(.*?)</b><a href=\"(.*?)\">(.*?)</a>(.*?)状态.<i>(.*?)</i>(.*?)更新时间.<i>(.*?)</i>");
         m = p.matcher(tmp);
         if (m.find()) {
@@ -200,7 +172,6 @@ public class DataModelImpl implements DataModel {
         }
         return book;
     }
-
 
     private Book findBookInfoInSearch() {
         Pattern p = Pattern.compile("<div class=\"list-lastupdate\"(.*?)<li>(.*?)</li>");
@@ -232,7 +203,5 @@ public class DataModelImpl implements DataModel {
             return null;
         }
         return book;
-
     }
-
 }

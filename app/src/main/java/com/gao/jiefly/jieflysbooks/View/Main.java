@@ -22,10 +22,10 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.gao.jiefly.jieflysbooks.Model.Book;
 import com.gao.jiefly.jieflysbooks.Model.CustomDatabaseHelper;
 import com.gao.jiefly.jieflysbooks.Model.DataModelImpl;
-import com.gao.jiefly.jieflysbooks.Model.onDataStateListener;
+import com.gao.jiefly.jieflysbooks.Model.bean.Book;
+import com.gao.jiefly.jieflysbooks.Model.listener.onDataStateListener;
 import com.gao.jiefly.jieflysbooks.R;
 
 import java.util.LinkedList;
@@ -55,6 +55,7 @@ public class Main extends Activity implements View, onDataStateListener {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
         dataModel = new DataModelImpl(this);
         databaseHelper = new CustomDatabaseHelper(getApplicationContext(), "bookStore.db", null, 1);
         /*book = new Book();
@@ -93,7 +94,7 @@ public class Main extends Activity implements View, onDataStateListener {
                             .map(new Func1<String, String>() {
                                 @Override
                                 public String call(String s) {
-                                    return dataModel.getBookTopic(s);
+                                    return dataModel.getBookChapter(s);
                                 }
                             })
                             .subscribeOn(AndroidSchedulers.mainThread())

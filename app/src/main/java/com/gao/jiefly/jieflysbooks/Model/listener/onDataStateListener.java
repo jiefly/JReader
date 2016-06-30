@@ -1,4 +1,6 @@
-package com.gao.jiefly.jieflysbooks.Model;
+package com.gao.jiefly.jieflysbooks.Model.listener;
+
+import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 
 /**
  * Created by jiefly on 2016/6/21.

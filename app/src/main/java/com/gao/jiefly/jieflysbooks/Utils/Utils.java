@@ -1,7 +1,11 @@
 package com.gao.jiefly.jieflysbooks.Utils;
 
-import com.gao.jiefly.jieflysbooks.Model.Chapter;
+import android.content.Context;
+import android.os.Environment;
 
+import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
+
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -103,6 +107,17 @@ public class Utils {
             result.add(new Chapter(matcher.group(1),matcher.group(2),index++));
         }
         return result;
+    }
+
+    public static File getDiskCacheDir(Context context, String uniqueName) {
+        String cachePath;
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())
+                || !Environment.isExternalStorageRemovable()) {
+            cachePath = context.getExternalCacheDir().getPath();
+        } else {
+            cachePath = context.getCacheDir().getPath();
+        }
+        return new File(cachePath + File.separator + uniqueName);
     }
 
 }

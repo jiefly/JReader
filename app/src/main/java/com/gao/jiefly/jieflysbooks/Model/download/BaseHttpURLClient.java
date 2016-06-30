@@ -1,4 +1,4 @@
-package com.gao.jiefly.jieflysbooks.Model;
+package com.gao.jiefly.jieflysbooks.Model.download;
 
 import java.io.BufferedReader;
 import java.io.IOException;
