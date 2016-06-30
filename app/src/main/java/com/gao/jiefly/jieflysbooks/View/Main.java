@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -112,8 +113,24 @@ public class Main extends Activity implements View, onDataStateListener {
             }
 
             @Override
-            public void onItemLongClick(android.view.View view, int position) {
+            public void onItemLongClick(android.view.View view, final int position) {
                 Toast.makeText(getApplicationContext(), position + "long click", Toast.LENGTH_SHORT).show();
+                if (position > 0) {
+                    android.view.View popupWindow = LayoutInflater.from(Main.this).inflate(R.layout.delete_book_popupwindow, null);
+                    final PopupWindow deletePopup = new PopupWindow(popupWindow, WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
+                    deletePopup.setFocusable(true);
+                    deletePopup.setBackgroundDrawable(new BitmapDrawable());
+                    deletePopup.showAtLocation(((ViewGroup) Main.this.findViewById(android.R.id.content)).getChildAt(0), Gravity.CENTER_VERTICAL, 0, 0);
+
+                    popupWindow.findViewById(R.id.id_popup_delete_btn).setOnClickListener(new android.view.View.OnClickListener() {
+                        @Override
+                        public void onClick(android.view.View v) {
+                            deleteBook(position - 1);
+                            deletePopup.dismiss();
+                            adapter.notifyItemRemoved(position);
+                        }
+                    });
+                }
             }
         });
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.id_rv);
@@ -123,6 +140,13 @@ public class Main extends Activity implements View, onDataStateListener {
             recyclerView.setLayoutManager(manager);
             recyclerView.setAdapter(adapter);
         }
+    }
+
+    private void deleteBook(int dataIndex) {
+        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        String name = data.get(dataIndex).getBookName();
+        db.delete("Book", "name = ?", new String[]{name});
+        addData();
     }
 
     private void addData() {
@@ -139,7 +163,7 @@ public class Main extends Activity implements View, onDataStateListener {
                 book.setBookName(cursor.getString(cursor.getColumnIndex("name")));
                 book.setBookNewTopicTitle(cursor.getString(cursor.getColumnIndex("recentTopic")));
                 book.setBookNewTopicUrl(cursor.getString(cursor.getColumnIndex("recentTopicUrl")));
-                book.setBookUrl(cursor.getString(cursor.getColumnIndex("recentTopicUrl")));
+                book.setBookUrl(cursor.getString(cursor.getColumnIndex("bookUrl")));
                 data.add(book);
                 Log.e("jiefly----db", book.toString());
             } while (cursor.moveToNext());
@@ -170,7 +194,7 @@ public class Main extends Activity implements View, onDataStateListener {
                     @Override
                     public void run() {
                         dataModel.getBookSuscribe(etAddBookName.getText().toString());
-                        Log.e("jieflyu",etAddBookName.getText().toString());
+                        Log.e("jieflyu", etAddBookName.getText().toString());
                     }
                 }).start();
                 mPopupWindow.dismiss();
@@ -204,20 +228,25 @@ public class Main extends Activity implements View, onDataStateListener {
     public void onSuccess(Book result) {
         Observable.just(result)
                 .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Book>() {
                     @Override
                     public void call(Book result) {
-                        SQLiteDatabase db = databaseHelper.getWritableDatabase();
-                        ContentValues contentValues = new ContentValues();
-                        contentValues.put("author", result.getBookAuthor());
-                        contentValues.put("name", result.getBookName());
-                        contentValues.put("recentTopic", result.getBookNewTopic());
-                        contentValues.put("recentTopicUrl", result.getBookNewTopicUrl());
-                        contentValues.put("bookUrl", result.getBookUrl());
-                        db.insert("Book", null, contentValues);
+                        if (result.getBookName() != null) {
+                            SQLiteDatabase db = databaseHelper.getWritableDatabase();
+                            ContentValues contentValues = new ContentValues();
+                            contentValues.put("author", result.getBookAuthor());
+                            contentValues.put("name", result.getBookName());
+                            contentValues.put("recentTopic", result.getBookNewTopicTitle());
+                            contentValues.put("recentTopicUrl", result.getBookNewTopicUrl());
+                            contentValues.put("bookUrl", result.getBookUrl());
+                            db.insert("Book", null, contentValues);
+                            Log.e("insertBook", result.toString());
+                            addData();
+                            adapter.notifyItemInserted(data.size() + 1);
+                        }
                     }
                 });
-        adapter.notifyItemChanged(0);
     }
 
     @Override
@@ -295,12 +324,12 @@ public class Main extends Activity implements View, onDataStateListener {
                             mListener.onItemClick(itemViewHolder.itemView, position);
                         }
                     });
-                    itemViewHolder.tvRecentUpdateTime.setOnLongClickListener(new android.view.View.OnLongClickListener() {
+                    itemViewHolder.itemView.setOnLongClickListener(new android.view.View.OnLongClickListener() {
                         @Override
                         public boolean onLongClick(android.view.View v) {
                             int position = itemViewHolder.getAdapterPosition();
                             mListener.onItemLongClick(itemViewHolder.itemView, position);
-                            return false;
+                            return true;
                         }
                     });
                 }

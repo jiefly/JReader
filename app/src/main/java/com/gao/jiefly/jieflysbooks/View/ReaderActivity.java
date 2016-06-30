@@ -62,7 +62,7 @@ public class ReaderActivity extends Activity {
         ButterKnife.inject(this);
         Bundle bundle = this.getIntent().getBundleExtra("bookbundle");
         mBook = (Book) bundle.getSerializable("book");
-        Log.d("readerActivity", mBook.toString());
+//        Log.d("readerActivity", mBook.toString());
 //        initData();
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.id_reader_left_recycle_view);
         RecyclerView.LayoutManager manager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
