@@ -1,5 +1,7 @@
 package com.gao.jiefly.jieflysbooks.Model.loader;
 
+import android.util.Log;
+
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
 
 import java.io.BufferedReader;
@@ -21,7 +23,8 @@ public class BaseEncoder implements Encoder {
         StringBuilder content = new StringBuilder();
         String line;
         while ((line = br.readLine()) != null) {
-            content.append(line);
+            Log.d("BaseEncoder",line);
+            content.append(line).append("\n");
         }
         Chapter chapter = new Chapter(url);
         chapter.setContent(content.toString());

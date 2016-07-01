@@ -5,13 +5,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 
-import com.gao.jiefly.jieflysbooks.Model.bean.Book;
+import com.gao.jiefly.jieflysbooks.Model.BaseDataModel;
 import com.gao.jiefly.jieflysbooks.Model.CustomDatabaseHelper;
-import com.gao.jiefly.jieflysbooks.Model.DataModelImpl;
+import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.listener.onDataStateListener;
 
 import java.io.BufferedInputStream;
@@ -20,21 +17,15 @@ import java.net.URLConnection;
 import java.util.zip.GZIPInputStream;
 
 import butterknife.ButterKnife;
-import butterknife.InjectView;
-import butterknife.OnClick;
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 
 public class MainActivity extends AppCompatActivity implements onDataStateListener {
 
-    @InjectView(R.id.id_test)
+    /*@InjectView(R.id.id_test)
     TextView mIdTest;
     @InjectView(R.id.button)
     Button mButton;
     @InjectView(R.id.editText)
-    EditText mEditText;
+    EditText mEditText;*/
 
 
     @Override
@@ -45,16 +36,16 @@ public class MainActivity extends AppCompatActivity implements onDataStateListen
 
     }
 
-    DataModelImpl dataModel;
+    BaseDataModel dataModel;
 
-    @OnClick(R.id.button)
+    /*@OnClick(R.id.button)
     public void onClick() {
         String s = mEditText.getText().toString();
-        dataModel = new DataModelImpl(this);
+        dataModel = new BaseDataModel(this);
         dataModel.getBookSuscribe(s);
 
 
-        /*new DataModelImpl(new onDataStateListener() {
+        *//*new BaseDataModel(new onDataStateListener() {
             @Override
             public void onSuccess(String result) {
                 Observable.just(result)
@@ -128,8 +119,8 @@ public class MainActivity extends AppCompatActivity implements onDataStateListen
                                 mIdTest.setText(s);
                                 Log.e("jielf", s);
                             }
-                        });*/
-                /*Observable.just(result)
+                        });*//*
+                *//*Observable.just(result)
                         .subscribeOn(AndroidSchedulers.mainThread())
                         .map(new Func1<String, String>() {
                             @Override
@@ -191,8 +182,8 @@ public class MainActivity extends AppCompatActivity implements onDataStateListen
                                 mIdTest.append(book.toString()
                                 );
                             }
-                        });*/
-    }
+                        });*//*
+    }*/
 
     @Override
     public void onSuccess(Book result) {
@@ -220,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements onDataStateListen
             }while (cursor.moveToNext());
         }
 //        mIdTest.setText(s);
-        Observable.create(new Observable.OnSubscribe<String>() {
+       /* Observable.create(new Observable.OnSubscribe<String>() {
             @Override
             public void call(Subscriber<? super String> subscriber) {
                 subscriber.onNext(s);
@@ -233,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements onDataStateListen
                     public void call(String s) {
                         mIdTest.setText(s);
                     }
-                });
+                });*/
     }
 
     @Override

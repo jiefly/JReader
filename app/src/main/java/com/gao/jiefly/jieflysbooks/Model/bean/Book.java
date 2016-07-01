@@ -11,7 +11,6 @@ public class Book implements Serializable{
     private static final long serialVersionUID = -7060210544600464481L;
     private String bookName = null;
     private String bookAuthor = null;
-    private String bookNewTopic;
     private String bookUrl = null;
     private String bookNewTopicTitle = null;
     private String bookNewTopicUrl = null;
@@ -86,14 +85,6 @@ public class Book implements Serializable{
 
     public void setBookAuthor(String bookAuthor) {
         this.bookAuthor = bookAuthor;
-    }
-
-    public String getBookNewTopic() {
-        return bookNewTopic;
-    }
-
-    public void setBookNewTopic(String bookNewTopic) {
-        this.bookNewTopic = bookNewTopic;
     }
 
     public String getBookNewTopicTitle() {

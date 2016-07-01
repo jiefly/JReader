@@ -1,5 +1,6 @@
 package com.gao.jiefly.jieflysbooks.Model;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
@@ -19,13 +20,23 @@ import java.util.regex.Pattern;
  * Email:jiefly1993@gmail.com
  * Fighting_jiiiiie
  */
-public class DataModelImpl implements DataModel {
+public class BaseDataModel implements DataModel {
+    private static final String TAG = "BaseDataModel";
+    static Context mContext;
+    private static volatile BaseDataModel instance = null;
     StringBuilder sb = new StringBuilder();
+
+    public void setOnDataStateListener(onDataStateListener onDataStateListener) {
+        mOnDataStateListener = onDataStateListener;
+    }
 
     onDataStateListener mOnDataStateListener = null;
 
-    public DataModelImpl(onDataStateListener onDataStateListener) {
+    public BaseDataModel(onDataStateListener onDataStateListener) {
         mOnDataStateListener = onDataStateListener;
+    }
+
+    private BaseDataModel() {
     }
 
     @Override
@@ -38,6 +49,55 @@ public class DataModelImpl implements DataModel {
             c.setUrl(url + "/" + c.getUrl());
         }
         return result;
+    }
+
+    @Override
+    public Book getBook(String name) {
+        if (!checkDataModelIsInit())
+            return null;
+
+        return null;
+    }
+
+    private boolean checkDataModelIsInit() {
+        if (instance == null)
+            return false;
+        return true;
+    }
+
+    @Override
+    public void addBook(String name) {
+
+    }
+
+    @Override
+    public Chapter getChapter(String bookName, int index) {
+        return null;
+    }
+
+    @Override
+    public void addChapter(String bookName, int index) {
+
+    }
+
+    public static BaseDataModel build(Context context) {
+        if (mContext == null)
+            mContext = context;
+        if (instance == null)
+            synchronized (BaseDataModel.class) {
+                if (instance == null) {
+                    instance = new BaseDataModel();
+                }
+            }
+        return instance;
+    }
+
+    @Override
+    public DataModel getInstance() {
+        if (instance != null)
+            return instance;
+        Log.e(TAG, "please build first!!!");
+        return null;
     }
 
     @Override

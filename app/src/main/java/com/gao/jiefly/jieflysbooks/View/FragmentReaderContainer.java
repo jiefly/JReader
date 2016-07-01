@@ -12,8 +12,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.gao.jiefly.jieflysbooks.Model.BaseDataModel;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
-import com.gao.jiefly.jieflysbooks.Model.DataModelImpl;
 import com.gao.jiefly.jieflysbooks.R;
 
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ public class FragmentReaderContainer extends Fragment implements ViewPager.OnPag
     //    FragmentReaderImpl[] mFragments = new FragmentReaderImpl[3];
     List<FragmentReaderImpl> mFragmentReaderList;
     Book mBook;
-    DataModelImpl mDataModel;
+    BaseDataModel mDataModel;
     Observable mObservable = null;
     ViewPager viewPager;
     {
@@ -79,7 +79,7 @@ public class FragmentReaderContainer extends Fragment implements ViewPager.OnPag
                     @Override
                     public String call(String s) {
                         if (mDataModel == null)
-                            mDataModel = new DataModelImpl(null);
+                            mDataModel = new BaseDataModel(null);
                         return mDataModel.getBookChapter(s);
                     }
                 }).subscribe(new Subscriber<String>() {

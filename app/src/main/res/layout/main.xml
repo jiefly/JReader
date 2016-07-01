@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
+              android:background="#618b61"
               android:orientation="vertical"
-				android:background="#618b61"
-			>
+>
 	<android.support.v7.widget.RecyclerView
 		android:id="@+id/id_rv"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent">
 	</android.support.v7.widget.RecyclerView>
-</LinearLayout>
+	<android.support.design.widget.FloatingActionButton
+		android:id="@+id/id_main_add_book_fab"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="bottom|end"
+		android:src="@android:drawable/ic_input_add"
+		android:layout_alignParentBottom="true" android:layout_alignParentRight="true"
+		android:layout_alignParentEnd="true" android:layout_margin="16dp"/>
+</RelativeLayout>

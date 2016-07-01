@@ -5,7 +5,7 @@ import android.os.Looper;
 import android.util.Log;
 import android.util.LruCache;
 
-import com.gao.jiefly.jieflysbooks.Model.DataModelImpl;
+import com.gao.jiefly.jieflysbooks.Model.BaseDataModel;
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
 import com.gao.jiefly.jieflysbooks.Utils.Utils;
 
@@ -65,7 +65,7 @@ public class ChapterLoader {
     }
 
     private Chapter getChapterFromHttp(String url) {
-        String result = new DataModelImpl(null).getBookChapter(url);
+        String result = new BaseDataModel(null).getBookChapter(url);
         Chapter chapter = new Chapter(url);
         chapter.setContent(result);
         return chapter;

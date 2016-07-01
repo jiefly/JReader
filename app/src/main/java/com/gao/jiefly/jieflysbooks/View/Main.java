@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -22,15 +23,19 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gao.jiefly.jieflysbooks.Model.BaseDataModel;
 import com.gao.jiefly.jieflysbooks.Model.CustomDatabaseHelper;
-import com.gao.jiefly.jieflysbooks.Model.DataModelImpl;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.listener.onDataStateListener;
+import com.gao.jiefly.jieflysbooks.Model.loader.BookLoader;
 import com.gao.jiefly.jieflysbooks.R;
 
 import java.util.LinkedList;
 import java.util.List;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import butterknife.OnClick;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -43,9 +48,10 @@ import rx.schedulers.Schedulers;
  * Fighting_jiiiiie
  */
 public class Main extends Activity implements View, onDataStateListener {
-    private int cursorPosition;
+    @InjectView(R.id.id_main_add_book_fab)
+    FloatingActionButton mIdMainAddBookFab;
     private List<Book> data = new LinkedList<>();
-    DataModelImpl dataModel;
+    BaseDataModel dataModel;
     BookListRecycleViewAdapter adapter;
     PopupWindow mPopupWindow = null;
     EditText etAddBookName;
@@ -55,8 +61,13 @@ public class Main extends Activity implements View, onDataStateListener {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-
-        dataModel = new DataModelImpl(this);
+        ButterKnife.inject(this);
+        Book book;
+        BookLoader bookLoader = new BookLoader(getApplicationContext());
+        bookLoader.addBook("完美世界");
+        book = bookLoader.getBook("完美世界");
+        Log.d("test", book.toString());
+        dataModel = new BaseDataModel(this);
         databaseHelper = new CustomDatabaseHelper(getApplicationContext(), "bookStore.db", null, 1);
         /*book = new Book();
         book.setBookAuthor("jiefly");
@@ -76,10 +87,6 @@ public class Main extends Activity implements View, onDataStateListener {
             public void onItemClick(android.view.View view, final int position) {
                 Toast.makeText(getApplicationContext(), position + "click", Toast.LENGTH_SHORT).show();
                 if (position == 0) {
-                    if (mPopupWindow == null) {
-                        initPopupWindow();
-                    }
-                    mPopupWindow.showAtLocation(((ViewGroup) Main.this.findViewById(android.R.id.content)).getChildAt(0), Gravity.NO_GRAVITY, 0, 0);
                     return;
                 }
                 if (data.get(position - 1) != null && data.get(position - 1).getBookNewTopicUrl().startsWith("http://")) {
@@ -195,7 +202,7 @@ public class Main extends Activity implements View, onDataStateListener {
                     @Override
                     public void run() {
                         dataModel.getBookSuscribe(etAddBookName.getText().toString());
-                        Log.e("jieflyu", etAddBookName.getText().toString());
+                        etAddBookName.setText("");
                     }
                 }).start();
                 mPopupWindow.dismiss();
@@ -255,6 +262,17 @@ public class Main extends Activity implements View, onDataStateListener {
 
     }
 
+    @OnClick(R.id.id_main_add_book_fab)
+    public void onClick() {
+        if (mPopupWindow == null) {
+            initPopupWindow();
+        }
+        mPopupWindow.showAtLocation(((ViewGroup) Main.this.findViewById(android.R.id.content)).getChildAt(0), Gravity.NO_GRAVITY, 0, 0);
+
+       /* Snackbar.make(mIdMainAddBookFab, "Replace with your own action", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();*/
+    }
+
     public interface OnItemClickListener {
         void onItemClick(android.view.View view, int position);
 
@@ -301,12 +319,6 @@ public class Main extends Activity implements View, onDataStateListener {
             if (holder instanceof HeadViewHolder) {
                 HeadViewHolder headViewHolder = (HeadViewHolder) holder;
                 final int finalPosition = position;
-                headViewHolder.btnAddBook.setOnClickListener(new android.view.View.OnClickListener() {
-                    @Override
-                    public void onClick(android.view.View v) {
-                        mListener.onItemClick(v, finalPosition);
-                    }
-                });
                 headViewHolder.ivHead.setImageDrawable(getDrawable(R.drawable.head_canvas));
             } else if (holder instanceof ItemViewHolder) {
                 position -= 1;
@@ -361,12 +373,10 @@ public class Main extends Activity implements View, onDataStateListener {
 
         public class HeadViewHolder extends RecyclerView.ViewHolder {
             ImageView ivHead;
-            Button btnAddBook;
 
             public HeadViewHolder(android.view.View itemView) {
                 super(itemView);
                 ivHead = (ImageView) itemView.findViewById(R.id.id_iv_head);
-                btnAddBook = (Button) itemView.findViewById(R.id.id_btn_add_book);
             }
         }
     }

@@ -18,6 +18,7 @@ public class CustomDatabaseHelper extends SQLiteOpenHelper {
             +"statue text, "
             +"recentTopic text, "
             +"recentTopicUrl text, "
+            +"recentUpdate text"
             +"bookUrl text,"
             +"bookType text)";
     private Context mContext;
@@ -33,6 +34,12 @@ public class CustomDatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+
+    }
+
+    @Override
+    public void onOpen(SQLiteDatabase db) {
+        super.onOpen(db);
 
     }
 }

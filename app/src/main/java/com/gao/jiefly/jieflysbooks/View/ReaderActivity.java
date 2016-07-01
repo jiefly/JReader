@@ -13,7 +13,7 @@ import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.gao.jiefly.jieflysbooks.Model.DataModelImpl;
+import com.gao.jiefly.jieflysbooks.Model.BaseDataModel;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
 import com.gao.jiefly.jieflysbooks.Model.loader.ChapterLoader;
@@ -46,7 +46,7 @@ public class ReaderActivity extends Activity {
     @InjectView(R.id.id_reader_phone_info)
     TextView mIdReaderPhoneInfo;
 
-    DataModelImpl mDataModel;
+    BaseDataModel mDataModel;
     Book mBook;
     List<Chapter> mChapterList = new LinkedList<>();
 
@@ -102,7 +102,7 @@ public class ReaderActivity extends Activity {
                     @Override
                     public String call(String s) {
                         if (mDataModel == null)
-                            mDataModel = new DataModelImpl(null);
+                            mDataModel = new BaseDataModel(null);
                         initData();
                         return mDataModel.getBookChapter(s);
                     }
