@@ -5,8 +5,8 @@ import android.os.Looper;
 import android.util.Log;
 import android.util.LruCache;
 
-import com.gao.jiefly.jieflysbooks.Model.BaseDataModel;
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
+import com.gao.jiefly.jieflysbooks.Model.download.BaseHttpURLClient;
 import com.gao.jiefly.jieflysbooks.Utils.Utils;
 
 import java.io.BufferedOutputStream;
@@ -14,8 +14,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by jiefly on 2016/6/30.
@@ -27,8 +31,9 @@ public class ChapterLoader {
     private static final int DISK_CACHE_SIZE = 1024 * 1024 * 60;
     private static final int DISK_CACHE_INDEX = 0;
     private static final int IO_BUFFER_SIZE = 512;
-
-    private boolean isNeedCacheInMemory = true;
+    private static Configuration mConfiguration;
+    //    如果没有配置的话，默认开启磁盘缓存，关闭内存缓存
+    private boolean isNeedCacheInMemory = false;
     private boolean isNeedCacheInDisk = true;
     private boolean mIsDiskCacheCreated = false;
     //    小说章节内存缓存
@@ -42,7 +47,13 @@ public class ChapterLoader {
         return new ChapterLoader(context);
     }
 
-    public Chapter getLoaderResult(String url) throws IOException {
+    public static ChapterLoader build(Context context, Configuration configuration) {
+        mConfiguration = configuration;
+        return new ChapterLoader(context);
+    }
+
+    //    获取每一章节的具体内容
+    public Chapter getChapterLoaderResult(String url) throws IOException {
         Chapter result;
 //        尝试从内存中获取
         result = getChapterFromMemoryCache(url);
@@ -50,7 +61,7 @@ public class ChapterLoader {
             return result;
 //        尝试从磁盘中获取
         result = loadChapterFromDiskCache(url);
-        if (result != null){
+        if (result != null) {
             if (isNeedCacheInMemory)
                 addChapterToMemoryCache(url, result);
             return result;
@@ -60,15 +71,32 @@ public class ChapterLoader {
         if (isNeedCacheInMemory)
             addChapterToMemoryCache(url, result);
         if (isNeedCacheInDisk)
-            addChapterToDiskCache(url,result);
+            addChapterToDiskCache(url, result);
         return result;
     }
 
     private Chapter getChapterFromHttp(String url) {
-        String result = new BaseDataModel(null).getBookChapter(url);
+        String result = getChapterStringFromHttp(url);
         Chapter chapter = new Chapter(url);
         chapter.setContent(result);
         return chapter;
+    }
+
+    private String getChapterStringFromHttp(String url) {
+        StringBuilder sb = new StringBuilder();
+        String result;
+        try {
+            result = new BaseHttpURLClient().getWebResourse(new URL(url));
+            String tmp = Utils.delHTMLTag(result);
+            Pattern p = Pattern.compile("下一章书签([\\w\\W]*)推荐上一章");
+            final Matcher m = p.matcher(tmp);
+            if (m.find())
+                Log.e("jiefly---", m.group(1));
+            sb.append(m.group(1));
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        return sb.toString();
     }
 
     private ChapterLoader(Context context) {
@@ -81,7 +109,7 @@ public class ChapterLoader {
         mMemoryCache = new LruCache<>(cacheSize);
 //        获取磁盘缓存文件夹地址
         File diskCacheDir = Utils.getDiskCacheDir(mContext, "book");
-        Log.i(TAG,diskCacheDir.getAbsolutePath());
+        Log.i(TAG, diskCacheDir.getAbsolutePath());
         if (!diskCacheDir.exists()) {
             diskCacheDir.mkdir();
         }
@@ -90,6 +118,10 @@ public class ChapterLoader {
             mIsDiskCacheCreated = true;
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        if (mConfiguration != null) {
+            isNeedCacheInDisk = mConfiguration.isNeedDiskCache();
+            isNeedCacheInMemory = mConfiguration.isNeedMemoryCache();
         }
     }
 
@@ -128,7 +160,7 @@ public class ChapterLoader {
         out = new BufferedOutputStream(outputStream, IO_BUFFER_SIZE);
         byte[] bytes = result.getBytes();
         try {
-            for (byte b:bytes){
+            for (byte b : bytes) {
                 out.write(b);
             }
             return true;
@@ -149,7 +181,7 @@ public class ChapterLoader {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             Log.w(TAG, "load chapter form UI Thread,is's not recommended");
         }
-        if (mDiskCache == null) {
+        if (!mIsDiskCacheCreated) {
             return null;
         }
         Chapter chapter = null;
@@ -157,12 +189,12 @@ public class ChapterLoader {
         DiskLruCache.Snapshot snapshot = mDiskCache.get(key);
         if (snapshot != null) {
             FileInputStream fileInputStream = (FileInputStream) snapshot.getInputStream(DISK_CACHE_INDEX);
-            chapter = new BaseEncoder().encode(url,fileInputStream);
+            chapter = new BaseEncoder().encode(url, fileInputStream);
         }
         return chapter;
     }
 
-    public String hashKeyForUrl(String key) {
+    private String hashKeyForUrl(String key) {
         String cacheKey;
         try {
             final MessageDigest mDigest = MessageDigest.getInstance("MD5");
@@ -184,5 +216,32 @@ public class ChapterLoader {
             sb.append(hex);
         }
         return sb.toString();
+    }
+
+    class Configuration {
+        private boolean isNeedMemoryCache;
+
+        public boolean isNeedDiskCache() {
+            return isNeedDiskCache;
+        }
+
+        public void setNeedDiskCache(boolean needDiskCache) {
+            isNeedDiskCache = needDiskCache;
+        }
+
+        public boolean isNeedMemoryCache() {
+            return isNeedMemoryCache;
+        }
+
+        public void setNeedMemoryCache(boolean needMemoryCache) {
+            isNeedMemoryCache = needMemoryCache;
+        }
+
+        private boolean isNeedDiskCache;
+
+        public Configuration(boolean isNeedMemoryCache, boolean isNeedDiskCache) {
+            this.isNeedMemoryCache = isNeedMemoryCache;
+            this.isNeedDiskCache = isNeedDiskCache;
+        }
     }
 }

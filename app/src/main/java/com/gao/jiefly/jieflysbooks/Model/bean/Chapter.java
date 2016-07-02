@@ -11,7 +11,8 @@ public class Chapter {
     }
 
     private String url;
-    private String name;
+    private String title;
+    private String bookName;
     private int index;
 
     public String getContent() {
@@ -28,18 +29,26 @@ public class Chapter {
         return url;
     }
 
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
     public int getIndex() {
         return index;
     }
 
-    public Chapter(String url, String name, int index) {
+    public String getBookName() {
+        return bookName;
+    }
+
+    public void setBookName(String bookName) {
+        this.bookName = bookName;
+    }
+
+    public Chapter(String url, String name, String bookName) {
         this.url = url;
-        this.name = name;
-        this.index = index;
+        this.title = name;
+        this.bookName = bookName;
     }
     public Chapter(String url){
         this.url = url;

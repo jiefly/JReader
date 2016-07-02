@@ -10,7 +10,9 @@ import java.util.List;
  * Fighting_jiiiiie
  */
 public interface View {
-    void showBookList(List<Book> books);
-    void showBookRecentTopic(Book book);
+    void showBooks(List<Book> books);
+    void readBook(Book book);
     void addBook(Book book);
+    void removeBook(Book book);
+    void showSnackbar(String value);
 }

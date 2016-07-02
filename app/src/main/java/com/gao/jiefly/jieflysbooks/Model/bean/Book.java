@@ -1,6 +1,7 @@
 package com.gao.jiefly.jieflysbooks.Model.bean;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by jiefly on 2016/6/21.
@@ -17,7 +18,7 @@ public class Book implements Serializable{
     private String bookLastUpdate = null;
     private String bookStatu = null;
     private int bookTotalWords;
-
+    private ChapterList mChapterList = null;
 
     @Override
 
@@ -101,5 +102,37 @@ public class Book implements Serializable{
 
     public void setBookNewTopicUrl(String bookNewTopicUrl) {
         this.bookNewTopicUrl = bookNewTopicUrl;
+    }
+
+    public ChapterList getChapterList() {
+        return mChapterList;
+    }
+
+    public void setChapterList(ChapterList chapterList) {
+        mChapterList = chapterList;
+    }
+
+    public static class ChapterList {
+        private String bookName;
+        private List<String> chapterTitleList;
+        private List<String> chapterUrlList;
+
+        public String getBookName() {
+            return bookName;
+        }
+
+        public List<String> getChapterTitleList() {
+            return chapterTitleList;
+        }
+
+        public List<String> getChapterUrlList() {
+            return chapterUrlList;
+        }
+
+        public ChapterList(String bookName, List<String> chapterUrlList , List<String> chapterTitleList) {
+            this.bookName = bookName;
+            this.chapterUrlList = chapterUrlList;
+            this.chapterTitleList = chapterTitleList;
+        }
     }
 }

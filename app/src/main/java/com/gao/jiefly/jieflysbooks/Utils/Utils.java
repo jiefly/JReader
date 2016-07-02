@@ -102,9 +102,8 @@ public class Utils {
         String regexGetChapterList = "<dd><a href=\"(.*?)\">(.*?)</a></dd>";
         Pattern pattern = Pattern.compile(regexGetChapterList);
         Matcher matcher = pattern.matcher(srcString);
-        int index = 0;
         while (matcher.find()){
-            result.add(new Chapter(matcher.group(1),matcher.group(2),index++));
+            result.add(new Chapter(matcher.group(1),matcher.group(2),"test"));
         }
         return result;
     }

@@ -9,6 +9,7 @@ import com.gao.jiefly.jieflysbooks.Model.download.BaseHttpURLClient;
 import com.gao.jiefly.jieflysbooks.Model.listener.onDataStateListener;
 import com.gao.jiefly.jieflysbooks.Utils.Utils;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
@@ -40,6 +41,21 @@ public class BaseDataModel implements DataModel {
     }
 
     @Override
+    public List<Book> getBookList() {
+        return null;
+    }
+
+    @Override
+    public Chapter getBookChapterByUrl(String url) throws IOException {
+        return null;
+    }
+
+    @Override
+    public Chapter getBookChapterByIndex(String bookName, int index) throws IOException {
+        return null;
+    }
+
+    @Override
     public List<Chapter> getChapterList(String url) throws MalformedURLException {
         URL urll = new URL(url);
         String srcHtml = new BaseHttpURLClient().getWebResourse(urll);
@@ -66,7 +82,22 @@ public class BaseDataModel implements DataModel {
     }
 
     @Override
-    public void addBook(String name) {
+    public Book addBook(String name) {
+        return null;
+    }
+
+    @Override
+    public void removeBook(String[] name) {
+
+    }
+
+    @Override
+    public void updateBook(Book book) {
+
+    }
+
+    @Override
+    public void updateAllBooks() {
 
     }
 
@@ -76,7 +107,17 @@ public class BaseDataModel implements DataModel {
     }
 
     @Override
+    public Chapter getChapter(URL url) {
+        return null;
+    }
+
+    @Override
     public void addChapter(String bookName, int index) {
+
+    }
+
+    @Override
+    public void addChapter(String bookName, URL url) {
 
     }
 
@@ -100,7 +141,7 @@ public class BaseDataModel implements DataModel {
         return null;
     }
 
-    @Override
+
     public void getBookSuscribe(final String bookName) {
         try {
             String result = new BaseHttpURLClient()
@@ -159,7 +200,6 @@ public class BaseDataModel implements DataModel {
         }).start();*/
     }
 
-    @Override
     public String getBookChapter(final String url) {
         String result;
         try {

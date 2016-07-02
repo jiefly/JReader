@@ -82,7 +82,7 @@ public class ReaderActivity extends Activity {
                                 @Override
                                 public void call(Chapter chapter) {
                                     setContentText(chapter.getUrl());
-                                    mIdReaderTopicTitle.setText(chapter.getName());
+                                    mIdReaderTopicTitle.setText(chapter.getTitle());
                                     mIdReaderLayout.showContent();
                                     mIdReaderScrollView.scrollTo(0, 0);
                                 }
@@ -147,7 +147,7 @@ public class ReaderActivity extends Activity {
                     @Override
                     public Chapter call(String s) {
                         try {
-                            return ChapterLoader.build(getBaseContext()).getLoaderResult(s);
+                            return ChapterLoader.build(getBaseContext()).getChapterLoaderResult(s);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -217,7 +217,7 @@ public class ReaderActivity extends Activity {
                     mListener.onItemClick(v, position);
                 }
             });
-            holder.mTextView.setText(mChapterList.get(position).getName());
+            holder.mTextView.setText(mChapterList.get(position).getTitle());
         }
 
         @Override
