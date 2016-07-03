@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -38,15 +39,19 @@ import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by jiefly on 2016/6/23.
  * Email:jiefly1993@gmail.com
  * Fighting_jiiiiie
  */
-public class Main extends Activity implements View, onDataStateListener {
+public class Main extends Activity implements View, onDataStateListener, SwipeRefreshLayout.OnRefreshListener {
     @InjectView(R.id.id_main_add_book_fab)
     FloatingActionButton mIdMainAddBookFab;
+    @InjectView(R.id.id_main_swipe_refresh_layout)
+    SwipeRefreshLayout mIdMainSwipeRefreshLayout;
     private List<Book> data;
     BaseDataModel dataModel;
     BookListRecycleViewAdapter adapter;
@@ -61,9 +66,9 @@ public class Main extends Activity implements View, onDataStateListener {
         setContentView(R.layout.main);
         ButterKnife.inject(this);
         mPresent = Present.getInstance(getApplicationContext(), this);
-        mPresent.updateBookList();
+//        mPresent.updateBookList();
         data = mPresent.getBookList();
-
+        mIdMainSwipeRefreshLayout.setOnRefreshListener(this);
         adapter = new BookListRecycleViewAdapter();
 
         adapter.setOnItemClickListener(new OnItemClickListener() {
@@ -241,6 +246,28 @@ public class Main extends Activity implements View, onDataStateListener {
                     public void call(String s) {
                         Snackbar.make(mIdMainAddBookFab, s, Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
+                    }
+                });
+    }
+
+    // 下拉刷新
+    @Override
+    public void onRefresh() {
+        Observable.just(1)
+                .map(new Func1<Integer, Integer>() {
+                    @Override
+                    public Integer call(Integer integer) {
+                        mPresent.updateBookList();
+                        return 1;
+                    }
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Action1<Integer>() {
+                    @Override
+                    public void call(Integer integer) {
+                        data = mPresent.getBookList();
+                        mIdMainSwipeRefreshLayout.setRefreshing(false);
                     }
                 });
     }

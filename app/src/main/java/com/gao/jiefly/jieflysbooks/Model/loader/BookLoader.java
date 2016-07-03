@@ -219,19 +219,23 @@ public class BookLoader {
     }
 
     //    更新数据库中的书籍信息
-    public boolean update(String bookName) throws MalformedURLException {
-        Book book = getBookFromHttp(bookName);
+    public boolean update(Book book) throws MalformedURLException {
+        Book updateBook = updateBookByUrl(new URL(book.getBookUrl()));
         SQLiteDatabase db = mBookDatabaseHelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put("recentTopic", book.getBookNewTopicTitle());
         contentValues.put("recentTopicUrl", book.getBookNewTopicUrl());
         contentValues.put("recentUpdate", book.getBookLastUpdate());
-        int result = db.update("Book", contentValues, "name=?", new String[]{bookName});
+        int result = db.update("Book", contentValues, "name=?", new String[]{book.getBookName()});
         db.close();
-        updateChapterList(bookName);
+        updateChapterList(book.getBookName());
         return result > 0;
     }
-
+//    通过书籍的网址，获取书籍的更新
+    private Book updateBookByUrl(URL url) {
+        String values = new BaseHttpURLClient().getWebResourse(url);
+        return findBookInfoInDetailWeb(values);
+    }
     //    查询是否成功向数据库添加书籍
     private boolean checkAddSuccess(String bookName) {
         boolean isSuccess = false;
@@ -257,12 +261,12 @@ public class BookLoader {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-        return findBookInHtml(bookName);
+        return findBookInHtml(bookName,sb.toString());
     }
 
-    private Book findBookInHtml(String bookName) {
+    private Book findBookInHtml(String bookName,String values) {
         Pattern p = Pattern.compile("<title>(.*?)</title>");
-        Matcher m = p.matcher(sb.toString());
+        Matcher m = p.matcher(values);
         String tmp;
         if (m.find()) {
             tmp = m.group();
@@ -275,19 +279,19 @@ public class BookLoader {
         p = Pattern.compile("搜索");
         Book book;
         if (p.matcher(tmp).find()) {
-            book = findBookInfoInSearchWeb(bookName);
+            book = findBookInfoInSearchWeb(bookName,values);
             Log.e("jiefly", "find book in search");
         } else {
-            book = findBookInfoInDetailWeb();
+            book = findBookInfoInDetailWeb(values);
             Log.e("jiefly", "find book direct url");
         }
         return book;
     }
 
-    private Book findBookInfoInDetailWeb() {
+    private Book findBookInfoInDetailWeb(String values) {
         Book book = new Book();
         Pattern p = Pattern.compile("<div class=\"book-about clrfix\"(.*?) <dl class=\"chapter-list clrfix\">");
-        Matcher m = p.matcher(sb.toString());
+        Matcher m = p.matcher(values);
         String tmp;
         if (m.find()) {
             tmp = m.group();
@@ -314,9 +318,9 @@ public class BookLoader {
         return book;
     }
 
-    private Book findBookInfoInSearchWeb(String bookName) {
+    private Book findBookInfoInSearchWeb(String bookName,String values) {
         Pattern p = Pattern.compile("<div class=\"list-lastupdate\">(.*?)</div>");
-        Matcher m = p.matcher(sb.toString());
+        Matcher m = p.matcher(values);
         String tmp;
         if (m.find()) {
             tmp = m.group(1);

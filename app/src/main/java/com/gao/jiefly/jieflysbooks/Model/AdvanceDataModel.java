@@ -87,7 +87,7 @@ public class AdvanceDataModel implements DataModel {
     @Override
     public void updateBook(Book book) {
         try {
-            mBookLoader.update(book.getBookName());
+            mBookLoader.update(book);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }

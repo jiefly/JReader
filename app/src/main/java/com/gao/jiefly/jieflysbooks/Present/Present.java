@@ -51,10 +51,12 @@ public class Present {
 
     //    增加书籍
     public void addBook(String bookName) throws MalformedURLException {
-        for (Book book : mBookList) {
-            if (book.getBookName().equals(bookName)) {
-                mView.showSnackbar("the book is exist,don't add again");
-                return;
+        if (mBookList != null) {
+            for (Book book : mBookList) {
+                if (book.getBookName().equals(bookName)) {
+                    mView.showSnackbar("the book is exist,don't add again");
+                    return;
+                }
             }
         }
         Book book = mAdvanceDataModel.addBook(bookName);
@@ -67,13 +69,8 @@ public class Present {
 
     //    更新书籍
     public void updateBookList() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                mAdvanceDataModel.updateAllBooks();
-                mBookList = mAdvanceDataModel.getBookList();
-            }
-        }).start();
+        mAdvanceDataModel.updateAllBooks();
+        mBookList = mAdvanceDataModel.getBookList();
     }
 
     //    删除书籍

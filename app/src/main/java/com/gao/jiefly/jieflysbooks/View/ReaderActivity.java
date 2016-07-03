@@ -13,10 +13,10 @@ import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.gao.jiefly.jieflysbooks.Model.AdvanceDataModel;
 import com.gao.jiefly.jieflysbooks.Model.BaseDataModel;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
-import com.gao.jiefly.jieflysbooks.Model.loader.ChapterLoader;
 import com.gao.jiefly.jieflysbooks.R;
 
 import java.io.IOException;
@@ -147,7 +147,7 @@ public class ReaderActivity extends Activity {
                     @Override
                     public Chapter call(String s) {
                         try {
-                            return ChapterLoader.build(getBaseContext()).getChapterLoaderResult(s);
+                            return AdvanceDataModel.build(getApplicationContext()).getBookChapterByUrl(s);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -177,7 +177,7 @@ public class ReaderActivity extends Activity {
                     public List<Chapter> call(Book book) {
                         List<Chapter> result = null;
                         try {
-                            result = mDataModel.getChapterList(book.getBookUrl());
+                            result = AdvanceDataModel.build(getApplicationContext()).getChapterList(mBook.getBookUrl());
                         } catch (MalformedURLException e) {
                             e.printStackTrace();
                         }
