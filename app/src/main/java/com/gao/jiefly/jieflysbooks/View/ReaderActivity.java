@@ -14,13 +14,13 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.gao.jiefly.jieflysbooks.Model.AdvanceDataModel;
-import com.gao.jiefly.jieflysbooks.Model.BaseDataModel;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
 import com.gao.jiefly.jieflysbooks.R;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -46,7 +46,6 @@ public class ReaderActivity extends Activity {
     @InjectView(R.id.id_reader_phone_info)
     TextView mIdReaderPhoneInfo;
 
-    BaseDataModel mDataModel;
     Book mBook;
     List<Chapter> mChapterList = new LinkedList<>();
 
@@ -55,6 +54,7 @@ public class ReaderActivity extends Activity {
     SlidingMenu mIdReaderLayout;
     @InjectView(R.id.id_reader_scroll_view)
     ScrollView mIdReaderScrollView;
+    AdvanceDataModel mAdvanceDataModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +64,8 @@ public class ReaderActivity extends Activity {
         ButterKnife.inject(this);
         Bundle bundle = this.getIntent().getBundleExtra("bookbundle");
         mBook = (Book) bundle.getSerializable("book");
+
+        mAdvanceDataModel = AdvanceDataModel.build(getApplicationContext());
 //        Log.d("readerActivity", mBook.toString());
 //        initData();
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.id_reader_left_recycle_view);
@@ -95,16 +97,22 @@ public class ReaderActivity extends Activity {
         mIdReaderTopicTitle.setText(mBook.getBookNewTopicTitle());
     }
 
-    private void setContentText(String url) {
+    private void setContentText(final String url) {
         Observable.just(url)
                 .observeOn(Schedulers.io())
                 .map(new Func1<String, String>() {
                     @Override
                     public String call(String s) {
-                        if (mDataModel == null)
-                            mDataModel = new BaseDataModel(null);
-                        initData();
-                        return mDataModel.getBookChapter(s);
+                        if (mChapterList.size() < 1)
+                            initData();
+                        Chapter chapter = null;
+                        try {
+                            chapter = mAdvanceDataModel.getChapter(new URL(url));
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        }
+                        assert chapter != null;
+                        return chapter.getContent();
                     }
                 })
                 .subscribeOn(AndroidSchedulers.mainThread())
@@ -147,7 +155,7 @@ public class ReaderActivity extends Activity {
                     @Override
                     public Chapter call(String s) {
                         try {
-                            return AdvanceDataModel.build(getApplicationContext()).getBookChapterByUrl(s);
+                            return mAdvanceDataModel.getBookChapterByUrl(s);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -177,7 +185,7 @@ public class ReaderActivity extends Activity {
                     public List<Chapter> call(Book book) {
                         List<Chapter> result = null;
                         try {
-                            result = AdvanceDataModel.build(getApplicationContext()).getChapterList(mBook.getBookUrl());
+                            result = mAdvanceDataModel.getChapterList(mBook.getBookName());
                         } catch (MalformedURLException e) {
                             e.printStackTrace();
                         }

@@ -53,16 +53,18 @@ public class BookLoader {
     private void updateChapterList(String bookName) throws MalformedURLException {
         List<Chapter> chaptersFromHttp = getChapterListFromHttp(getBook(bookName).getBookUrl());
         Book.ChapterList chaptersFromDB = getChapterListFromDB(bookName);
-        if (chaptersFromDB.getChapterUrlList().size() < chaptersFromHttp.size()) {
-            List<String> chapterUrl = new LinkedList<>();
-            List<String> chapterTopic = new LinkedList<>();
-            ContentValues contentValues = new ContentValues();
-            contentValues.put("bookName", bookName);
-            for (int i = chaptersFromDB.getChapterTitleList().size(); i < chaptersFromHttp.size(); i++) {
-                SQLiteDatabase db = mChapterListDatabaseHelper.getWritableDatabase();
-                contentValues.put("chapterTitle", chaptersFromHttp.get(i).getTitle());
-                contentValues.put("chapterUrl", chaptersFromHttp.get(i).getUrl());
-                db.insert("chapterList", null, contentValues);
+        if (chaptersFromHttp !=null){
+            if (chaptersFromDB == null || chaptersFromHttp.size()>chaptersFromDB.getChapterUrlList().size()){
+                List<String> chapterUrl = new LinkedList<>();
+                List<String> chapterTopic = new LinkedList<>();
+                ContentValues contentValues = new ContentValues();
+                contentValues.put("bookName", bookName);
+                for (int i = chaptersFromDB != null ? chaptersFromDB.getChapterTitleList().size() : 0; i < chaptersFromHttp.size(); i++) {
+                    SQLiteDatabase db = mChapterListDatabaseHelper.getWritableDatabase();
+                    contentValues.put("chapterTitle", chaptersFromHttp.get(i).getTitle());
+                    contentValues.put("chapterUrl", chaptersFromHttp.get(i).getUrl());
+                    db.insert("chapterList", null, contentValues);
+                }
             }
         }
     }

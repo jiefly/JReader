@@ -1,6 +1,7 @@
 package com.gao.jiefly.jieflysbooks.Model.bean;
 
 import java.io.Serializable;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -19,7 +20,6 @@ public class Book implements Serializable{
     private String bookStatu = null;
     private int bookTotalWords;
     private ChapterList mChapterList = null;
-
     @Override
 
     public String toString(){
@@ -107,7 +107,9 @@ public class Book implements Serializable{
     public ChapterList getChapterList() {
         return mChapterList;
     }
-
+    public List<Chapter> getList(){
+        return chapterList2List(mChapterList);
+    }
     public void setChapterList(ChapterList chapterList) {
         mChapterList = chapterList;
     }
@@ -134,5 +136,26 @@ public class Book implements Serializable{
             this.chapterUrlList = chapterUrlList;
             this.chapterTitleList = chapterTitleList;
         }
+    }
+
+    private List<Chapter> chapterList2List(Book.ChapterList chapterList) {
+        List<Chapter> chapters = new LinkedList<>();
+        List<String> urlList = chapterList.getChapterUrlList();
+        List<String> titleList = chapterList.getChapterTitleList();
+
+        for (int i = 0; i < chapterList.getChapterUrlList().size(); i++) {
+            chapters.add(new Chapter(urlList.get(i), titleList.get(i), chapterList.getBookName()));
+        }
+        return chapters;
+    }
+
+    private Book.ChapterList list2ChapterList(List<Chapter> chapters) {
+        List<String> url = new LinkedList<>();
+        List<String> title = new LinkedList<>();
+        for (Chapter c : chapters) {
+            url.add(c.getUrl());
+            title.add(c.getTitle());
+        }
+        return new Book.ChapterList(chapters.get(0).getBookName(), url, title);
     }
 }

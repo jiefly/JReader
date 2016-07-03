@@ -58,8 +58,7 @@ public class AdvanceDataModel implements DataModel {
     }
 
     @Override
-    public List<Chapter> getChapterList(String url) throws MalformedURLException {
-        String bookName = mBookLoader.getBook(url).getBookName();
+    public List<Chapter> getChapterList(String bookName) throws MalformedURLException {
         return mBookLoader.getChapterList(bookName);
     }
 
