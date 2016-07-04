@@ -141,6 +141,11 @@ public class BaseDataModel implements DataModel {
         return null;
     }
 
+    @Override
+    public void updateBookReaderChapterIndex(Book book, int index) {
+
+    }
+
 
     public void getBookSuscribe(final String bookName) {
         try {

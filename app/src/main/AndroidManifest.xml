@@ -20,9 +20,11 @@
 			</intent-filter>
 		</activity>
 		<activity android:name=".TestActivity">
-
 		</activity>
 		<activity android:name=".View.ReaderActivity">
+		</activity>
+
+		<activity android:name=".View.JieReader">
 			android:exported="true"
 		</activity>
 	</application>

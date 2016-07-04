@@ -8,6 +8,7 @@ import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.View.View;
 
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,25 +16,25 @@ import java.util.List;
  * Email:jiefly1993@gmail.com
  * Fighting_jiiiiie
  */
-public class Present {
+public class PresentMain {
     private Context mContext;
-    private List<Book> mBookList;
-    private static Present instance = null;
+    private List<Book> mBookList = new ArrayList<>();
+    private static PresentMain instance = null;
     private AdvanceDataModel mAdvanceDataModel;
     View mView;
 
-    private Present(Context context, View view) {
+    private PresentMain(Context context, View view) {
         mContext = context;
         mAdvanceDataModel = AdvanceDataModel.build(context);
         mView = view;
         mBookList = mAdvanceDataModel.getBookList();
     }
 
-    public static Present getInstance(Context context, View view) {
+    public static PresentMain getInstance(Context context, View view) {
         if (instance == null) {
-            synchronized (Present.class) {
+            synchronized (PresentMain.class) {
                 if (instance == null) {
-                    instance = new Present(context, view);
+                    instance = new PresentMain(context, view);
                 }
             }
         }
@@ -42,16 +43,16 @@ public class Present {
 
     //    显示书籍列表
     public void showBookList() {
-        if (mBookList == null) {
+        if (mBookList.size() == 0) {
 //            初始化书籍列表
-            mBookList = mAdvanceDataModel.getBookList();
+            mBookList.addAll(mAdvanceDataModel.getBookList());
         }
         mView.showBooks(mBookList);
     }
 
     //    增加书籍
     public void addBook(String bookName) throws MalformedURLException {
-        if (mBookList != null) {
+        if (mBookList.size() != 0) {
             for (Book book : mBookList) {
                 if (book.getBookName().equals(bookName)) {
                     mView.showSnackbar("the book is exist,don't add again");
@@ -61,10 +62,8 @@ public class Present {
         }
         Book book = mAdvanceDataModel.addBook(bookName);
         Log.i("addBook", book.toString());
-        if (book != null) {
-//            mBookList.add(book);
-            mView.addBook(book);
-        }
+        //            mBookList.add(book);
+        mView.addBook(book);
     }
 
     //    更新书籍

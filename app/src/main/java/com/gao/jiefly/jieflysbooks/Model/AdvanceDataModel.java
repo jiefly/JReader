@@ -143,6 +143,11 @@ public class AdvanceDataModel implements DataModel {
         return null;
     }
 
+    @Override
+    public void updateBookReaderChapterIndex(Book book, int index) {
+        mBookLoader.refreshReadChapterIndex(book,index);
+    }
+
     private boolean checkDataModelIsInit() {
         return instance != null;
     }

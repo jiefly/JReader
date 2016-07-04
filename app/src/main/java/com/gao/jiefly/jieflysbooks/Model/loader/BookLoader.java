@@ -53,8 +53,8 @@ public class BookLoader {
     private void updateChapterList(String bookName) throws MalformedURLException {
         List<Chapter> chaptersFromHttp = getChapterListFromHttp(getBook(bookName).getBookUrl());
         Book.ChapterList chaptersFromDB = getChapterListFromDB(bookName);
-        if (chaptersFromHttp !=null){
-            if (chaptersFromDB == null || chaptersFromHttp.size()>chaptersFromDB.getChapterUrlList().size()){
+        if (chaptersFromHttp != null) {
+            if (chaptersFromDB == null || chaptersFromHttp.size() > chaptersFromDB.getChapterUrlList().size()) {
                 List<String> chapterUrl = new LinkedList<>();
                 List<String> chapterTopic = new LinkedList<>();
                 ContentValues contentValues = new ContentValues();
@@ -69,17 +69,28 @@ public class BookLoader {
         }
     }
 
+    //更新Book中读者读到的章节index
+    public void refreshReadChapterIndex(Book book, int index) {
+        SQLiteDatabase db = mChapterListDatabaseHelper.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("chapterIndex", book.getReadChapterIndex());
+        db.update("Book", contentValues, "name=?", new String[]{book.getBookName()});
+        db.close();
+    }
+
+    //从网络拉取小说列表
     private List<Chapter> getChapterListFromHttp(String url) throws MalformedURLException {
         URL urll = new URL(url);
         String srcHtml = new BaseHttpURLClient().getWebResourse(urll);
         List<Chapter> result = Utils.getChapterListFromHtml(srcHtml);
         for (Chapter c : result) {
-//            拼接好地址
+            // 拼接好地址
             c.setUrl(url + "/" + c.getUrl());
         }
         return result;
     }
 
+    //获取小说章节列表
     public List<Chapter> getChapterList(String bookName) throws MalformedURLException {
         Book.ChapterList chapterList = getChapterListFromDB(bookName);
         if (chapterList != null)
@@ -106,7 +117,7 @@ public class BookLoader {
         return null;
     }
 
-    // 向数据库中添加小说章节列表
+    // 从网络中获取小说列表最后向数据库中添加小说章节列表
     private boolean addChapterList(String bookName) throws MalformedURLException {
         List<Chapter> chapters = getChapterListFromHttp(getBook(bookName).getBookUrl());
         List<String> chapterUrl = new LinkedList<>();
@@ -120,6 +131,7 @@ public class BookLoader {
         return true;
     }
 
+    //直接将小说列表添加到数据库中
     private void addChapterList(Book.ChapterList chapterList) {
         SQLiteDatabase db = mChapterListDatabaseHelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -131,7 +143,7 @@ public class BookLoader {
         }
     }
 
-    //    获取数据库中的小说所有小说列表
+    //获取数据库中的小说所有小说列表
     public List<Book> getBookList() {
         SQLiteDatabase db = mBookDatabaseHelper.getReadableDatabase();
         List<Book> data;
@@ -174,6 +186,7 @@ public class BookLoader {
             book.setBookLastUpdate(cursor.getString(cursor.getColumnIndex("recentUpdate")));
             book.setBookNewTopicTitle(cursor.getString(cursor.getColumnIndex("recentTopic")));
             book.setBookNewTopicUrl(cursor.getString(cursor.getColumnIndex("recentTopicUrl")));
+            book.setReadChapterIndex(cursor.getInt(cursor.getColumnIndex("chapterIndex")));
             db.close();
             cursor.close();
             return book;
@@ -201,6 +214,7 @@ public class BookLoader {
         contentValues.put("recentUpdate", book.getBookLastUpdate());
         contentValues.put("bookType", book.getBookStyle());
         contentValues.put("statue", book.getBookStatu());
+        contentValues.put("chapterIndex", book.getReadChapterIndex());
         db.insert("Book", null, contentValues);
         db.close();
         if (!checkAddSuccess(bookName)) {
@@ -225,19 +239,21 @@ public class BookLoader {
         Book updateBook = updateBookByUrl(new URL(book.getBookUrl()));
         SQLiteDatabase db = mBookDatabaseHelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put("recentTopic", book.getBookNewTopicTitle());
-        contentValues.put("recentTopicUrl", book.getBookNewTopicUrl());
-        contentValues.put("recentUpdate", book.getBookLastUpdate());
-        int result = db.update("Book", contentValues, "name=?", new String[]{book.getBookName()});
+        contentValues.put("recentTopic", updateBook.getBookNewTopicTitle());
+        contentValues.put("recentTopicUrl", updateBook.getBookNewTopicUrl());
+        contentValues.put("recentUpdate", updateBook.getBookLastUpdate());
+        int result = db.update("Book", contentValues, "name=?", new String[]{updateBook.getBookName()});
         db.close();
         updateChapterList(book.getBookName());
         return result > 0;
     }
-//    通过书籍的网址，获取书籍的更新
+
+    //    通过书籍的网址，获取书籍的更新
     private Book updateBookByUrl(URL url) {
         String values = new BaseHttpURLClient().getWebResourse(url);
         return findBookInfoInDetailWeb(values);
     }
+
     //    查询是否成功向数据库添加书籍
     private boolean checkAddSuccess(String bookName) {
         boolean isSuccess = false;
@@ -249,6 +265,7 @@ public class BookLoader {
         return isSuccess;
     }
 
+    //通过网络获取小说
     private Book getBookFromHttp(String bookName) {
         if (sb == null)
             sb = new StringBuilder();
@@ -263,10 +280,11 @@ public class BookLoader {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-        return findBookInHtml(bookName,sb.toString());
+        return findBookInHtml(bookName, sb.toString());
     }
 
-    private Book findBookInHtml(String bookName,String values) {
+    //从web源码中获取小说
+    private Book findBookInHtml(String bookName, String values) {
         Pattern p = Pattern.compile("<title>(.*?)</title>");
         Matcher m = p.matcher(values);
         String tmp;
@@ -281,15 +299,18 @@ public class BookLoader {
         p = Pattern.compile("搜索");
         Book book;
         if (p.matcher(tmp).find()) {
-            book = findBookInfoInSearchWeb(bookName,values);
+            book = findBookInfoInSearchWeb(bookName, values);
             Log.e("jiefly", "find book in search");
         } else {
             book = findBookInfoInDetailWeb(values);
             Log.e("jiefly", "find book direct url");
         }
+        if (book != null)
+            book.setReadChapterIndex(0);
         return book;
     }
 
+    //从小说index web页面获取小说
     private Book findBookInfoInDetailWeb(String values) {
         Book book = new Book();
         Pattern p = Pattern.compile("<div class=\"book-about clrfix\"(.*?) <dl class=\"chapter-list clrfix\">");
@@ -313,6 +334,7 @@ public class BookLoader {
             book.setBookNewTopicTitle(m.group(7));
             book.setBookStatu(m.group(9));
             book.setBookLastUpdate(m.group(11));
+
         } else {
             Log.e(TAG, "can't find book in method >>>>findBookInfoInDetailWeb<<<<");
             return null;
@@ -320,7 +342,8 @@ public class BookLoader {
         return book;
     }
 
-    private Book findBookInfoInSearchWeb(String bookName,String values) {
+    //从搜索web页面获取小说
+    private Book findBookInfoInSearchWeb(String bookName, String values) {
         Pattern p = Pattern.compile("<div class=\"list-lastupdate\">(.*?)</div>");
         Matcher m = p.matcher(values);
         String tmp;
@@ -344,6 +367,7 @@ public class BookLoader {
                 book.setBookTotalWords(Integer.parseInt(m.group(7).replaceAll("K", "")) * 1000);
                 book.setBookLastUpdate(m.group(8));
                 book.setBookStatu(m.group(9));
+
                 return book;
             }
         }

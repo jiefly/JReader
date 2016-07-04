@@ -22,11 +22,9 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.gao.jiefly.jieflysbooks.Model.BaseDataModel;
-import com.gao.jiefly.jieflysbooks.Model.CustomDatabaseHelper;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.listener.onDataStateListener;
-import com.gao.jiefly.jieflysbooks.Present.Present;
+import com.gao.jiefly.jieflysbooks.Present.PresentMain;
 import com.gao.jiefly.jieflysbooks.R;
 
 import java.net.MalformedURLException;
@@ -53,21 +51,19 @@ public class Main extends Activity implements View, onDataStateListener, SwipeRe
     @InjectView(R.id.id_main_swipe_refresh_layout)
     SwipeRefreshLayout mIdMainSwipeRefreshLayout;
     private List<Book> data;
-    BaseDataModel dataModel;
     BookListRecycleViewAdapter adapter;
     PopupWindow mPopupWindow = null;
     EditText etAddBookName;
-    CustomDatabaseHelper databaseHelper;
-    Present mPresent;
+    PresentMain mPresentMain;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         ButterKnife.inject(this);
-        mPresent = Present.getInstance(getApplicationContext(), this);
-//        mPresent.updateBookList();
-        data = mPresent.getBookList();
+        mPresentMain = PresentMain.getInstance(getApplicationContext(), this);
+//        mPresentMain.updateBookList();
+        data = mPresentMain.getBookList();
         mIdMainSwipeRefreshLayout.setOnRefreshListener(this);
         adapter = new BookListRecycleViewAdapter();
 
@@ -78,7 +74,7 @@ public class Main extends Activity implements View, onDataStateListener, SwipeRe
                 if (position == 0) {
                     return;
                 }
-                mPresent.readBook(position - 1);
+                mPresentMain.readBook(position - 1);
             }
 
             @Override
@@ -100,7 +96,7 @@ public class Main extends Activity implements View, onDataStateListener, SwipeRe
                                     new android.view.View.OnClickListener() {
                                         @Override
                                         public void onClick(android.view.View v) {
-                                            mPresent.removeBook(new int[]{position - 1});
+                                            mPresentMain.removeBook(new int[]{position - 1});
                                             deletePopup.dismiss();
                                         }
                                     });
@@ -142,7 +138,7 @@ public class Main extends Activity implements View, onDataStateListener, SwipeRe
                     @Override
                     public void run() {
                         try {
-                            mPresent.addBook(etAddBookName.getText().toString());
+                            mPresentMain.addBook(etAddBookName.getText().toString());
                         } catch (MalformedURLException e) {
                             e.printStackTrace();
                         }
@@ -190,7 +186,7 @@ public class Main extends Activity implements View, onDataStateListener, SwipeRe
 
                     @Override
                     public void onNext(Book book) {
-                        data = mPresent.getBookList();
+                        data = mPresentMain.getBookList();
                         if (data.contains(book)) {
                             data.add(book);
                             adapter.notifyItemChanged(1, data.size());
@@ -205,7 +201,7 @@ public class Main extends Activity implements View, onDataStateListener, SwipeRe
     @Override
     public void readBook(Book book) {
         Intent intent = new Intent();
-        intent.setClass(Main.this, ReaderActivity.class);
+        intent.setClass(Main.this, JieReader.class);
         Bundle bundle = new Bundle();
         bundle.putSerializable("book", book);
         intent.putExtra("bookbundle", bundle);
@@ -257,7 +253,7 @@ public class Main extends Activity implements View, onDataStateListener, SwipeRe
                 .map(new Func1<Integer, Integer>() {
                     @Override
                     public Integer call(Integer integer) {
-                        mPresent.updateBookList();
+                        mPresentMain.updateBookList();
                         return 1;
                     }
                 })
@@ -266,8 +262,9 @@ public class Main extends Activity implements View, onDataStateListener, SwipeRe
                 .subscribe(new Action1<Integer>() {
                     @Override
                     public void call(Integer integer) {
-                        data = mPresent.getBookList();
+                        data = mPresentMain.getBookList();
                         mIdMainSwipeRefreshLayout.setRefreshing(false);
+                        adapter.notifyItemRangeChanged(1,data.size());
                     }
                 });
     }

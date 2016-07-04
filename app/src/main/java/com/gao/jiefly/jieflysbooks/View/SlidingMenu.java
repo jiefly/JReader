@@ -3,6 +3,7 @@ package com.gao.jiefly.jieflysbooks.View;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
@@ -76,12 +77,26 @@ public class SlidingMenu extends HorizontalScrollView {
             this.scrollTo(mMneuWidth, 0);
 
     }
-
+    private boolean moveStartFlag = false;
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         int action = ev.getAction();
+        int moveStartX;
         switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                Log.i("jiefly","down"+ev.getX());
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (!moveStartFlag){
+                    moveStartFlag = true;
+                    moveStartX = (int) ev.getX();
+                    Log.i("jiefly",moveStartX+"move"+ev.getX());
+                }
+
+                break;
             case MotionEvent.ACTION_UP:
+                moveStartFlag = false;
+                Log.i("jiefly","up"+ev.getX());
                 //隐藏在左边的宽度
                 int scrollX = getScrollX();
                 if (scrollX > mMneuWidth / 2) {

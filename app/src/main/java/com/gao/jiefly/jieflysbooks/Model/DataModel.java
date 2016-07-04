@@ -52,4 +52,7 @@ interface DataModel {
 
     //    获取DataModel对象
     DataModel getInstance();
+
+//    更新小说的当前读书进度
+    void updateBookReaderChapterIndex(Book book,int index);
 }

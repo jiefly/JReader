@@ -9,7 +9,7 @@ import java.util.List;
  * Email:jiefly1993@gmail.com
  * Fighting_jiiiiie
  */
-public class Book implements Serializable{
+public class Book implements Serializable {
     private static final long serialVersionUID = -7060210544600464481L;
     private String bookName = null;
     private String bookAuthor = null;
@@ -20,9 +20,11 @@ public class Book implements Serializable{
     private String bookStatu = null;
     private int bookTotalWords;
     private ChapterList mChapterList = null;
-    @Override
+    private int readChapterIndex = 0;
 
-    public String toString(){
+
+    @Override
+    public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder
                 .append("类型：").append(bookStyle).append("\n")
@@ -36,24 +38,39 @@ public class Book implements Serializable{
                 .append("小说状态：").append(bookStatu).append("\n");
         return stringBuilder.toString();
     }
+
+    public int getReadChapterIndex() {
+        return readChapterIndex;
+    }
+
+    public void setReadChapterIndex(int readChapterIndex) {
+        this.readChapterIndex = readChapterIndex;
+    }
+
     public int getBookTotalWords() {
         return bookTotalWords;
     }
+
     public void setBookTotalWords(int bookTotalWords) {
         this.bookTotalWords = bookTotalWords;
     }
+
     public String getBookStatu() {
         return bookStatu;
     }
+
     public void setBookStatu(String bookStatu) {
         this.bookStatu = bookStatu;
     }
+
     public String getBookLastUpdate() {
         return bookLastUpdate;
     }
+
     public void setBookLastUpdate(String bookLastUpdate) {
         this.bookLastUpdate = bookLastUpdate;
     }
+
     public String getBookStyle() {
         return bookStyle;
     }
@@ -107,9 +124,11 @@ public class Book implements Serializable{
     public ChapterList getChapterList() {
         return mChapterList;
     }
-    public List<Chapter> getList(){
+
+    public List<Chapter> getList() {
         return chapterList2List(mChapterList);
     }
+
     public void setChapterList(ChapterList chapterList) {
         mChapterList = chapterList;
     }
@@ -131,7 +150,7 @@ public class Book implements Serializable{
             return chapterUrlList;
         }
 
-        public ChapterList(String bookName, List<String> chapterUrlList , List<String> chapterTitleList) {
+        public ChapterList(String bookName, List<String> chapterUrlList, List<String> chapterTitleList) {
             this.bookName = bookName;
             this.chapterUrlList = chapterUrlList;
             this.chapterTitleList = chapterTitleList;
