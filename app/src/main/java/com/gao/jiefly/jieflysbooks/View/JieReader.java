@@ -7,6 +7,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,6 +41,7 @@ public class JieReader extends Activity {
     @InjectView(R.id.id_jie_reader_drawer_layout)
     DrawerLayout mDrawerLayout;
     private int mScreenWidth;
+    private int mScreenHeight;
     private List<Chapter> mChapterList;
     private Book mBook;
     private AdvanceDataModel mAdvanceDataModel;
@@ -50,7 +52,7 @@ public class JieReader extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_jie_reader);
         ButterKnife.inject(this);
-
+        getScreenWidth();
         Bundle bundle = this.getIntent().getBundleExtra("bookbundle");
         mBook = (Book) bundle.getSerializable("book");
         mAdvanceDataModel = AdvanceDataModel.build(getApplicationContext());
@@ -59,7 +61,8 @@ public class JieReader extends Activity {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.id_reader_left_recycle_view);
+        mDrawerLayout.openDrawer(Gravity.LEFT);
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.id_jie_reader_left_menu_rv);
         RecyclerView.LayoutManager manager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
 
         if (recyclerView != null) {
@@ -85,20 +88,23 @@ public class JieReader extends Activity {
             recyclerView.setAdapter(mRecycleAdapter);
         }
     }
-    private void getScreenWidth(){
+
+    private void getScreenWidth() {
         WindowManager windowManager = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);
         DisplayMetrics displayMetrics = new DisplayMetrics();
         windowManager.getDefaultDisplay().getMetrics(displayMetrics);
         mScreenWidth = displayMetrics.widthPixels;
     }
+
    /* @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        switch (ev.getAction()){
+        switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
 //                如果是在左边手机屏幕边缘的位置向右滑动则默认为是打开侧边栏的手势，将由activity的onTouchEvent处理
-                if (ev.getX()<mScreenWidth/8){
+                if (ev.getX() < 200) {
                     return false;
                 }
+                Log.i("jiefly", ev.getX() + "");
         }
         return super.dispatchTouchEvent(ev);
     }
@@ -106,12 +112,12 @@ public class JieReader extends Activity {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int moveStartX = mScreenWidth;
-        switch (event.getAction()){
+        switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 moveStartX = (int) event.getX();
                 break;
             case MotionEvent.ACTION_UP:
-                if (event.getX() - moveStartX > mScreenWidth/5) {
+                if (event.getX() - moveStartX > mScreenWidth / 5) {
                     Log.i("jiefly", "up" + event.getX());
                     mDrawerLayout.openDrawer(Gravity.LEFT);
                 }
@@ -123,6 +129,7 @@ public class JieReader extends Activity {
     public interface OnItemClickListener {
         void onItemClick(View view, int position);
     }
+
     class CustomRecycleAdapter extends RecyclerView.Adapter<CustomRecycleAdapter.ViewHolder> {
         OnItemClickListener mListener = null;
 
