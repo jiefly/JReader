@@ -28,14 +28,22 @@ interface DataModel {
     //    获取书籍
     Book getBook(String name) throws MalformedURLException;
 
-    //    添加书籍
+    //    添加书籍 (同步)
     Book addBook(String name);
+
+    //    添加书籍（异步）
+    void addBookSyn(String name);
 
     //    删除书籍
     void removeBook(String[] name);
 
+    //    删除书籍（异步）
+    void removeBookSyn(String[] name);
+
     //    更新书籍
     void updateBook(Book book);
+//    更新书籍（异步）
+    void updateBookSyn(Book book);
 
     //    更新所有书籍
     void updateAllBooks();
@@ -53,6 +61,6 @@ interface DataModel {
     //    获取DataModel对象
     DataModel getInstance();
 
-//    更新小说的当前读书进度
-    void updateBookReaderChapterIndex(Book book,int index);
+    //    更新小说的当前读书进度
+    void updateBookReaderChapterIndex(Book book, int index);
 }

@@ -11,6 +11,7 @@ import java.util.List;
  */
 public interface View {
     void showBooks(List<Book> books);
+    void updateBook(String bookName);
     void readBook(Book book);
     void addBook(Book book);
     void removeBook(Book book);

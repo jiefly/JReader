@@ -133,7 +133,7 @@ public class Book implements Serializable {
         mChapterList = chapterList;
     }
 
-    public static class ChapterList {
+    public static class ChapterList implements Serializable{
         private String bookName;
         private List<String> chapterTitleList;
         private List<String> chapterUrlList;

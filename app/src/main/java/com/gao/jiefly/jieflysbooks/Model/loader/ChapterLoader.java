@@ -33,7 +33,7 @@ public class ChapterLoader {
     private static final int IO_BUFFER_SIZE = 512;
     private static Configuration mConfiguration;
     //    如果没有配置的话，默认开启磁盘缓存，关闭内存缓存
-    private boolean isNeedCacheInMemory = false;
+    private boolean isNeedCacheInMemory = true;
     private boolean isNeedCacheInDisk = true;
     private boolean mIsDiskCacheCreated = false;
     //    小说章节内存缓存

@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnDataModelListener;
 import com.gao.jiefly.jieflysbooks.Model.loader.BookLoader;
 import com.gao.jiefly.jieflysbooks.Model.loader.ChapterLoader;
 
@@ -18,12 +19,14 @@ import java.util.List;
  * Email:jiefly1993@gmail.com
  * Fighting_jiiiiie
  */
-public class AdvanceDataModel implements DataModel {
+public class AdvanceDataModel implements DataModel ,OnDataModelListener {
     private static final String TAG = "BaseDataModel";
     static Context mContext;
     private static volatile AdvanceDataModel instance = null;
     private BookLoader mBookLoader;
     private ChapterLoader mChapterLoader;
+    private int chapterSize = 0;
+    private static OnDataModelListener mOnDataModelListener;
 
     private AdvanceDataModel() {
         mBookLoader = new BookLoader(mContext);
@@ -41,7 +44,11 @@ public class AdvanceDataModel implements DataModel {
             }
         return instance;
     }
-
+    public static AdvanceDataModel build(Context context,OnDataModelListener modelListener) {
+        if (mOnDataModelListener == null)
+            mOnDataModelListener = modelListener;
+        return build(context);
+    }
     @Override
     public List<Book> getBookList() {
         return mBookLoader.getBookList();
@@ -77,10 +84,34 @@ public class AdvanceDataModel implements DataModel {
         }
         return book;
     }
-
+    @Override
+    public void addBookSyn(final String name) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Book book;
+                    book = mBookLoader.addBook(name);
+                    onBookAddSuccess(book);
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
     @Override
     public void removeBook(String[] name) {
         mBookLoader.removeBook(name);
+    }
+    @Override
+    public void removeBookSyn(final String[] name) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mBookLoader.removeBook(name);
+                onBookRemoveSuccess();
+            }
+        }).start();
     }
 
     @Override
@@ -91,17 +122,43 @@ public class AdvanceDataModel implements DataModel {
             e.printStackTrace();
         }
     }
+    @Override
+    public void updateBookSyn(final Book book) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mBookLoader.update(book);
+                    onBookUpdataSuccess(book.getBookName());
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
 
     @Override
     public void updateAllBooks() {
         List<Book> books = getBookList();
-        for (Book b:books){
-            updateBook(b);
+        for (Book b : books) {
+            updateBookSyn(b);
         }
     }
 
     @Override
     public Chapter getChapter(String bookName, int index) {
+        if (chapterSize == 0) {
+            try {
+                chapterSize = getChapterList(bookName).size();
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+        }
+        if (index < 0 || index > chapterSize) {
+            Chapter chapter = new Chapter("null", "null", bookName);
+            chapter.setContent("前面没有更多内容了，客官别翻啦");
+            return chapter;
+        }
         URL url = null;
         try {
             url = new URL(mBookLoader.getChapterList(bookName).get(index).getUrl());
@@ -145,10 +202,30 @@ public class AdvanceDataModel implements DataModel {
 
     @Override
     public void updateBookReaderChapterIndex(Book book, int index) {
-        mBookLoader.refreshReadChapterIndex(book,index);
+        mBookLoader.refreshReadChapterIndex(book, index);
     }
 
     private boolean checkDataModelIsInit() {
         return instance != null;
+    }
+
+    @Override
+    public void onBookAddSuccess(Book book) {
+        mOnDataModelListener.onBookAddSuccess(book);
+    }
+
+    @Override
+    public void onBookUpdataSuccess(String bookName) {
+        mOnDataModelListener.onBookUpdataSuccess(bookName);
+    }
+
+    @Override
+    public void onBookRemoveSuccess() {
+    mOnDataModelListener.onBookRemoveSuccess();
+    }
+
+    @Override
+    public void onChapterLoadSuccess() {
+        mOnDataModelListener.onChapterLoadSuccess();
     }
 }

@@ -74,7 +74,11 @@ public class Main extends Activity implements View, onDataStateListener, SwipeRe
                 if (position == 0) {
                     return;
                 }
-                mPresentMain.readBook(position - 1);
+                try {
+                    mPresentMain.readBook(position - 1);
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -149,6 +153,12 @@ public class Main extends Activity implements View, onDataStateListener, SwipeRe
             }
         });
     }
+/*    @Override
+    protected void onRestart() {
+        super.onRestart();
+        data = mPresentMain.getBookList();
+        Log.e("onRestart", data.size() + "");
+    }*/
 
     @Override
     public void onSuccess(Book result) {
@@ -199,6 +209,31 @@ public class Main extends Activity implements View, onDataStateListener, SwipeRe
     }
 
     @Override
+    public void updateBook(String bookName) {
+        data = mPresentMain.getBookList();
+        final int index = getBookIndex(bookName);
+        Observable.just("").subscribeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<String>() {
+            @Override
+            public void call(String s) {
+                adapter.notifyItemChanged(index);
+            }
+        });
+        Log.e("updateBook",bookName+"update success");
+    }
+
+    private int getBookIndex(String bookName) {
+        //        加上头部
+        int index = 1;
+        for (Book b : data) {
+            if (b.getBookName().equals(bookName)) {
+                break;
+            }
+            index++;
+        }
+        return index;
+    }
+
+    @Override
     public void readBook(Book book) {
         Intent intent = new Intent();
         intent.setClass(Main.this, JieReader.class);
@@ -212,9 +247,19 @@ public class Main extends Activity implements View, onDataStateListener, SwipeRe
     public void addBook(Book book) {
         Observable.just(book)
                 .subscribeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Book>() {
+                .subscribe(new Subscriber<Book>() {
                     @Override
-                    public void call(Book book) {
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        showSnackbar(e.getMessage());
+                    }
+
+                    @Override
+                    public void onNext(Book book) {
                         data.add(book);
                         adapter.notifyItemInserted(data.size() + 1);
                     }
@@ -264,7 +309,7 @@ public class Main extends Activity implements View, onDataStateListener, SwipeRe
                     public void call(Integer integer) {
                         data = mPresentMain.getBookList();
                         mIdMainSwipeRefreshLayout.setRefreshing(false);
-                        adapter.notifyItemRangeChanged(1,data.size());
+                        adapter.notifyItemRangeChanged(1, data.size());
                     }
                 });
     }

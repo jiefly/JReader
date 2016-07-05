@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                        android:id ="@+id/id_jie_reader_drawer_layout"
+<android.support.v4.widget.DrawerLayout android:id="@+id/id_jie_reader_drawer_layout"
+                                        xmlns:android="http://schemas.android.com/apk/res/android"
                                         android:layout_width="match_parent"
                                         android:layout_height="match_parent">
-	<FrameLayout android:layout_width="match_parent"
-	             android:layout_height="match_parent">
+	<RelativeLayout android:layout_width="match_parent"
+	                android:layout_height="match_parent">
 		<com.gao.jiefly.jieflysbooks.View.CustomViewPager android:id="@+id/id_jie_reader_content_vp"
-		                                   android:layout_width="match_parent"
-		                                   android:layout_height="match_parent">
+		                                                  android:layout_width="match_parent"
+		                                                  android:layout_height="match_parent">
 
 		</com.gao.jiefly.jieflysbooks.View.CustomViewPager>
-	</FrameLayout>
+		<include layout="@layout/reader_bottom_bar"
+		         android:layout_width="match_parent"
+		         android:layout_height="100dp" android:layout_alignParentBottom="true"
+		         android:layout_centerHorizontal="true"/>
+	</RelativeLayout>
 	<android.support.v7.widget.RecyclerView android:id="@+id/id_jie_reader_left_menu_rv"
 	                                        android:layout_width="match_parent"
 	                                        android:layout_height="match_parent"
-	                                        android:background="#0d0"
-	                                        android:layout_gravity="start">
+	                                        android:layout_gravity="start"
+	                                        android:background="#0d0">
 
 	</android.support.v7.widget.RecyclerView>
 

@@ -87,12 +87,27 @@ public class BaseDataModel implements DataModel {
     }
 
     @Override
+    public void addBookSyn(String name) {
+
+    }
+
+    @Override
     public void removeBook(String[] name) {
 
     }
 
     @Override
+    public void removeBookSyn(String[] name) {
+
+    }
+
+    @Override
     public void updateBook(Book book) {
+
+    }
+
+    @Override
+    public void updateBookSyn(Book book) {
 
     }
 

@@ -179,7 +179,6 @@ public class ReaderActivity extends Activity {
 
     private void initData() {
         Observable.just(mBook)
-                .subscribeOn(Schedulers.io())
                 .map(new Func1<Book, List<Chapter>>() {
                     @Override
                     public List<Chapter> call(Book book) {

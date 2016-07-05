@@ -71,11 +71,18 @@ public class BookLoader {
 
     //更新Book中读者读到的章节index
     public void refreshReadChapterIndex(Book book, int index) {
-        SQLiteDatabase db = mChapterListDatabaseHelper.getWritableDatabase();
+        Log.e(TAG,"index:"+index);
+        SQLiteDatabase db = mBookDatabaseHelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put("chapterIndex", book.getReadChapterIndex());
+        contentValues.put("chapterIndex", index);
         db.update("Book", contentValues, "name=?", new String[]{book.getBookName()});
         db.close();
+        try {
+            Log.e(TAG,"after index:"+getBook(book.getBookName()).getReadChapterIndex());
+//            updateBookChapterIndex(getBook(book.getBookName()));
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
     }
 
     //从网络拉取小说列表
@@ -163,6 +170,7 @@ public class BookLoader {
                 book.setBookLastUpdate(cursor.getString(cursor.getColumnIndex("recentUpdate")));
                 book.setBookNewTopicTitle(cursor.getString(cursor.getColumnIndex("recentTopic")));
                 book.setBookNewTopicUrl(cursor.getString(cursor.getColumnIndex("recentTopicUrl")));
+                book.setReadChapterIndex(cursor.getInt(cursor.getColumnIndex("chapterIndex")));
                 data.add(book);
             } while (cursor.moveToNext());
             db.close();
@@ -246,6 +254,20 @@ public class BookLoader {
         db.close();
         updateChapterList(book.getBookName());
         return result > 0;
+    }
+//    更新数据库中书的最近读取章节
+    public void updateBookChapterIndex(Book book){
+        Log.e("updateBookChapterIndex",book.getReadChapterIndex()+"");
+        SQLiteDatabase db = mBookDatabaseHelper.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("chapterIndex", book.getReadChapterIndex());
+        db.update("Book", contentValues, "name=?", new String[]{book.getBookName()});
+        db.close();
+        try {
+            Log.e("updateBookChapterIndex",getBook(book.getBookName()).getReadChapterIndex()+"");
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
     }
 
     //    通过书籍的网址，获取书籍的更新

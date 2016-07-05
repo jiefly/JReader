@@ -95,8 +95,9 @@ public class FragmentReaderContainer extends Fragment implements ViewPager.OnPag
 
             @Override
             public void onNext(String s) {
-                mFragmentReaderList.get(position).showContent(s);
+//                mFragmentReaderList.get(position).showChapter(s);
             }
+
         });
     }
 
