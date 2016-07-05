@@ -167,6 +167,11 @@ public class AdvanceDataModel implements DataModel ,OnDataModelListener {
         }
         return getChapter(url);
     }
+    public Chapter getChapter(String bookName, int index,String title){
+        Chapter chapter =getChapter(bookName,index);
+        chapter.setTitle(title);
+        return chapter;
+    }
 
     @Override
     public Chapter getChapter(URL url) {

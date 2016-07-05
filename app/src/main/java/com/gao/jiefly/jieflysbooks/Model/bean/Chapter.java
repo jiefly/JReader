@@ -11,6 +11,11 @@ public class Chapter {
     }
 
     private String url;
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     private String title;
     private String bookName;
     private int index;

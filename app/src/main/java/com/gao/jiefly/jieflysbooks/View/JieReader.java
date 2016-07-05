@@ -114,9 +114,9 @@ public class JieReader extends AppCompatActivity {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                ((FragmentReader) mFragmentReaderList.get(0)).showChapter(mAdvanceDataModel.getChapter(mBook.getBookName(), chapterIndex - 2));
-                                ((FragmentReader) mFragmentReaderList.get(1)).showChapter(mAdvanceDataModel.getChapter(mBook.getBookName(), chapterIndex - 1));
-                                ((FragmentReader) mFragmentReaderList.get(2)).showChapter(mAdvanceDataModel.getChapter(mBook.getBookName(), chapterIndex));
+                                ((FragmentReader) mFragmentReaderList.get(0)).showChapter(mAdvanceDataModel.getChapter(mBook.getBookName(), chapterIndex - 2,mChapterList.get(chapterIndex - 2)));
+                                ((FragmentReader) mFragmentReaderList.get(1)).showChapter(mAdvanceDataModel.getChapter(mBook.getBookName(), chapterIndex - 1,mChapterList.get(chapterIndex - 1)));
+                                ((FragmentReader) mFragmentReaderList.get(2)).showChapter(mAdvanceDataModel.getChapter(mBook.getBookName(), chapterIndex,mChapterList.get(chapterIndex)));
                             }
                         }).start();
                         chapterIndex--;
@@ -124,9 +124,9 @@ public class JieReader extends AppCompatActivity {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                ((FragmentReader) mFragmentReaderList.get(0)).showChapter(mAdvanceDataModel.getChapter(mBook.getBookName(), chapterIndex));
-                                ((FragmentReader) mFragmentReaderList.get(2)).showChapter(mAdvanceDataModel.getChapter(mBook.getBookName(), chapterIndex + 2));
-                                ((FragmentReader) mFragmentReaderList.get(1)).showChapter(mAdvanceDataModel.getChapter(mBook.getBookName(), chapterIndex + 1));
+                                ((FragmentReader) mFragmentReaderList.get(0)).showChapter(mAdvanceDataModel.getChapter(mBook.getBookName(), chapterIndex,mChapterList.get(chapterIndex)));
+                                ((FragmentReader) mFragmentReaderList.get(2)).showChapter(mAdvanceDataModel.getChapter(mBook.getBookName(), chapterIndex + 2,mChapterList.get(chapterIndex + 2)));
+                                ((FragmentReader) mFragmentReaderList.get(1)).showChapter(mAdvanceDataModel.getChapter(mBook.getBookName(), chapterIndex + 1,mChapterList.get(chapterIndex + 1)));
                             }
                         }).start();
 
