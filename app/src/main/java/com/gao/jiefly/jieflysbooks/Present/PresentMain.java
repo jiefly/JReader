@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.gao.jiefly.jieflysbooks.Model.AdvanceDataModel;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
+import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnDataModelListener;
 import com.gao.jiefly.jieflysbooks.Utils.Utils;
 import com.gao.jiefly.jieflysbooks.View.View;
@@ -128,7 +129,8 @@ public class PresentMain implements OnDataModelListener {
     }
 
     @Override
-    public void onChapterLoadSuccess() {
+    public void onChapterLoadSuccess(Chapter chapter) {
 
     }
+
 }

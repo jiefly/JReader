@@ -3,6 +3,7 @@ package com.gao.jiefly.jieflysbooks.View;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,8 +14,8 @@ import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
 import com.gao.jiefly.jieflysbooks.R;
 
 import rx.Observable;
+import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 
 /**
  * Created by jiefly on 2016/6/23.
@@ -26,6 +27,7 @@ public class FragmentReaderImpl extends Fragment implements FragmentReader {
     private TextView tvShowTitle;
     private TextView tvShowInfo;
     private ScrollView svWrapper;
+    private Chapter mChapter;
 
 
     @Nullable
@@ -44,9 +46,20 @@ public class FragmentReaderImpl extends Fragment implements FragmentReader {
         if (tvShowContent != null) {
             Observable.just(chapter)
                     .subscribeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Action1<Chapter>() {
+                    .subscribe(new Subscriber<Chapter>() {
                         @Override
-                        public void call(Chapter chapter) {
+                        public void onCompleted() {
+
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.e("FragmentReader",e.getMessage());
+                        }
+
+                        @Override
+                        public void onNext(Chapter chapter) {
+                            mChapter = chapter;
                             svWrapper.scrollTo(0, 0);
                             tvShowContent.setText(chapter.getContent());
                             tvShowTitle.setText(chapter.getTitle());
@@ -54,5 +67,13 @@ public class FragmentReaderImpl extends Fragment implements FragmentReader {
                     });
         }
     }
+
+    @Override
+    public Chapter getChapter() {
+        if (mChapter != null)
+            return mChapter;
+        return null;
+    }
+
 
 }

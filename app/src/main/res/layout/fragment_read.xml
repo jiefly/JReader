@@ -3,9 +3,12 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:background="#cf9f9039"
-              android:orientation="vertical">
+              android:orientation="vertical" android:paddingLeft="10dp" android:paddingRight="10dp">
 	<TextView android:id="@+id/id_fragment_title_tv" android:layout_width="match_parent"
-	          android:layout_height="30dp"/>
+	          android:layout_gravity="center_vertical"
+	          android:gravity="left"
+	          android:text="dfasdfasdf"
+	          android:layout_height="20dp"/>
 	<ScrollView android:id="@+id/id_fragment_sv"
 
 	            android:layout_width="match_parent"
@@ -18,6 +21,7 @@
 	</ScrollView>
 
 	<TextView android:id="@+id/id_fragment_info_tv" android:layout_width="match_parent"
-	          android:layout_height="30dp"/>
+
+	          android:layout_height="20dp"/>
 
 </LinearLayout>

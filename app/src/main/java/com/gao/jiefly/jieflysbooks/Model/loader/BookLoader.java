@@ -71,14 +71,14 @@ public class BookLoader {
 
     //更新Book中读者读到的章节index
     public void refreshReadChapterIndex(Book book, int index) {
-        Log.e(TAG,"index:"+index);
+        Log.e(TAG, "index:" + index);
         SQLiteDatabase db = mBookDatabaseHelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put("chapterIndex", index);
         db.update("Book", contentValues, "name=?", new String[]{book.getBookName()});
         db.close();
         try {
-            Log.e(TAG,"after index:"+getBook(book.getBookName()).getReadChapterIndex());
+            Log.e(TAG, "after index:" + getBook(book.getBookName()).getReadChapterIndex());
 //            updateBookChapterIndex(getBook(book.getBookName()));
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -102,9 +102,14 @@ public class BookLoader {
         Book.ChapterList chapterList = getChapterListFromDB(bookName);
         if (chapterList != null)
             return chapterList2List(chapterList);
-        List<Chapter> chapters = getChapterListFromHttp(getBook(bookName).getBookUrl());
-//        如果数据库中没有数据，则向数据库中添加数据
-        addChapterList(list2ChapterList(chapters));
+        final List<Chapter> chapters = getChapterListFromHttp(getBook(bookName).getBookUrl());
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //        如果数据库中没有数据，则向数据库中添加数据
+                addChapterList(list2ChapterList(chapters));
+            }
+        }).start();
         return chapters;
     }
 
@@ -251,20 +256,21 @@ public class BookLoader {
         contentValues.put("recentTopicUrl", updateBook.getBookNewTopicUrl());
         contentValues.put("recentUpdate", updateBook.getBookLastUpdate());
         int result = db.update("Book", contentValues, "name=?", new String[]{updateBook.getBookName()});
-        db.close();
         updateChapterList(book.getBookName());
+        db.close();
         return result > 0;
     }
-//    更新数据库中书的最近读取章节
-    public void updateBookChapterIndex(Book book){
-        Log.e("updateBookChapterIndex",book.getReadChapterIndex()+"");
+
+    //    更新数据库中书的最近读取章节
+    public void updateBookChapterIndex(Book book) {
+        Log.e("updateBookChapterIndex", book.getReadChapterIndex() + "");
         SQLiteDatabase db = mBookDatabaseHelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put("chapterIndex", book.getReadChapterIndex());
         db.update("Book", contentValues, "name=?", new String[]{book.getBookName()});
         db.close();
         try {
-            Log.e("updateBookChapterIndex",getBook(book.getBookName()).getReadChapterIndex()+"");
+            Log.e("updateBookChapterIndex", getBook(book.getBookName()).getReadChapterIndex() + "");
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }

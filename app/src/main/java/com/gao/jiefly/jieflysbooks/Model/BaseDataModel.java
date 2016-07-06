@@ -127,6 +127,11 @@ public class BaseDataModel implements DataModel {
     }
 
     @Override
+    public void getChapterSyn(String bookName, String title, String url) {
+
+    }
+
+    @Override
     public void addChapter(String bookName, int index) {
 
     }

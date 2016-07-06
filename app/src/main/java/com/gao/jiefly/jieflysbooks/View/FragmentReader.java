@@ -9,4 +9,5 @@ import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
  */
 public interface FragmentReader {
     void showChapter(Chapter chapter);
+    Chapter getChapter();
 }

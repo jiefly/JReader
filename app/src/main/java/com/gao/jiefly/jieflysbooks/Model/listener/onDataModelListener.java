@@ -1,6 +1,7 @@
 package com.gao.jiefly.jieflysbooks.Model.listener;
 
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
+import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
 
 /**
  * Created by jiefly on 2016/7/5.
@@ -11,5 +12,5 @@ public interface OnDataModelListener {
     void onBookAddSuccess(Book book);
     void onBookUpdataSuccess(String bookName);
     void onBookRemoveSuccess();
-    void onChapterLoadSuccess();
+    void onChapterLoadSuccess(Chapter chapter);
 }

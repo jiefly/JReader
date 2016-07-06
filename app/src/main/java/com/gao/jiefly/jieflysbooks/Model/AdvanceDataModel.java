@@ -19,7 +19,7 @@ import java.util.List;
  * Email:jiefly1993@gmail.com
  * Fighting_jiiiiie
  */
-public class AdvanceDataModel implements DataModel ,OnDataModelListener {
+public class AdvanceDataModel implements DataModel, OnDataModelListener {
     private static final String TAG = "BaseDataModel";
     static Context mContext;
     private static volatile AdvanceDataModel instance = null;
@@ -44,11 +44,13 @@ public class AdvanceDataModel implements DataModel ,OnDataModelListener {
             }
         return instance;
     }
-    public static AdvanceDataModel build(Context context,OnDataModelListener modelListener) {
+
+    public static AdvanceDataModel build(Context context, OnDataModelListener modelListener) {
         if (mOnDataModelListener == null)
             mOnDataModelListener = modelListener;
         return build(context);
     }
+
     @Override
     public List<Book> getBookList() {
         return mBookLoader.getBookList();
@@ -84,6 +86,7 @@ public class AdvanceDataModel implements DataModel ,OnDataModelListener {
         }
         return book;
     }
+
     @Override
     public void addBookSyn(final String name) {
         new Thread(new Runnable() {
@@ -99,10 +102,12 @@ public class AdvanceDataModel implements DataModel ,OnDataModelListener {
             }
         }).start();
     }
+
     @Override
     public void removeBook(String[] name) {
         mBookLoader.removeBook(name);
     }
+
     @Override
     public void removeBookSyn(final String[] name) {
         new Thread(new Runnable() {
@@ -122,8 +127,10 @@ public class AdvanceDataModel implements DataModel ,OnDataModelListener {
             e.printStackTrace();
         }
     }
+
     @Override
     public void updateBookSyn(final Book book) {
+        isUpdateComplete = false;
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -137,24 +144,58 @@ public class AdvanceDataModel implements DataModel ,OnDataModelListener {
         }).start();
     }
 
+    private volatile boolean isUpdateComplete = true;
+
     @Override
     public void updateAllBooks() {
-        List<Book> books = getBookList();
-        for (Book b : books) {
-            updateBookSyn(b);
-        }
+        final List<Book> books = getBookList();
+        if (books != null)
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    for (Book b : books) {
+                        while (!isUpdateComplete) {
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        updateBookSyn(b);
+                    }
+                }
+            }).start();
+    }
+
+    @Override
+    public void getChapterSyn(final String bookName, final String title , final String url) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Chapter chapter = null;
+                try {
+                    chapter = getChapter(new URL(url));
+                    chapter.setBookName(bookName);
+                    chapter.setTitle(title);
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
+                onChapterLoadSuccess(chapter);
+            }
+        }).start();
     }
 
     @Override
     public Chapter getChapter(String bookName, int index) {
-        if (chapterSize == 0) {
+//        if (chapterSize == 0) {
             try {
                 chapterSize = getChapterList(bookName).size();
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
-        }
-        if (index < 0 || index > chapterSize) {
+//        }
+        Log.e(TAG, "chapter size:" + chapterSize + "><><><><" + index);
+        if (index < 0 || index >= chapterSize - 1) {
             Chapter chapter = new Chapter("null", "null", bookName);
             chapter.setContent("前面没有更多内容了，客官别翻啦");
             return chapter;
@@ -167,11 +208,13 @@ public class AdvanceDataModel implements DataModel ,OnDataModelListener {
         }
         return getChapter(url);
     }
-    public Chapter getChapter(String bookName, int index,String title){
-        Chapter chapter =getChapter(bookName,index);
+
+    public Chapter getChapter(String bookName, int index, String title) {
+        Chapter chapter = getChapter(bookName, index);
         chapter.setTitle(title);
         return chapter;
     }
+
 
     @Override
     public Chapter getChapter(URL url) {
@@ -221,16 +264,17 @@ public class AdvanceDataModel implements DataModel ,OnDataModelListener {
 
     @Override
     public void onBookUpdataSuccess(String bookName) {
+        isUpdateComplete = true;
         mOnDataModelListener.onBookUpdataSuccess(bookName);
     }
 
     @Override
     public void onBookRemoveSuccess() {
-    mOnDataModelListener.onBookRemoveSuccess();
+        mOnDataModelListener.onBookRemoveSuccess();
     }
 
     @Override
-    public void onChapterLoadSuccess() {
-        mOnDataModelListener.onChapterLoadSuccess();
+    public void onChapterLoadSuccess(Chapter chapter) {
+        mOnDataModelListener.onChapterLoadSuccess(chapter);
     }
 }

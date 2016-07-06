@@ -218,7 +218,7 @@ public class Main extends Activity implements View, onDataStateListener, SwipeRe
                 adapter.notifyItemChanged(index);
             }
         });
-        Log.e("updateBook",bookName+"update success");
+        Log.e("updateBook", bookName + "update success");
     }
 
     private int getBookIndex(String bookName) {
@@ -308,8 +308,10 @@ public class Main extends Activity implements View, onDataStateListener, SwipeRe
                     @Override
                     public void call(Integer integer) {
                         data = mPresentMain.getBookList();
+                        if (data != null) {
+                            adapter.notifyItemRangeChanged(1, data.size());
+                        }
                         mIdMainSwipeRefreshLayout.setRefreshing(false);
-                        adapter.notifyItemRangeChanged(1, data.size());
                     }
                 });
     }
