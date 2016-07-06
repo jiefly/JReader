@@ -195,7 +195,7 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
             }
 //        }
         Log.e(TAG, "chapter size:" + chapterSize + "><><><><" + index);
-        if (index < 0 || index >= chapterSize - 1) {
+        if (index < 0 || index > chapterSize - 1) {
             Chapter chapter = new Chapter("null", "null", bookName);
             chapter.setContent("前面没有更多内容了，客官别翻啦");
             return chapter;
