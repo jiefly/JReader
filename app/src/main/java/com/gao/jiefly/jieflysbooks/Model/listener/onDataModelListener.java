@@ -10,7 +10,9 @@ import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
  */
 public interface OnDataModelListener {
     void onBookAddSuccess(Book book);
-    void onBookUpdataSuccess(String bookName);
+    void onBookAddFailed();
+    void onBookUpdateSuccess(String bookName);
+    void onBookUpdateFailed();
     void onBookRemoveSuccess();
     void onChapterLoadSuccess(Chapter chapter);
 }

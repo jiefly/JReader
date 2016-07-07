@@ -20,14 +20,12 @@ import java.util.List;
  * Fighting_jiiiiie
  */
 public class PresentMain implements OnDataModelListener {
-    private Context mContext;
     private List<Book> mBookList = new ArrayList<>();
     private static PresentMain instance = null;
     private AdvanceDataModel mAdvanceDataModel;
     View mView;
 
     private PresentMain(Context context, View view) {
-        mContext = context;
         mAdvanceDataModel = AdvanceDataModel.build(context, this);
         mView = view;
         mBookList = mAdvanceDataModel.getBookList();
@@ -58,7 +56,7 @@ public class PresentMain implements OnDataModelListener {
         if (mBookList != null) {
             for (Book book : mBookList) {
                 if (book.getBookName().equals(bookName)) {
-                    mView.showSnackbar("the book is exist,don't add again");
+                    mView.showSnackbar("小说已存在，请勿重复添加");
                     return;
                 }
             }
@@ -118,9 +116,19 @@ public class PresentMain implements OnDataModelListener {
     }
 
     @Override
-    public void onBookUpdataSuccess(String bookName) {
+    public void onBookAddFailed() {
+        mView.showSnackbar("添加书籍失败\n请检查您的网络或者输入的小说名字是否正确");
+    }
+
+    @Override
+    public void onBookUpdateSuccess(String bookName) {
         mView.updateBook(bookName);
         Log.e("updateBook","更新书籍完毕");
+    }
+
+    @Override
+    public void onBookUpdateFailed() {
+        mView.showSnackbar("更新书籍失败\n请检查您的网络");
     }
 
     @Override

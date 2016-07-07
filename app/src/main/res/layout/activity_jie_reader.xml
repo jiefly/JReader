@@ -7,6 +7,7 @@
 	                android:layout_height="match_parent">
 		<com.gao.jiefly.jieflysbooks.View.CustomViewPager android:id="@+id/id_jie_reader_content_vp"
 		                                                  android:layout_width="match_parent"
+		                                                  android:background="@drawable/read_default_background"
 		                                                  android:layout_height="match_parent">
 
 		</com.gao.jiefly.jieflysbooks.View.CustomViewPager>

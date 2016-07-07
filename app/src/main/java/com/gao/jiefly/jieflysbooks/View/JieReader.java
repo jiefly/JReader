@@ -22,6 +22,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -66,7 +67,7 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
     @InjectView(R.id.id_include_context_btn)
     ImageButton mIdIncludeContextBtn;
     @InjectView(R.id.id_include_night_btn)
-    ImageButton mIdIncludeNightBtn;
+    CheckBox mIdIncludeNightBtn;
     @InjectView(R.id.id_include_setting_btn)
     ImageButton mIdIncludeSettingBtn;
     @InjectView(R.id.id_reader_left_menu_book_name)
@@ -79,6 +80,8 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
     NumberProgressBar mIdReaderLeftMenuProgressBar;
     @InjectView(R.id.id_reader_left_menu_info_cached)
     TextView mIdReaderLeftMenuInfoCached;
+    @InjectView(R.id.id_include_mode_tv)
+    TextView mIdIncludeModeTv;
     private int mScreenWidth;
     private int mScreenHeight;
     private List<String> mChapterList;
@@ -95,6 +98,7 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);//去掉标题栏
         this.requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
         setContentView(R.layout.activity_jie_reader);
+//        getActionBar().hide(); //隐藏ActionBar
         ButterKnife.inject(this);
         initData();
         initViewPager();
@@ -478,6 +482,11 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
                 break;
 //            底栏夜间模式
             case R.id.id_include_night_btn:
+                Log.e("radiobutton", mIdIncludeNightBtn.isChecked() + "");
+                if (mIdIncludeNightBtn.isChecked())
+                    mIdIncludeModeTv.setText("日间");
+                else
+                    mIdIncludeModeTv.setText("夜间");
                 break;
 //            底栏设置
             case R.id.id_include_setting_btn:
@@ -542,7 +551,17 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
     }
 
     @Override
-    public void onBookUpdataSuccess(String bookName) {
+    public void onBookAddFailed() {
+
+    }
+
+    @Override
+    public void onBookUpdateSuccess(String bookName) {
+
+    }
+
+    @Override
+    public void onBookUpdateFailed() {
 
     }
 

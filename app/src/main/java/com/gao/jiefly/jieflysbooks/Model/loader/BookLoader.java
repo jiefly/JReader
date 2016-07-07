@@ -72,15 +72,15 @@ public class BookLoader {
 
     //更新Book中读者读到的章节index
     public void refreshReadChapterIndex(Book book, int index) {
-        Log.e(TAG, "index:" + index+"isCached:"+book.isCached());
+        Log.e(TAG, "index:" + index + "isCached:" + book.isCached());
         SQLiteDatabase db = mBookDatabaseHelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put("chapterIndex", index);
-        contentValues.put("isCached", book.isCached()?0x10:0x01);
+        contentValues.put("isCached", book.isCached() ? 0x10 : 0x01);
         db.update("Book", contentValues, "name=?", new String[]{book.getBookName()});
         db.close();
         try {
-            Log.e(TAG, "after index:" + getBook(book.getBookName()).getReadChapterIndex()+"isCached:"+getBook(book.getBookName()).isCached());
+            Log.e(TAG, "after index:" + getBook(book.getBookName()).getReadChapterIndex() + "isCached:" + getBook(book.getBookName()).isCached());
 //            updateBookChapterIndex(getBook(book.getBookName()));
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -221,6 +221,9 @@ public class BookLoader {
             return null;
         }*/
         Book book = getBookFromHttp(bookName);
+        if (book == null) {
+            return null;
+        }
         SQLiteDatabase db = mBookDatabaseHelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put("author", book.getBookAuthor());
@@ -232,7 +235,7 @@ public class BookLoader {
         contentValues.put("bookType", book.getBookStyle());
         contentValues.put("statue", book.getBookStatu());
         contentValues.put("chapterIndex", book.getReadChapterIndex());
-        contentValues.put("isCached",book.isCached()?0x10:0x01);
+        contentValues.put("isCached", book.isCached() ? 0x10 : 0x01);
         db.insert("Book", null, contentValues);
         db.close();
         if (!checkAddSuccess(bookName)) {
@@ -255,6 +258,8 @@ public class BookLoader {
     //    更新数据库中的书籍信息
     public boolean update(Book book) throws MalformedURLException {
         Book updateBook = updateBookByUrl(new URL(book.getBookUrl()));
+        if (updateBook == null)
+            return false;
         SQLiteDatabase db = mBookDatabaseHelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put("recentTopic", updateBook.getBookNewTopicTitle());

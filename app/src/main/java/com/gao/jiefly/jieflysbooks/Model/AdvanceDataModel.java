@@ -97,7 +97,10 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
                 try {
                     Book book;
                     book = mBookLoader.addBook(name);
-                    onBookAddSuccess(book);
+                    if (book != null)
+                        onBookAddSuccess(book);
+                    else
+                        onBookAddFailed();
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
                 }
@@ -137,8 +140,11 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
             @Override
             public void run() {
                 try {
-                    mBookLoader.update(book);
-                    onBookUpdataSuccess(book.getBookName());
+                    if (!mBookLoader.update(book))
+                        onBookUpdateSuccess(book.getBookName());
+                    else {
+                        onBookUpdateFailed();
+                    }
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
                 }
@@ -151,26 +157,34 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
     }
 
     private volatile boolean isUpdateComplete = true;
+    Thread updateBookThread;
+    private boolean isUpdateFailed = false;
 
     @Override
     public void updateAllBooks() {
         final List<Book> books = getBookList();
         if (books != null)
-            new Thread(new Runnable() {
+            updateBookThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     for (Book b : books) {
-                        while (!isUpdateComplete) {
-                            try {
-                                Thread.sleep(100);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
+                        if (!isUpdateFailed) {
+                            while (!isUpdateComplete) {
+                                try {
+                                    if (isUpdateFailed)
+                                        break;
+                                    Thread.sleep(100);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
                             }
+                            if (!isUpdateFailed)
+                                updateBookSyn(b);
                         }
-                        updateBookSyn(b);
                     }
                 }
-            }).start();
+            });
+        updateBookThread.start();
     }
 
     @Override
@@ -269,9 +283,20 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
     }
 
     @Override
-    public void onBookUpdataSuccess(String bookName) {
+    public void onBookAddFailed() {
+        mOnDataModelListener.onBookAddFailed();
+    }
+
+    @Override
+    public void onBookUpdateSuccess(String bookName) {
         isUpdateComplete = true;
-        mOnDataModelListener.onBookUpdataSuccess(bookName);
+        mOnDataModelListener.onBookUpdateSuccess(bookName);
+    }
+
+    @Override
+    public void onBookUpdateFailed() {
+        isUpdateFailed = true;
+        mOnDataModelListener.onBookAddFailed();
     }
 
     @Override
