@@ -7,7 +7,7 @@
 	<TextView android:id="@+id/id_fragment_title_tv" android:layout_width="match_parent"
 	          android:layout_gravity="center_vertical"
 	          android:gravity="left"
-	          android:text="dfasdfasdf"
+	          android:text="加载中...请稍后..."
 	          android:layout_height="20dp"/>
 	<ScrollView android:id="@+id/id_fragment_sv"
 

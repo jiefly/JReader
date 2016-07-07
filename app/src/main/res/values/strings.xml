@@ -9,4 +9,7 @@
 	<string name="navigation_drawer_close">Close navigation drawer</string>
 
 	<string name="action_settings">Settings</string>
+	<string name="tv_cached_all_chapter">已缓存所有章节</string>
+	<string name="tv_click_to_cache_all_chapter">点击缓存所有章节</string>
+	<string name="tv_go_bottom">直达底部</string>
 </resources>

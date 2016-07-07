@@ -10,8 +10,9 @@
 
 	<LinearLayout android:layout_width="0dp" android:layout_height="match_parent"
 	              android:layout_weight="1" android:orientation="vertical">
-		<Button android:layout_width="60dp" android:layout_height="60dp"
-		        android:layout_gravity="center" android:id="@+id/id_include_context_btn"/>
+		<ImageButton android:layout_width="60dp" android:layout_height="60dp"
+		             android:layout_gravity="center" android:id="@+id/id_include_context_btn"
+		             />
 		<TextView android:layout_width="match_parent" android:layout_height="wrap_content"
 		          android:textColor="#fff"
 		          android:layout_gravity="center" android:gravity="center" android:text="目录"/>
@@ -19,18 +20,21 @@
 
 	<LinearLayout android:layout_width="0dp" android:layout_height="match_parent"
 	              android:layout_weight="3" android:orientation="vertical">
-		<Button android:layout_width="60dp" android:layout_height="60dp"
+		<ImageButton android:layout_width="60dp" android:layout_height="60dp"
 		        android:layout_gravity="center" android:id="@+id/id_include_night_btn"/>
 		<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#fff"
 		          android:layout_gravity="center" android:gravity="center" android:text="夜间"/>
 	</LinearLayout>
 
 	<LinearLayout android:layout_width="0dp" android:layout_height="match_parent"
-	              android:layout_weight="1" android:orientation="vertical">
-		<Button android:layout_width="60dp" android:layout_height="60dp"
+	              android:layout_weight="1" android:orientation="vertical" android:gravity="center_vertical">
+		<ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content"
+		             android:src="@drawable/set_ibtn_selector"
+		             android:background="#00f9f9f9"
 		        android:layout_gravity="center" android:id="@+id/id_include_setting_btn"/>
 		<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#fff"
-		          android:layout_gravity="center" android:gravity="center" android:text="设置"/>
+		          android:gravity="center" android:text="设置" android:layout_gravity="center"
+		          android:layout_marginTop="10dp"/>
 	</LinearLayout>
 
 </LinearLayout>

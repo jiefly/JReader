@@ -7,6 +7,7 @@ import android.util.LruCache;
 
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
 import com.gao.jiefly.jieflysbooks.Model.download.BaseHttpURLClient;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnChapterCacheListener;
 import com.gao.jiefly.jieflysbooks.Utils.Utils;
 
 import java.io.BufferedOutputStream;
@@ -18,6 +19,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,6 +43,9 @@ public class ChapterLoader {
     //    小说章节磁盘缓存
     private DiskLruCache mDiskCache;
 
+    //缓存章节回调函数
+    private OnChapterCacheListener mOnChapterCacheListener;
+
     private Context mContext;
 
     public static ChapterLoader build(Context context) {
@@ -50,6 +55,51 @@ public class ChapterLoader {
     public static ChapterLoader build(Context context, Configuration configuration) {
         mConfiguration = configuration;
         return new ChapterLoader(context);
+    }
+
+    //    缓存所有章节
+    public void cacheAllChapter(final List<String> urlList, final OnChapterCacheListener onChapterCacheListener) {
+        mOnChapterCacheListener = onChapterCacheListener;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int count;
+                //如果某一章节缓存失败，则再进行两次尝试，如果还是失败，则放弃缓存该章节
+                for (String s : urlList) {
+                    count = 1;
+                    while (count < 4) {
+                        try {
+                            if (cacheChapter(s))
+                                break;
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        count++;
+                        if (count > 3)
+                            onChapterCacheListener.onFailed(s);
+                    }
+                }
+            }
+        }).start();
+    }
+
+    //    缓存章节
+    public boolean cacheChapter(String url) throws IOException {
+        Chapter chapter = loadChapterFromDiskCache(url);
+        if (chapter != null) {
+            mOnChapterCacheListener.onSuccess();
+            return true;
+        }
+        chapter = getChapterFromHttp(url);
+//        将下载的数据缓存至磁盘
+        addChapterToDiskCache(url, chapter);
+        if (chapter != null) {
+            mOnChapterCacheListener.onSuccess();
+            return true;
+        }
+        mOnChapterCacheListener.onFailed(url);
+        Log.e(TAG, "缓存章节失败" + url);
+        return false;
     }
 
     //    获取每一章节的具体内容
@@ -91,7 +141,7 @@ public class ChapterLoader {
             Pattern p = Pattern.compile("下一章书签([\\w\\W]*)推荐上一章");
             final Matcher m = p.matcher(tmp);
             if (m.find())
-                Log.e("jiefly---", m.group(1));
+                Log.e("jiefly---", "从网络中获取章节数据");
             sb.append(m.group(1));
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -125,7 +175,7 @@ public class ChapterLoader {
         }
     }
 
-    //    向磁内存缓存中添加内容
+    //    向内存缓存中添加内容
     private void addChapterToMemoryCache(String url, Chapter chapter) {
         String key = hashKeyForUrl(url);
         if (mMemoryCache.get(key) == null) {

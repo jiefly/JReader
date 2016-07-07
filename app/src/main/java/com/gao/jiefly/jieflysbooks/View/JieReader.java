@@ -20,13 +20,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.daimajia.numberprogressbar.NumberProgressBar;
 import com.gao.jiefly.jieflysbooks.Model.AdvanceDataModel;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnChapterCacheListener;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnDataModelListener;
 import com.gao.jiefly.jieflysbooks.R;
 
@@ -60,11 +64,21 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
     @InjectView(R.id.id_reader_bottom_bar)
     LinearLayout mIdReaderBottomBar;
     @InjectView(R.id.id_include_context_btn)
-    Button mIdIncludeContextBtn;
+    ImageButton mIdIncludeContextBtn;
     @InjectView(R.id.id_include_night_btn)
-    Button mIdIncludeNightBtn;
+    ImageButton mIdIncludeNightBtn;
     @InjectView(R.id.id_include_setting_btn)
-    Button mIdIncludeSettingBtn;
+    ImageButton mIdIncludeSettingBtn;
+    @InjectView(R.id.id_reader_left_menu_book_name)
+    TextView mIdReaderLeftMenuBookName;
+    @InjectView(R.id.id_reader_left_menu_bottom_btn)
+    ImageButton mIdReaderLeftMenuBottomBtn;
+    @InjectView(R.id.id_reader_left_menu_cache_ll)
+    LinearLayout mIdReaderLeftMenuCacheLl;
+    @InjectView(R.id.id_reader_left_menu_progress_bar)
+    NumberProgressBar mIdReaderLeftMenuProgressBar;
+    @InjectView(R.id.id_reader_left_menu_info_cached)
+    TextView mIdReaderLeftMenuInfoCached;
     private int mScreenWidth;
     private int mScreenHeight;
     private List<String> mChapterList;
@@ -85,7 +99,13 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
         initData();
         initViewPager();
         initRecycleView();
-        Log.e("chapterListSize", mChapterList.size() + "");
+        if (mBook.isCached()) {
+            mIdReaderLeftMenuCacheLl.setVisibility(View.GONE);
+            mIdReaderLeftMenuProgressBar.setProgress(View.GONE);
+        } else {
+            mIdReaderLeftMenuInfoCached.setVisibility(View.GONE);
+        }
+        Log.e("chapterListSize", mChapterList.size() + "" + "isCached" + mBook.isCached());
     }
 
     private void initViewPager() {
@@ -155,12 +175,6 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
                     Observable.just(position)
                             .observeOn(Schedulers.io())
                             .subscribeOn(AndroidSchedulers.mainThread())
-                            .filter(new Func1<Integer, Boolean>() {
-                                @Override
-                                public Boolean call(Integer integer) {
-                                    return integer != 1;
-                                }
-                            })
                             .map(new Func1<Integer, Chapter>() {
                                 @Override
                                 public Chapter call(final Integer integer) {
@@ -195,11 +209,17 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
                                         return null;
                                     }
                                     if (chapterIndex == mChapterList.size() - 1 && integer == 1) {
+                                        Log.e("翻页", "最后一页向前翻页");
+                                        chapterIndex--;
                                         return null;
                                     }
                                     if (chapterIndex == 0 && integer == 1) {
+                                        Log.e("翻页", "第一页向后翻页");
+                                        chapterIndex++;
                                         return null;
                                     }
+                                    if (integer == 1)
+                                        return null;
                                     chapterIndex = integer == 0 ? chapterIndex - 1 : chapterIndex + 1;
 //                                    Chapter chapter = mFragmentReaderList.get(integer).getChapter();
                                     Chapter chapter = null;
@@ -214,13 +234,13 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
                                         }
                                     }).start();
 //                                    if (!chapter.getTitle().equals(mChapterList.get(chapterIndex))) {
-                                        try {
-                                            chapter = mAdvanceDataModel.getChapter(new URL(urlList.get(chapterIndex)));
-                                            chapter.setTitle(mChapterList.get(chapterIndex));
-                                        } catch (MalformedURLException e) {
-                                            e.printStackTrace();
-                                        }
-                                        return chapter;
+                                    try {
+                                        chapter = mAdvanceDataModel.getChapter(new URL(urlList.get(chapterIndex)));
+                                        chapter.setTitle(mChapterList.get(chapterIndex));
+                                    } catch (MalformedURLException e) {
+                                        e.printStackTrace();
+                                    }
+                                    return chapter;
 //                                    }
 //                                    return null;
                                 }
@@ -267,7 +287,7 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
             mIdJieReaderContentVp.setCurrentItem(1);
     }
 
-    private void setViewPagerConfigure(Chapter chapter) {
+    private void setViewPagerConfigure(final Chapter chapter) {
         if (chapterIndex == 0) {
             (mFragmentReaderList.get(0)).showChapter(chapter);
             mIdJieReaderContentVp.setCurrentItem(0, false);
@@ -275,8 +295,12 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
                 @Override
                 public void run() {
                     try {
-                        mFragmentReaderList.get(1).showChapter(mAdvanceDataModel.getChapter(new URL(mBook.getChapterList().getChapterUrlList().get(chapterIndex + 1))));
-                        mFragmentReaderList.get(2).showChapter(mAdvanceDataModel.getChapter(new URL(mBook.getChapterList().getChapterUrlList().get(chapterIndex + 2))));
+                        Chapter tmp = mAdvanceDataModel.getChapter(new URL(urlList.get(chapterIndex + 1)));
+                        tmp.setTitle(mChapterList.get(chapterIndex + 1));
+                        mFragmentReaderList.get(1).showChapter(tmp);
+                        tmp = mAdvanceDataModel.getChapter(new URL(urlList.get(chapterIndex + 2)));
+                        tmp.setTitle(mChapterList.get(chapterIndex + 2));
+                        mFragmentReaderList.get(2).showChapter(tmp);
                     } catch (MalformedURLException e) {
                         e.printStackTrace();
                     }
@@ -289,8 +313,12 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
                 @Override
                 public void run() {
                     try {
-                        mFragmentReaderList.get(0).showChapter(mAdvanceDataModel.getChapter(new URL(mBook.getChapterList().getChapterUrlList().get(chapterIndex - 2))));
-                        mFragmentReaderList.get(1).showChapter(mAdvanceDataModel.getChapter(new URL(mBook.getChapterList().getChapterUrlList().get(chapterIndex - 1))));
+                        Chapter tmp = mAdvanceDataModel.getChapter(new URL(urlList.get(chapterIndex - 2)));
+                        tmp.setTitle(mChapterList.get(chapterIndex - 2));
+                        mFragmentReaderList.get(0).showChapter(tmp);
+                        tmp = mAdvanceDataModel.getChapter(new URL(urlList.get(chapterIndex - 1)));
+                        tmp.setTitle(mChapterList.get(chapterIndex - 1));
+                        mFragmentReaderList.get(1).showChapter(tmp);
                     } catch (MalformedURLException e) {
                         e.printStackTrace();
                     }
@@ -304,8 +332,12 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
                 @Override
                 public void run() {
                     try {
-                        mFragmentReaderList.get(0).showChapter(mAdvanceDataModel.getChapter(new URL(mBook.getChapterList().getChapterUrlList().get(chapterIndex - 1))));
-                        mFragmentReaderList.get(2).showChapter(mAdvanceDataModel.getChapter(new URL(mBook.getChapterList().getChapterUrlList().get(chapterIndex + 1))));
+                        Chapter tmp = mAdvanceDataModel.getChapter(new URL(urlList.get(chapterIndex - 2)));
+                        tmp.setTitle(mChapterList.get(chapterIndex - 1));
+                        mFragmentReaderList.get(0).showChapter(tmp);
+                        tmp = mAdvanceDataModel.getChapter(new URL(urlList.get(chapterIndex - 2)));
+                        tmp.setTitle(mChapterList.get(chapterIndex + 1));
+                        mFragmentReaderList.get(2).showChapter(tmp);
                     } catch (MalformedURLException e) {
                         e.printStackTrace();
                     }
@@ -325,18 +357,20 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
         chapterIndex = mBook.getReadChapterIndex();
     }
 
-    private void initRecycleView() {
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.id_jie_reader_left_menu_rv);
-        RecyclerView.LayoutManager manager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+    RecyclerView.LayoutManager manager;
 
-        if (recyclerView != null) {
-            recyclerView.setLayoutManager(manager);
-            recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
+    private void initRecycleView() {
+        mIdReaderLeftMenuBookName.setText("《" + mBook.getBookName() + "》");
+        manager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        if (mIdJieReaderLeftMenuRv != null) {
+            mIdJieReaderLeftMenuRv.setLayoutManager(manager);
+            mIdJieReaderLeftMenuRv.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
+            mIdJieReaderLeftMenuRv.setHasFixedSize(true);
             mRecycleAdapter = new CustomRecycleAdapter();
             mRecycleAdapter.setOnItemClickListener(new OnItemClickListener() {
                 @Override
                 public void onItemClick(View view, final int position) {
-                    Observable.just(mBook.getChapterList().getChapterUrlList())
+                    Observable.just(urlList)
                             .map(new Func1<List<String>, Chapter>() {
                                 @Override
                                 public Chapter call(List<String> strings) {
@@ -377,7 +411,7 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
                             });
                 }
             });
-            recyclerView.setAdapter(mRecycleAdapter);
+            mIdJieReaderLeftMenuRv.setAdapter(mRecycleAdapter);
         }
     }
 
@@ -392,7 +426,7 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
     @Override
     protected void onStop() {
         mAdvanceDataModel.updateBookReaderChapterIndex(mBook, chapterIndex);
-        Log.e("onDestroy", "" + chapterIndex);
+        Log.e("onDestroy", "" + chapterIndex + "isCached:" + mBook.isCached());
         super.onStop();
     }
 
@@ -435,18 +469,72 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 
-    @OnClick({R.id.id_include_context_btn, R.id.id_include_night_btn, R.id.id_include_setting_btn})
+    @OnClick({R.id.id_include_context_btn, R.id.id_include_night_btn, R.id.id_include_setting_btn, R.id.id_reader_left_menu_bottom_btn, R.id.id_reader_left_menu_cache_ll})
     public void onClick(View view) {
         switch (view.getId()) {
+//            底栏弹出侧边栏
             case R.id.id_include_context_btn:
                 mDrawerLayout.openDrawer(Gravity.LEFT);
                 break;
+//            底栏夜间模式
             case R.id.id_include_night_btn:
                 break;
+//            底栏设置
             case R.id.id_include_setting_btn:
+                break;
+//            侧边栏直达底部
+            case R.id.id_reader_left_menu_bottom_btn:
+                Log.e("bottomBtn", "clicked:" + ((LinearLayoutManager) manager).findFirstVisibleItemPosition());
+//              直接用scrollToPositon不能够滑动到底部，可以通过滑动到接近底部的时候调用smoothScrollToPosition来滑动剩余部分
+//                如果直接用smoothScrollToPosition，由于数据量过大，滑动的时间非常非常非常长。。。
+
+//                如果当前最后一个可见item大于一半的数据量，则向上滑动到底，否则滑动到底部
+                if (((LinearLayoutManager) manager).findLastVisibleItemPosition() > mChapterList.size() / 2) {
+                    Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.button_up_anim);
+                    mIdReaderLeftMenuBottomBtn.startAnimation(animation);
+                    mIdJieReaderLeftMenuRv.scrollToPosition(20);
+                    mIdJieReaderLeftMenuRv.smoothScrollToPosition(0);
+                } else {
+                    Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.button_down_anim);
+                    mIdReaderLeftMenuBottomBtn.startAnimation(animation);
+                    mIdJieReaderLeftMenuRv.scrollToPosition(mChapterList.size() - 20);
+                    mIdJieReaderLeftMenuRv.smoothScrollToPosition(mChapterList.size() + 1);
+                }
+                break;
+//            侧边栏缓存所有章节
+            case R.id.id_reader_left_menu_cache_ll:
+                mIdReaderLeftMenuProgressBar.setMax(urlList.size() - 1);
+                mIdReaderLeftMenuProgressBar.setProgress(0);
+                mIdReaderLeftMenuProgressBar.setVisibility(View.VISIBLE);
+                updateProgressBar = Observable.just(0).subscribeOn(AndroidSchedulers.mainThread());
+
+                mAdvanceDataModel.cacheChapterFromList(urlList, new OnChapterCacheListener() {
+                    @Override
+                    public void onSuccess() {
+                        Observable.just(cachedChapterCount++)
+                                .subscribeOn(AndroidSchedulers.mainThread())
+                                .subscribe(new Action1<Integer>() {
+                                    @Override
+                                    public void call(Integer integer) {
+                                        mIdReaderLeftMenuProgressBar.setProgress(integer);
+                                    }
+                                });
+                        if (cachedChapterCount >= mChapterList.size() - 1) {
+                            mBook.setCached(true);
+                        }
+                    }
+
+                    @Override
+                    public void onFailed(String url) {
+                        Log.e("onFailed", url);
+                    }
+                });
                 break;
         }
     }
+
+    int cachedChapterCount = 0;
+    Observable updateProgressBar;
 
     @Override
     public void onBookAddSuccess(Book book) {
@@ -473,6 +561,7 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
             ((FragmentReaderImpl) mFragmentReaderList.get(2)).showChapter(chapter);
         }*/
     }
+
 
     class CustomFragmentPagerAdapter extends FragmentPagerAdapter {
 

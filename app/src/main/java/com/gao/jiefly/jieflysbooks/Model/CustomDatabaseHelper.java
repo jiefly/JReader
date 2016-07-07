@@ -22,6 +22,7 @@ public class CustomDatabaseHelper extends SQLiteOpenHelper {
             + "recentUpdate text, "
             + "bookUrl text, "
             + "chapterIndex int,"
+            + "isCached short,"
             + "bookType text)";
     public static final String CREATE_CHAPTER_LIST = "create table chapterList ("
             + "id integer primary key autoincrement, "
@@ -38,7 +39,8 @@ public class CustomDatabaseHelper extends SQLiteOpenHelper {
         mContext = context;
         databaseType = BOOK_TYPE;
     }
-    public CustomDatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory cursorFactory, int version,int databaseType){
+
+    public CustomDatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory cursorFactory, int version, int databaseType) {
         super(context, name, cursorFactory, version);
         mContext = context;
         this.databaseType = databaseType;
@@ -46,7 +48,7 @@ public class CustomDatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        switch (databaseType){
+        switch (databaseType) {
             case BOOK_TYPE:
                 db.execSQL(CREATE_BOOK);
                 Log.i(TAG, "create book database success");

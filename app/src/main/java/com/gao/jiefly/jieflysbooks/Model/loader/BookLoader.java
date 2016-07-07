@@ -69,16 +69,18 @@ public class BookLoader {
         }
     }
 
+
     //更新Book中读者读到的章节index
     public void refreshReadChapterIndex(Book book, int index) {
-        Log.e(TAG, "index:" + index);
+        Log.e(TAG, "index:" + index+"isCached:"+book.isCached());
         SQLiteDatabase db = mBookDatabaseHelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put("chapterIndex", index);
+        contentValues.put("isCached", book.isCached()?0x10:0x01);
         db.update("Book", contentValues, "name=?", new String[]{book.getBookName()});
         db.close();
         try {
-            Log.e(TAG, "after index:" + getBook(book.getBookName()).getReadChapterIndex());
+            Log.e(TAG, "after index:" + getBook(book.getBookName()).getReadChapterIndex()+"isCached:"+getBook(book.getBookName()).isCached());
 //            updateBookChapterIndex(getBook(book.getBookName()));
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -176,6 +178,7 @@ public class BookLoader {
                 book.setBookNewTopicTitle(cursor.getString(cursor.getColumnIndex("recentTopic")));
                 book.setBookNewTopicUrl(cursor.getString(cursor.getColumnIndex("recentTopicUrl")));
                 book.setReadChapterIndex(cursor.getInt(cursor.getColumnIndex("chapterIndex")));
+                book.setCached(cursor.getShort(cursor.getColumnIndex("isCached")) == 0x10);
                 data.add(book);
             } while (cursor.moveToNext());
             db.close();
@@ -200,6 +203,7 @@ public class BookLoader {
             book.setBookNewTopicTitle(cursor.getString(cursor.getColumnIndex("recentTopic")));
             book.setBookNewTopicUrl(cursor.getString(cursor.getColumnIndex("recentTopicUrl")));
             book.setReadChapterIndex(cursor.getInt(cursor.getColumnIndex("chapterIndex")));
+            book.setCached(cursor.getShort(cursor.getColumnIndex("isCached")) == 0x10);
             db.close();
             cursor.close();
             return book;
@@ -228,6 +232,7 @@ public class BookLoader {
         contentValues.put("bookType", book.getBookStyle());
         contentValues.put("statue", book.getBookStatu());
         contentValues.put("chapterIndex", book.getReadChapterIndex());
+        contentValues.put("isCached",book.isCached()?0x10:0x01);
         db.insert("Book", null, contentValues);
         db.close();
         if (!checkAddSuccess(bookName)) {

@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnChapterCacheListener;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnDataModelListener;
 import com.gao.jiefly.jieflysbooks.Model.loader.BookLoader;
 import com.gao.jiefly.jieflysbooks.Model.loader.ChapterLoader;
@@ -32,6 +33,7 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
         mBookLoader = new BookLoader(mContext);
         mChapterLoader = ChapterLoader.build(mContext);
     }
+
 
     public static AdvanceDataModel build(Context context) {
         if (mContext == null)
@@ -144,6 +146,10 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
         }).start();
     }
 
+    public void cacheChapterFromList(List<String> urlList, OnChapterCacheListener onChapterCacheListener) {
+        mChapterLoader.cacheAllChapter(urlList, onChapterCacheListener);
+    }
+
     private volatile boolean isUpdateComplete = true;
 
     @Override
@@ -168,7 +174,7 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
     }
 
     @Override
-    public void getChapterSyn(final String bookName, final String title , final String url) {
+    public void getChapterSyn(final String bookName, final String title, final String url) {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -188,11 +194,11 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
     @Override
     public Chapter getChapter(String bookName, int index) {
 //        if (chapterSize == 0) {
-            try {
-                chapterSize = getChapterList(bookName).size();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
+        try {
+            chapterSize = getChapterList(bookName).size();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
 //        }
         Log.e(TAG, "chapter size:" + chapterSize + "><><><><" + index);
         if (index < 0 || index > chapterSize - 1) {

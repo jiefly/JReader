@@ -21,6 +21,7 @@ public class Book implements Serializable {
     private int bookTotalWords;
     private ChapterList mChapterList = null;
     private int readChapterIndex = 0;
+    private boolean isCached = false;
 
 
     @Override
@@ -91,6 +92,14 @@ public class Book implements Serializable {
 
     public String getBookName() {
         return bookName;
+    }
+
+    public boolean isCached() {
+        return isCached;
+    }
+
+    public void setCached(boolean cached) {
+        isCached = cached;
     }
 
     public void setBookName(String bookName) {
