@@ -19,13 +19,13 @@
 				<category android:name="android.intent.category.LAUNCHER"/>
 			</intent-filter>
 		</activity>
-		<!--		<activity android:name=".TestActivity">
+				<activity android:name=".TestActivity">android:exported="true"
 				</activity>
 				<activity android:name=".View.ReaderActivity">
-				</activity>-->
+				</activity>
 
 		<activity android:name=".View.JieReader" android:theme="@style/AppTheme">
-			android:exported="true">
+			android:exported="true"
 		</activity>
 	</application>
 

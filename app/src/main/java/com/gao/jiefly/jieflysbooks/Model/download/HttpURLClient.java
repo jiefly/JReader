@@ -1,5 +1,7 @@
 package com.gao.jiefly.jieflysbooks.Model.download;
 
+import com.gao.jiefly.jieflysbooks.Model.listener.OnDataStateListener;
+
 import java.net.URL;
 
 /**
@@ -9,4 +11,5 @@ import java.net.URL;
  */
 public interface HttpURLClient {
     String getWebResourse(URL url);
+    void getWebResource(String url, OnDataStateListener onDataStateListener);
 }

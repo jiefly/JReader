@@ -1,5 +1,7 @@
 package com.gao.jiefly.jieflysbooks.Model.download;
 
+import com.gao.jiefly.jieflysbooks.Model.listener.OnDataStateListener;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -38,5 +40,10 @@ public class BaseHttpURLClient implements HttpURLClient {
         }*/
 
         return sb.toString();
+    }
+
+    @Override
+    public void getWebResource(String url, OnDataStateListener onDataStateListener) {
+
     }
 }

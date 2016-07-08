@@ -1,15 +1,10 @@
 package com.gao.jiefly.jieflysbooks;
 
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 import com.gao.jiefly.jieflysbooks.Model.BaseDataModel;
-import com.gao.jiefly.jieflysbooks.Model.CustomDatabaseHelper;
-import com.gao.jiefly.jieflysbooks.Model.bean.Book;
-import com.gao.jiefly.jieflysbooks.Model.listener.onDataStateListener;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnDataStateListener;
 
 import java.io.BufferedInputStream;
 import java.net.URL;
@@ -18,7 +13,7 @@ import java.util.zip.GZIPInputStream;
 
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements onDataStateListener {
+public class MainActivity extends AppCompatActivity implements OnDataStateListener {
 
     /*@InjectView(R.id.id_test)
     TextView mIdTest;
@@ -45,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements onDataStateListen
         dataModel.getBookSuscribe(s);
 
 
-        *//*new BaseDataModel(new onDataStateListener() {
+        *//*new BaseDataModel(new OnDataStateListener() {
             @Override
             public void onSuccess(String result) {
                 Observable.just(result)
@@ -185,33 +180,33 @@ public class MainActivity extends AppCompatActivity implements onDataStateListen
                         });*//*
     }*/
 
-    @Override
-    public void onSuccess(Book result) {
+    /*@Override
+    public void onSuccess(String result) {
         Log.d("jiefly", "success");
-        final String s = dataModel.getBookChapter(result.getBookNewTopicUrl());
+       *//* final String s = dataModel.getBookChapter(result.getBookNewTopicUrl());
         CustomDatabaseHelper databaseHelper = new CustomDatabaseHelper(getApplicationContext(),"bookStore.db",null,1);
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
-        db.delete("Book","author = ?",new String[]{"辰东"});
-        /*ContentValues contentValues = new ContentValues();
+        db.delete("Book","author = ?",new String[]{"辰东"});*//*
+        *//*ContentValues contentValues = new ContentValues();
         contentValues.put("author",result.getBookAuthor());
         contentValues.put("name",result.getBookName());
         contentValues.put("recentTopic",result.getBookNewTopic());
         contentValues.put("recentTopicUrl",result.getBookNewTopicUrl());
         contentValues.put("bookUrl",result.getBookUrl());
         db.insert("Book",null,contentValues);
-*/
-        /*
+*//*
+        *//*
         * 查询数据
-        * */
-        Cursor cursor = db.query("Book",null,null,null,null,null,null);
+        * *//*
+       *//* Cursor cursor = db.query("Book",null,null,null,null,null,null);
         if (cursor.moveToFirst()){
             do {
                 String author = cursor.getString(cursor.getColumnIndex("author"));
                 Log.e("jiefly----db",author);
             }while (cursor.moveToNext());
-        }
+        }*//*
 //        mIdTest.setText(s);
-       /* Observable.create(new Observable.OnSubscribe<String>() {
+       *//* Observable.create(new Observable.OnSubscribe<String>() {
             @Override
             public void call(Subscriber<? super String> subscriber) {
                 subscriber.onNext(s);
@@ -224,13 +219,20 @@ public class MainActivity extends AppCompatActivity implements onDataStateListen
                     public void call(String s) {
                         mIdTest.setText(s);
                     }
-                });*/
+                });*//*
+    }*/
+
+    @Override
+    public void onSuccess(String result) {
+
     }
 
     @Override
-    public void onFailed() {
+    public void onFailed(Exception e) {
 
     }
+
+
 
             /*@Override
             public void onFailed() {

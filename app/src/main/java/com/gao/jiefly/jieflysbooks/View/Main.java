@@ -23,7 +23,8 @@ import android.widget.Toast;
 
 import com.daimajia.numberprogressbar.NumberProgressBar;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
-import com.gao.jiefly.jieflysbooks.Model.listener.onDataStateListener;
+import com.gao.jiefly.jieflysbooks.Model.download.VolleyClient;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnDataStateListener;
 import com.gao.jiefly.jieflysbooks.Present.PresentMain;
 import com.gao.jiefly.jieflysbooks.R;
 import com.melnykov.fab.FloatingActionButton;
@@ -46,7 +47,7 @@ import rx.schedulers.Schedulers;
  * Email:jiefly1993@gmail.com
  * Fighting_jiiiiie
  */
-public class Main extends AppCompatActivity implements View, onDataStateListener, SwipeRefreshLayout.OnRefreshListener {
+public class Main extends AppCompatActivity implements View, OnDataStateListener, SwipeRefreshLayout.OnRefreshListener {
     @InjectView(R.id.id_main_add_book_fab)
     FloatingActionButton mIdMainAddBookFab;
     @InjectView(R.id.id_main_swipe_refresh_layout)
@@ -64,6 +65,17 @@ public class Main extends AppCompatActivity implements View, onDataStateListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         ButterKnife.inject(this);
+        VolleyClient.build(getApplicationContext()).getWebResource("http://www.uctxt.com/book/1/1269/392327.html", new OnDataStateListener() {
+            @Override
+            public void onSuccess(String result) {
+                Log.e("jiefly",result);
+            }
+
+            @Override
+            public void onFailed(Exception e) {
+                Log.e("jiefly",e.getMessage());
+            }
+        });
         mPresentMain = PresentMain.getInstance(getApplicationContext(), this);
 //        mPresentMain.updateBookList();
         data = mPresentMain.getBookList();
@@ -183,13 +195,7 @@ public class Main extends AppCompatActivity implements View, onDataStateListener
         Log.e("onRestart", data.size() + "");
     }*/
 
-    @Override
-    public void onSuccess(Book result) {
-    }
 
-    @Override
-    public void onFailed() {
-    }
 
     @OnClick(R.id.id_main_add_book_fab)
     public void onClick() {
@@ -347,6 +353,16 @@ public class Main extends AppCompatActivity implements View, onDataStateListener
                         mIdMainSwipeRefreshLayout.setRefreshing(false);
                     }
                 });
+
+    }
+
+    @Override
+    public void onSuccess(String result) {
+
+    }
+
+    @Override
+    public void onFailed(Exception e) {
 
     }
 

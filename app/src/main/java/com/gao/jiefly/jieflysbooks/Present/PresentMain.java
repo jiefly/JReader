@@ -125,6 +125,10 @@ public class PresentMain implements OnDataModelListener {
     //    缓存所有章节
     public void cacheAllChapter(final int position) {
 //        Log.e("tag",""+position);
+        if (mBookList.get(position).isCached()){
+            mView.showSnackbar("该小说已经缓存，请勿重复缓存");
+            return;
+        }
         cacheCountMap.put(position, 0);
         Observable.just(position)
                 .observeOn(Schedulers.io())
@@ -133,14 +137,13 @@ public class PresentMain implements OnDataModelListener {
                     public List<String> call(Integer integer) {
                         List<String> result = null;
                         try {
-                            result = Utils.list2ChapterList(mAdvanceDataModel.getChapterList(mBookList.get(position).getBookName())).getChapterUrlList();
+                            result = Utils.list2ChapterList(mAdvanceDataModel.getChapterList(mBookList.get(integer).getBookName())).getChapterUrlList();
                         } catch (MalformedURLException e) {
                             e.printStackTrace();
                         }
                         return result;
                     }
                 })
-
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<List<String>>() {
                     @Override
@@ -148,7 +151,6 @@ public class PresentMain implements OnDataModelListener {
                         final NumberProgressBar numberProgressBar = mView.getNumProgressBar(position);
                         numberProgressBar.setMax(chaptersUrlList.size() - 1);
                         numberProgressBar.setProgress(0);
-                        numberProgressBar.setVisibility(android.view.View.VISIBLE);
                         if (chaptersUrlList != null) {
                             final List<String> finalChaptersUrlList = chaptersUrlList;
                             mAdvanceDataModel.cacheChapterFromList(chaptersUrlList, new OnChapterCacheListener() {
@@ -161,10 +163,13 @@ public class PresentMain implements OnDataModelListener {
                                                 public void call(Integer integer) {
                                                     cacheCountMap.put(position, integer + 1);
                                                     numberProgressBar.setProgress(integer + 1);
+                                                    if (!numberProgressBar.isShown())
+                                                        numberProgressBar.setVisibility(android.view.View.VISIBLE);
                                                 }
                                             });
                                     if (cacheCountMap.get(position) >= finalChaptersUrlList.size() - 1) {
                                         mBookList.get(position).setCached(true);
+                                        numberProgressBar.setVisibility(android.view.View.VISIBLE);
                                     }
                                 }
 

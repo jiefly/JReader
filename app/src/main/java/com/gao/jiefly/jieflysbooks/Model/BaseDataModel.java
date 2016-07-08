@@ -6,7 +6,7 @@ import android.util.Log;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
 import com.gao.jiefly.jieflysbooks.Model.download.BaseHttpURLClient;
-import com.gao.jiefly.jieflysbooks.Model.listener.onDataStateListener;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnDataStateListener;
 import com.gao.jiefly.jieflysbooks.Utils.Utils;
 
 import java.io.IOException;
@@ -27,14 +27,14 @@ public class BaseDataModel implements DataModel {
     private static volatile BaseDataModel instance = null;
     StringBuilder sb = new StringBuilder();
 
-    public void setOnDataStateListener(onDataStateListener onDataStateListener) {
-        mOnDataStateListener = onDataStateListener;
+    public void setOnDataStateListener(OnDataStateListener OnDataStateListener) {
+        mOnDataStateListener = OnDataStateListener;
     }
 
-    onDataStateListener mOnDataStateListener = null;
+    OnDataStateListener mOnDataStateListener = null;
 
-    public BaseDataModel(onDataStateListener onDataStateListener) {
-        mOnDataStateListener = onDataStateListener;
+    public BaseDataModel(OnDataStateListener OnDataStateListener) {
+        mOnDataStateListener = OnDataStateListener;
     }
 
     private BaseDataModel() {
@@ -264,7 +264,7 @@ public class BaseDataModel implements DataModel {
             book = findBookInfoInDetail();
             Log.e("jiefly", "can not find search");
         }
-        mOnDataStateListener.onSuccess(book);
+//        mOnDataStateListener.onSuccess(book);
     }
 
     private Book findBookInfoInDetail() {
@@ -276,7 +276,7 @@ public class BaseDataModel implements DataModel {
             tmp = m.group();
 //            Log.e("jiefly", tmp);
         } else {
-            mOnDataStateListener.onFailed();
+            mOnDataStateListener.onFailed(null);
             return null;
         }
         p = Pattern.compile("<div class=\"l\"><h1>(.*?)</h1><em>作者.(.*?)</em></div>(.*?)onClick=\"recom*\\((.*?)\\);\"(.*?)</b><a href=\"(.*?)\">(.*?)</a>(.*?)状态.<i>(.*?)</i>(.*?)更新时间.<i>(.*?)</i>");
@@ -292,7 +292,7 @@ public class BaseDataModel implements DataModel {
             book.setBookStatu(m.group(9));
             book.setBookLastUpdate(m.group(11));
         } else {
-            mOnDataStateListener.onFailed();
+            mOnDataStateListener.onFailed(null);
             return null;
         }
         return book;
@@ -306,7 +306,7 @@ public class BaseDataModel implements DataModel {
             tmp = m.group(2);
         } else {
 
-            mOnDataStateListener.onFailed();
+            mOnDataStateListener.onFailed(null);
             return null;
         }
         p = Pattern.compile("<span class=\"class\">(.*?)</span><span class=\"name\"><a href=\"(.*?)\">(.*?)</a><small> / <a href=\"(.*?)\">(.*?)</a></small></span><span class=\"other\">(.*?)<small>(.*?)</small><small>(.*?)</small><small>(.*?)</small></span>");
@@ -324,7 +324,7 @@ public class BaseDataModel implements DataModel {
             book.setBookStatu(m.group(9));
         } else {
 
-            mOnDataStateListener.onFailed();
+            mOnDataStateListener.onFailed(null);
             return null;
         }
         return book;
