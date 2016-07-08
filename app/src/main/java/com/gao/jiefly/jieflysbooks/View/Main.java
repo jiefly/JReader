@@ -1,13 +1,12 @@
 package com.gao.jiefly.jieflysbooks.View;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -22,10 +21,12 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.daimajia.numberprogressbar.NumberProgressBar;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.listener.onDataStateListener;
 import com.gao.jiefly.jieflysbooks.Present.PresentMain;
 import com.gao.jiefly.jieflysbooks.R;
+import com.melnykov.fab.FloatingActionButton;
 
 import java.net.MalformedURLException;
 import java.util.List;
@@ -45,11 +46,13 @@ import rx.schedulers.Schedulers;
  * Email:jiefly1993@gmail.com
  * Fighting_jiiiiie
  */
-public class Main extends Activity implements View, onDataStateListener, SwipeRefreshLayout.OnRefreshListener {
+public class Main extends AppCompatActivity implements View, onDataStateListener, SwipeRefreshLayout.OnRefreshListener {
     @InjectView(R.id.id_main_add_book_fab)
     FloatingActionButton mIdMainAddBookFab;
     @InjectView(R.id.id_main_swipe_refresh_layout)
     SwipeRefreshLayout mIdMainSwipeRefreshLayout;
+    @InjectView(R.id.id_rv)
+    RecyclerView mIdRv;
     private List<Book> data;
     BookListRecycleViewAdapter adapter;
     PopupWindow mPopupWindow = null;
@@ -66,7 +69,6 @@ public class Main extends Activity implements View, onDataStateListener, SwipeRe
         data = mPresentMain.getBookList();
         mIdMainSwipeRefreshLayout.setOnRefreshListener(this);
         adapter = new BookListRecycleViewAdapter();
-
         adapter.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(android.view.View view, final int position) {
@@ -94,7 +96,7 @@ public class Main extends Activity implements View, onDataStateListener, SwipeRe
                     deletePopup.showAtLocation((
                             (ViewGroup) Main.this.findViewById(android.R.id.content))
                             .getChildAt(0), Gravity.CENTER_VERTICAL, 0, 0);
-
+//删除
                     popupWindow.findViewById(R.id.id_popup_delete_btn)
                             .setOnClickListener(
                                     new android.view.View.OnClickListener() {
@@ -104,17 +106,38 @@ public class Main extends Activity implements View, onDataStateListener, SwipeRe
                                             deletePopup.dismiss();
                                         }
                                     });
+//                    缓存所有
+                    popupWindow.findViewById(R.id.id_popup_cache_btn)
+                            .setOnClickListener(
+                                    new android.view.View.OnClickListener() {
+                                        @Override
+                                        public void onClick(android.view.View v) {
+                                            mPresentMain.cacheAllChapter(position - 1);
+                                            deletePopup.dismiss();
+                                        }
+                                    });
+//                    置顶
+                    popupWindow.findViewById(R.id.id_popup_top_btn)
+                            .setOnClickListener(
+                                    new android.view.View.OnClickListener() {
+                                        @Override
+                                        public void onClick(android.view.View v) {
+
+                                            deletePopup.dismiss();
+                                        }
+                                    });
                 }
             }
         });
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.id_rv);
         RecyclerView.LayoutManager manager =
                 new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
 
-        if (recyclerView != null) {
-            recyclerView.setLayoutManager(manager);
-            recyclerView.setAdapter(adapter);
+        if (mIdRv != null) {
+            mIdRv.setLayoutManager(manager);
+            mIdRv.setAdapter(adapter);
+            mIdMainAddBookFab.attachToRecyclerView(mIdRv);
         }
+
     }
 
     private void initPopupWindow() {
@@ -173,7 +196,9 @@ public class Main extends Activity implements View, onDataStateListener, SwipeRe
         if (mPopupWindow == null) {
             initPopupWindow();
         }
-        mPopupWindow.showAtLocation(((ViewGroup) Main.this.findViewById(android.R.id.content)).getChildAt(0), Gravity.NO_GRAVITY, 0, 0);
+        mPopupWindow.showAtLocation(((ViewGroup)
+                Main.this.findViewById(android.R.id.content))
+                .getChildAt(0), Gravity.NO_GRAVITY, 0, 0);
 
        /* Snackbar.make(mIdMainAddBookFab, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show();*/
@@ -264,6 +289,7 @@ public class Main extends Activity implements View, onDataStateListener, SwipeRe
                         adapter.notifyItemInserted(data.size() + 1);
                     }
                 });
+
     }
 
     @Override
@@ -291,6 +317,13 @@ public class Main extends Activity implements View, onDataStateListener, SwipeRe
                 });
     }
 
+    @Override
+    public NumberProgressBar getNumProgressBar(int position) {
+        return ((BookListRecycleViewAdapter.ItemViewHolder)mIdRv
+                .getChildViewHolder(mIdRv.getChildAt(position + 1)))
+                .getNumberProgressBar();
+    }
+
     // 下拉刷新
     @Override
     public void onRefresh() {
@@ -314,7 +347,9 @@ public class Main extends Activity implements View, onDataStateListener, SwipeRe
                         mIdMainSwipeRefreshLayout.setRefreshing(false);
                     }
                 });
+
     }
+
 
     public interface OnItemClickListener {
         void onItemClick(android.view.View view, int position);
@@ -328,6 +363,7 @@ public class Main extends Activity implements View, onDataStateListener, SwipeRe
 
     class BookListRecycleViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private OnItemClickListener mListener = null;
+
 
         public void setOnItemClickListener(OnItemClickListener listener) {
             mListener = listener;
@@ -391,6 +427,7 @@ public class Main extends Activity implements View, onDataStateListener, SwipeRe
             }
         }
 
+
         @Override
         public int getItemCount() {
             if (data == null)
@@ -406,6 +443,14 @@ public class Main extends Activity implements View, onDataStateListener, SwipeRe
             TextView tvRecentUpdateTime;
             ImageView ivBook;
 
+            public NumberProgressBar getNumberProgressBar() {
+                return mNumberProgressBar;
+            }
+
+            public NumberProgressBar mNumberProgressBar;
+/*            TextView tvUpdateInfo;
+            ProgressBar pbCacheAllChapter;*/
+
             public ItemViewHolder(android.view.View itemView) {
                 super(itemView);
                 tvBookAuthor = (TextView) itemView.findViewById(R.id.id_item_book_author);
@@ -413,6 +458,9 @@ public class Main extends Activity implements View, onDataStateListener, SwipeRe
                 tvRecentUpdateTime = (TextView) itemView.findViewById(R.id.id_item_book_recent_update_time);
                 tvRecentUpdateTopic = (TextView) itemView.findViewById(R.id.id_item_book_recent_update);
                 ivBook = (ImageView) itemView.findViewById(R.id.id_iv_book);
+                mNumberProgressBar = (NumberProgressBar) itemView.findViewById(R.id.id_main_progress_bar);
+/*                tvUpdateInfo = (TextView) itemView.findViewById(R.id.id_item_update_info_tv);
+                pbCacheAllChapter = (ProgressBar) itemView.findViewById(R.id.id_item_progress_bar);*/
             }
         }
 

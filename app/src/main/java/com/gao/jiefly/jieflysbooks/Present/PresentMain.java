@@ -3,16 +3,25 @@ package com.gao.jiefly.jieflysbooks.Present;
 import android.content.Context;
 import android.util.Log;
 
+import com.daimajia.numberprogressbar.NumberProgressBar;
 import com.gao.jiefly.jieflysbooks.Model.AdvanceDataModel;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnChapterCacheListener;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnDataModelListener;
 import com.gao.jiefly.jieflysbooks.Utils.Utils;
 import com.gao.jiefly.jieflysbooks.View.View;
 
 import java.net.MalformedURLException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by jiefly on 2016/6/26.
@@ -20,7 +29,7 @@ import java.util.List;
  * Fighting_jiiiiie
  */
 public class PresentMain implements OnDataModelListener {
-    private List<Book> mBookList = new ArrayList<>();
+    private List<Book> mBookList;
     private static PresentMain instance = null;
     private AdvanceDataModel mAdvanceDataModel;
     View mView;
@@ -62,7 +71,7 @@ public class PresentMain implements OnDataModelListener {
             }
         }
         mAdvanceDataModel.addBookSyn(bookName);
-        Log.e("addBook","正在加载书籍");
+        Log.e("addBook", "正在加载书籍");
         /*Book book = mAdvanceDataModel.addBook(bookName);
         Log.i("addBook", book.toString());
         //            mBookList.add(book);
@@ -93,12 +102,81 @@ public class PresentMain implements OnDataModelListener {
     }
 
     //    阅读书籍
-    public void readBook(int index) throws MalformedURLException {
+    public void readBook(final int index) throws MalformedURLException {
         if (mBookList.get(index).getBookNewTopicTitle() != null) {
-            Book book = mAdvanceDataModel.getBook(mBookList.get(index).getBookName());
-            book.setChapterList(Utils.list2ChapterList(mAdvanceDataModel.getChapterList(book.getBookName())));
-            mView.readBook(book);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Book book = null;
+                    try {
+                        book = mAdvanceDataModel.getBook(mBookList.get(index).getBookName());
+                        book.setChapterList(Utils.list2ChapterList(mAdvanceDataModel.getChapterList(book.getBookName())));
+                    } catch (MalformedURLException e) {
+                        e.printStackTrace();
+                    }
+                    mView.readBook(book);
+                }
+            }).start();
         }
+    }
+
+    Map<Integer, Integer> cacheCountMap = new HashMap<>();
+
+    //    缓存所有章节
+    public void cacheAllChapter(final int position) {
+//        Log.e("tag",""+position);
+        cacheCountMap.put(position, 0);
+        Observable.just(position)
+                .observeOn(Schedulers.io())
+                .map(new Func1<Integer, List<String>>() {
+                    @Override
+                    public List<String> call(Integer integer) {
+                        List<String> result = null;
+                        try {
+                            result = Utils.list2ChapterList(mAdvanceDataModel.getChapterList(mBookList.get(position).getBookName())).getChapterUrlList();
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        }
+                        return result;
+                    }
+                })
+
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<List<String>>() {
+                    @Override
+                    public void call(List<String> chaptersUrlList) {
+                        final NumberProgressBar numberProgressBar = mView.getNumProgressBar(position);
+                        numberProgressBar.setMax(chaptersUrlList.size() - 1);
+                        numberProgressBar.setProgress(0);
+                        numberProgressBar.setVisibility(android.view.View.VISIBLE);
+                        if (chaptersUrlList != null) {
+                            final List<String> finalChaptersUrlList = chaptersUrlList;
+                            mAdvanceDataModel.cacheChapterFromList(chaptersUrlList, new OnChapterCacheListener() {
+                                @Override
+                                public void onSuccess() {
+                                    Observable.just(cacheCountMap.get(position))
+                                            .subscribeOn(AndroidSchedulers.mainThread())
+                                            .subscribe(new Action1<Integer>() {
+                                                @Override
+                                                public void call(Integer integer) {
+                                                    cacheCountMap.put(position, integer + 1);
+                                                    numberProgressBar.setProgress(integer + 1);
+                                                }
+                                            });
+                                    if (cacheCountMap.get(position) >= finalChaptersUrlList.size() - 1) {
+                                        mBookList.get(position).setCached(true);
+                                    }
+                                }
+
+                                @Override
+                                public void onFailed(String url) {
+
+                                }
+                            });
+                        }
+                    }
+                });
+
     }
 
     public void readRecentChapter(Book book) {
@@ -112,7 +190,7 @@ public class PresentMain implements OnDataModelListener {
     @Override
     public void onBookAddSuccess(Book book) {
         mView.addBook(book);
-        Log.e("addBook","加载书籍完毕");
+        Log.e("addBook", "加载书籍完毕");
     }
 
     @Override
@@ -123,7 +201,7 @@ public class PresentMain implements OnDataModelListener {
     @Override
     public void onBookUpdateSuccess(String bookName) {
         mView.updateBook(bookName);
-        Log.e("updateBook","更新书籍完毕");
+        Log.e("updateBook", "更新书籍完毕");
     }
 
     @Override
@@ -133,7 +211,7 @@ public class PresentMain implements OnDataModelListener {
 
     @Override
     public void onBookRemoveSuccess() {
-        Log.e("removeBook","删除书籍完毕");
+        Log.e("removeBook", "删除书籍完毕");
     }
 
     @Override

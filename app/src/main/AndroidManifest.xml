@@ -9,22 +9,22 @@
 		android:icon="@mipmap/ic_launcher"
 		android:label="@string/app_name"
 		android:supportsRtl="true"
-		android:theme="@style/AppTheme.NoActionBar">
-		<activity android:name=".MainActivity">
-		</activity>
-		<activity android:name=".View.Main">
+		android:theme="@style/AppTheme">
+		<!--<activity android:name=".MainActivity" >
+		</activity>-->
+		<activity android:name=".View.Main" android:theme="@style/ImageTranslucentTheme">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN"/>
 
 				<category android:name="android.intent.category.LAUNCHER"/>
 			</intent-filter>
 		</activity>
-		<activity android:name=".TestActivity">
-		</activity>
-		<activity android:name=".View.ReaderActivity">
-		</activity>
+		<!--		<activity android:name=".TestActivity">
+				</activity>
+				<activity android:name=".View.ReaderActivity">
+				</activity>-->
 
-		<activity android:name=".View.JieReader">
+		<activity android:name=".View.JieReader" android:theme="@style/AppTheme">
 			android:exported="true">
 		</activity>
 	</application>

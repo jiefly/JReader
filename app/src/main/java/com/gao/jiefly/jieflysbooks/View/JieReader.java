@@ -95,10 +95,8 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.requestWindowFeature(Window.FEATURE_NO_TITLE);//去掉标题栏
-        this.requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_jie_reader);
-//        getActionBar().hide(); //隐藏ActionBar
         ButterKnife.inject(this);
         initData();
         initViewPager();
@@ -117,6 +115,9 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
         final FragmentReaderImpl currentFragment = new FragmentReaderImpl();
         final FragmentReaderImpl prevFragment = new FragmentReaderImpl();
         final FragmentReaderImpl nextFragment = new FragmentReaderImpl();
+        currentFragment.setChapterSize(urlList.size());
+        prevFragment.setChapterSize(urlList.size());
+        nextFragment.setChapterSize(urlList.size());
         mFragmentReaderList.add(prevFragment);
         mFragmentReaderList.add(currentFragment);
         mFragmentReaderList.add(nextFragment);
@@ -292,6 +293,7 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
     }
 
     private void setViewPagerConfigure(final Chapter chapter) {
+        chapter.setIndex(chapterIndex);
         if (chapterIndex == 0) {
             (mFragmentReaderList.get(0)).showChapter(chapter);
             mIdJieReaderContentVp.setCurrentItem(0, false);
@@ -301,9 +303,11 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
                     try {
                         Chapter tmp = mAdvanceDataModel.getChapter(new URL(urlList.get(chapterIndex + 1)));
                         tmp.setTitle(mChapterList.get(chapterIndex + 1));
+                        tmp.setIndex(chapterIndex + 1);
                         mFragmentReaderList.get(1).showChapter(tmp);
                         tmp = mAdvanceDataModel.getChapter(new URL(urlList.get(chapterIndex + 2)));
                         tmp.setTitle(mChapterList.get(chapterIndex + 2));
+                        tmp.setIndex(chapterIndex + 2);
                         mFragmentReaderList.get(2).showChapter(tmp);
                     } catch (MalformedURLException e) {
                         e.printStackTrace();
@@ -319,9 +323,11 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
                     try {
                         Chapter tmp = mAdvanceDataModel.getChapter(new URL(urlList.get(chapterIndex - 2)));
                         tmp.setTitle(mChapterList.get(chapterIndex - 2));
+                        tmp.setIndex(chapterIndex - 2);
                         mFragmentReaderList.get(0).showChapter(tmp);
                         tmp = mAdvanceDataModel.getChapter(new URL(urlList.get(chapterIndex - 1)));
                         tmp.setTitle(mChapterList.get(chapterIndex - 1));
+                        tmp.setIndex(chapterIndex - 1);
                         mFragmentReaderList.get(1).showChapter(tmp);
                     } catch (MalformedURLException e) {
                         e.printStackTrace();
@@ -339,8 +345,10 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
                         Chapter tmp = mAdvanceDataModel.getChapter(new URL(urlList.get(chapterIndex - 2)));
                         tmp.setTitle(mChapterList.get(chapterIndex - 1));
                         mFragmentReaderList.get(0).showChapter(tmp);
+                        tmp.setIndex(chapterIndex - 1);
                         tmp = mAdvanceDataModel.getChapter(new URL(urlList.get(chapterIndex - 2)));
                         tmp.setTitle(mChapterList.get(chapterIndex + 1));
+                        tmp.setIndex(chapterIndex + 1);
                         mFragmentReaderList.get(2).showChapter(tmp);
                     } catch (MalformedURLException e) {
                         e.printStackTrace();

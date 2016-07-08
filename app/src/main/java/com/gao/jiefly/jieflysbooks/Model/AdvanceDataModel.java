@@ -140,7 +140,7 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
             @Override
             public void run() {
                 try {
-                    if (!mBookLoader.update(book))
+                    if (mBookLoader.update(book))
                         onBookUpdateSuccess(book.getBookName());
                     else {
                         onBookUpdateFailed();
@@ -232,6 +232,7 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
     public Chapter getChapter(String bookName, int index, String title) {
         Chapter chapter = getChapter(bookName, index);
         chapter.setTitle(title);
+        chapter.setIndex(index);
         return chapter;
     }
 

@@ -142,6 +142,7 @@ public class ChapterLoader {
             final Matcher m = p.matcher(tmp);
             if (m.find())
                 Log.e("jiefly---", "从网络中获取章节数据");
+            else return null;
             sb.append(m.group(1));
         } catch (MalformedURLException e) {
             e.printStackTrace();

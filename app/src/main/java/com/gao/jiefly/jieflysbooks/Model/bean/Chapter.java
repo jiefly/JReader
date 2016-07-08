@@ -50,10 +50,15 @@ public class Chapter {
         this.bookName = bookName;
     }
 
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
     public Chapter(String url, String name, String bookName) {
         this.url = url;
         this.title = name;
         this.bookName = bookName;
+
     }
     public Chapter(String url){
         this.url = url;

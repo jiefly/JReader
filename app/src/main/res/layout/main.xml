@@ -2,9 +2,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#618b61"
-                android:orientation="vertical"
->
+                android:background="#83817c"
+                android:fitsSystemWindows="true"
+                android:orientation="vertical">
+
 	<android.support.v4.widget.SwipeRefreshLayout android:layout_width="match_parent"
 	                                              android:id="@+id/id_main_swipe_refresh_layout"
 	                                              android:layout_height="match_parent">
@@ -14,7 +15,8 @@
 			android:layout_height="match_parent">
 		</android.support.v7.widget.RecyclerView>
 	</android.support.v4.widget.SwipeRefreshLayout>
-	<android.support.design.widget.FloatingActionButton
+	<com.melnykov.fab.FloatingActionButton
+
 		android:id="@+id/id_main_add_book_fab"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
