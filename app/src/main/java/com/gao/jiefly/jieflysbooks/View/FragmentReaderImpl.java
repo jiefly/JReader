@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,7 +38,7 @@ public class FragmentReaderImpl extends Fragment implements FragmentReader {
     public void setChapterSize(int chapterSize) {
         this.chapterSize = chapterSize;
     }
-
+    private float testSize;
     private int chapterSize;
 
     @Nullable
@@ -89,6 +90,16 @@ public class FragmentReaderImpl extends Fragment implements FragmentReader {
         if (mChapter != null)
             return mChapter;
         return null;
+    }
+
+    @Override
+    public void addTextSize() {
+        tvShowContent.setTextSize(TypedValue.COMPLEX_UNIT_PX,tvShowContent.getTextSize() + 1);
+    }
+
+    @Override
+    public void reduceTextSize() {
+        tvShowContent.setTextSize(TypedValue.COMPLEX_UNIT_PX,tvShowContent.getTextSize() - 1);
     }
 
     Date mDate = new Date();

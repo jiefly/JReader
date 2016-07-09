@@ -10,6 +10,7 @@ import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnChapterCacheListener;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnDataModelListener;
 import com.gao.jiefly.jieflysbooks.Utils.Utils;
+import com.gao.jiefly.jieflysbooks.View.Main;
 import com.gao.jiefly.jieflysbooks.View.View;
 
 import java.net.MalformedURLException;
@@ -114,6 +115,7 @@ public class PresentMain implements OnDataModelListener {
                     } catch (MalformedURLException e) {
                         e.printStackTrace();
                     }
+
                     mView.readBook(book);
                 }
             }).start();
@@ -148,7 +150,7 @@ public class PresentMain implements OnDataModelListener {
                 .subscribe(new Action1<List<String>>() {
                     @Override
                     public void call(List<String> chaptersUrlList) {
-                        final NumberProgressBar numberProgressBar = mView.getNumProgressBar(position);
+                        final NumberProgressBar numberProgressBar = mView.getViewHolder(position).getNumberProgressBar();
                         numberProgressBar.setMax(chaptersUrlList.size() - 1);
                         numberProgressBar.setProgress(0);
                         if (chaptersUrlList != null) {
@@ -202,7 +204,7 @@ public class PresentMain implements OnDataModelListener {
     public void onBookAddFailed() {
         mView.showSnackbar("添加书籍失败\n请检查您的网络或者输入的小说名字是否正确");
     }
-
+    private Main.BookListRecycleViewAdapter.ItemViewHolder mItemViewHolder;
     @Override
     public void onBookUpdateSuccess(String bookName) {
         mView.updateBook(bookName);

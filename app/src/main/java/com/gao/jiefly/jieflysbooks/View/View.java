@@ -1,6 +1,5 @@
 package com.gao.jiefly.jieflysbooks.View;
 
-import com.daimajia.numberprogressbar.NumberProgressBar;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 
 import java.util.List;
@@ -17,5 +16,5 @@ public interface View {
     void addBook(Book book);
     void removeBook(Book book);
     void showSnackbar(String value);
-    NumberProgressBar getNumProgressBar(int position);
+    Main.BookListRecycleViewAdapter.ItemViewHolder getViewHolder(int position);
 }

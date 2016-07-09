@@ -22,7 +22,8 @@ public class CustomDatabaseHelper extends SQLiteOpenHelper {
             + "recentUpdate text, "
             + "bookUrl text, "
             + "chapterIndex int,"
-            + "isCached short,"
+            + "isCached int,"
+            + "hasUpdate int,"
             + "bookType text)";
     public static final String CREATE_CHAPTER_LIST = "create table chapterList ("
             + "id integer primary key autoincrement, "

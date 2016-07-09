@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="#2e2e27"
+              android:orientation="vertical" android:gravity="bottom">
+	<!--设置亮度-->
+	<LinearLayout android:layout_width="match_parent" android:layout_height="80dp"
+	              android:gravity="center_vertical"
+	              android:orientation="horizontal" android:paddingLeft="20dp"
+	              android:paddingRight="20dp">
+		<ImageButton android:id="@+id/id_set_popup_lightdown_ibtn" android:layout_width="40dp"
+		             android:layout_height="40dp"
+		             android:background="@drawable/lightdown_selector"/>
+		<SeekBar
+			android:id="@+id/id_set_popup_sb"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:progress="50" android:max="255" android:indeterminate="false"/>
+
+		<ImageButton android:id="@+id/id_set_popup_lightup_ibtn" android:layout_width="40dp"
+		             android:layout_height="40dp"
+		             android:layout_marginRight="10dp"
+		             android:background="@drawable/lightup_selector"/>
+		<TextView android:layout_width="1dp" android:layout_height="40dp"
+
+		          android:background="#b1b3b1"/>
+		<CheckBox
+			android:id="@+id/id_set_popup_light_follow_sys_cb"
+			android:layout_width="30dp"
+			android:layout_height="30dp"
+			android:layout_marginLeft="10dp"
+			android:background="@drawable/check_box_selector"
+			android:button="@null" android:checked="false"/>
+		<TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+		          android:text="@string/system_light_level"
+		          android:textColor="@color/colorTextGray"/>
+	</LinearLayout>
+	<TextView android:layout_width="match_parent" android:layout_height="1dp"
+	          android:background="#5d5858"/>
+	<!--设置字体大小-->
+	<LinearLayout android:layout_width="match_parent" android:layout_height="80dp"
+	              android:gravity="center_vertical"
+	              android:orientation="horizontal" android:paddingLeft="40dp"
+	              android:paddingRight="40dp">
+		<ImageButton android:layout_width="40dp" android:layout_height="40dp"
+		             android:background="@drawable/text_size_down"
+		             android:id="@+id/id_reduce_text_size_ibtn"/>
+		<TextView android:layout_width="0dp" android:layout_height="wrap_content"
+		          android:layout_marginLeft="20dp"
+		          android:layout_marginRight="20dp"
+		          android:layout_weight="1"
+		          android:gravity="center"
+		          android:inputType="number"
+		          android:text="100"
+		          android:textColor="@color/colorTextGray" android:textSize="30sp"
+		          android:textStyle="bold" android:id="@+id/id_set_popup_textsize_tv"/>
+		<ImageButton android:layout_width="40dp" android:layout_height="40dp"
+		             android:background="@drawable/text_size_up"
+		             android:id="@+id/id_add_text_size_ibtn"/>
+
+	</LinearLayout>
+	<TextView android:layout_width="match_parent" android:layout_height="1dp"
+	          android:background="#5d5858"/>
+	<!--设置背景颜色-->
+	<RadioGroup android:id="@+id/id_set_popup_radio_group" android:layout_width="match_parent"
+	            android:layout_height="80dp"
+	            android:layout_gravity="center_vertical"
+	            android:gravity="center"
+	            android:orientation="horizontal" android:padding="10dp">
+		<RadioButton android:layout_width="50dp" android:layout_height="50dp"
+		             android:layout_gravity="center"
+		             android:layout_margin="10dp"
+		             android:background="@drawable/radio_button_selector_1"
+		             android:button="@null" android:checked="false"/>
+		<RadioButton android:layout_width="50dp" android:layout_height="50dp"
+		             android:layout_gravity="center"
+		             android:layout_margin="10dp"
+		             android:background="@drawable/radio_button_selector_2"
+		             android:button="@null" android:checked="false"/>
+		<RadioButton android:layout_width="50dp" android:layout_height="50dp"
+		             android:layout_gravity="center"
+		             android:layout_margin="10dp"
+		             android:background="@drawable/radio_button_selector_3"
+		             android:button="@null" android:checked="false"/>
+		<RadioButton android:layout_width="50dp" android:layout_height="50dp"
+		             android:layout_gravity="center"
+		             android:layout_margin="10dp"
+		             android:background="@drawable/radio_button_selector_4"
+		             android:button="@null" android:checked="false"/>
+		<RadioButton android:layout_width="50dp" android:layout_height="50dp"
+		             android:layout_gravity="center"
+		             android:layout_margin="10dp"
+		             android:background="@drawable/radio_button_selector_5"
+		             android:button="@null" android:checked="false"/>
+
+	</RadioGroup>
+
+
+</LinearLayout>

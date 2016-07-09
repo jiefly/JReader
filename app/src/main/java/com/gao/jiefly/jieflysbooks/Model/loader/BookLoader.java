@@ -48,15 +48,17 @@ public class BookLoader {
         int result = db.delete("Book", "name=?", bookName);
         return result > 0;
     }
-
+//    关闭数据库
+    public void closeDB(){
+        mBookDatabaseHelper.close();
+        mChapterListDatabaseHelper.close();
+    }
     //    更新数据库中的小说章节列表
     private void updateChapterList(String bookName) throws MalformedURLException {
         List<Chapter> chaptersFromHttp = getChapterListFromHttp(getBook(bookName).getBookUrl());
         Book.ChapterList chaptersFromDB = getChapterListFromDB(bookName);
         if (chaptersFromHttp != null) {
             if (chaptersFromDB == null || chaptersFromHttp.size() > chaptersFromDB.getChapterUrlList().size()) {
-                List<String> chapterUrl = new LinkedList<>();
-                List<String> chapterTopic = new LinkedList<>();
                 ContentValues contentValues = new ContentValues();
                 contentValues.put("bookName", bookName);
                 for (int i = chaptersFromDB != null ? chaptersFromDB.getChapterTitleList().size() : 0; i < chaptersFromHttp.size(); i++) {
@@ -77,8 +79,8 @@ public class BookLoader {
         ContentValues contentValues = new ContentValues();
         contentValues.put("chapterIndex", index);
         contentValues.put("isCached", book.isCached() ? 0x10 : 0x01);
+        contentValues.put("hasUpdate",book.getHasUpdate());
         db.update("Book", contentValues, "name=?", new String[]{book.getBookName()});
-        db.close();
         try {
             Log.e(TAG, "after index:" + getBook(book.getBookName()).getReadChapterIndex() + "isCached:" + getBook(book.getBookName()).isCached());
 //            updateBookChapterIndex(getBook(book.getBookName()));
@@ -178,10 +180,10 @@ public class BookLoader {
                 book.setBookNewTopicTitle(cursor.getString(cursor.getColumnIndex("recentTopic")));
                 book.setBookNewTopicUrl(cursor.getString(cursor.getColumnIndex("recentTopicUrl")));
                 book.setReadChapterIndex(cursor.getInt(cursor.getColumnIndex("chapterIndex")));
-                book.setCached(cursor.getShort(cursor.getColumnIndex("isCached")) == 0x10);
+                book.setCached(cursor.getInt(cursor.getColumnIndex("isCached")) == 0x10);
+                book.setHsaUpdateByShort(cursor.getInt(cursor.getColumnIndex("hasUpdate")));
                 data.add(book);
             } while (cursor.moveToNext());
-            db.close();
             cursor.close();
             return data;
         }
@@ -203,8 +205,8 @@ public class BookLoader {
             book.setBookNewTopicTitle(cursor.getString(cursor.getColumnIndex("recentTopic")));
             book.setBookNewTopicUrl(cursor.getString(cursor.getColumnIndex("recentTopicUrl")));
             book.setReadChapterIndex(cursor.getInt(cursor.getColumnIndex("chapterIndex")));
-            book.setCached(cursor.getShort(cursor.getColumnIndex("isCached")) == 0x10);
-            db.close();
+            book.setCached(cursor.getInt(cursor.getColumnIndex("isCached")) == 0x10);
+            book.setHsaUpdateByShort(cursor.getInt(cursor.getColumnIndex("hasUpdate")));
             cursor.close();
             return book;
         }
@@ -236,6 +238,7 @@ public class BookLoader {
         contentValues.put("statue", book.getBookStatu());
         contentValues.put("chapterIndex", book.getReadChapterIndex());
         contentValues.put("isCached", book.isCached() ? 0x10 : 0x01);
+        contentValues.put("hasUpdate",book.getHasUpdate());
         db.insert("Book", null, contentValues);
         db.close();
         if (!checkAddSuccess(bookName)) {
@@ -265,9 +268,11 @@ public class BookLoader {
         contentValues.put("recentTopic", updateBook.getBookNewTopicTitle());
         contentValues.put("recentTopicUrl", updateBook.getBookNewTopicUrl());
         contentValues.put("recentUpdate", updateBook.getBookLastUpdate());
+        if (!book.getBookLastUpdate().equals(updateBook.getBookLastUpdate())){
+            contentValues.put("hasUpdate",0x10);
+            updateChapterList(book.getBookName());
+        }
         int result = db.update("Book", contentValues, "name=?", new String[]{updateBook.getBookName()});
-        updateChapterList(book.getBookName());
-        db.close();
         return result > 0;
     }
 

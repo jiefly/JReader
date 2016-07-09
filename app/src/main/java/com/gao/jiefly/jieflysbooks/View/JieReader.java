@@ -1,8 +1,10 @@
 package com.gao.jiefly.jieflysbooks.View;
 
 import android.content.Context;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -24,11 +26,16 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
+import android.widget.RadioGroup;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.daimajia.numberprogressbar.NumberProgressBar;
+import com.gao.jiefly.jieflysbooks.Animation.DepthPageTransformer;
 import com.gao.jiefly.jieflysbooks.Model.AdvanceDataModel;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
@@ -95,7 +102,10 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
     private List<String> urlList;
     Animation animationShow;
     Animation animationDismiss;
-
+    private DepthPageTransformer mViewPageTransformer;
+    private PopupWindow setPopupWindow;
+    private SeekBar lightSeekBar;
+    private CheckBox followSystemCheckBox;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,52 +145,13 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
         mFragmentReaderList.add(prevFragment);
         mFragmentReaderList.add(currentFragment);
         mFragmentReaderList.add(nextFragment);
-//        进入activity后根据chapter索引分情况对viewpager进行初始化
-        Observable.just(mBook)
-                .observeOn(Schedulers.io())
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .map(new Func1<Book, Chapter>() {
-                    @Override
-                    public Chapter call(Book book) {
-                        try {
-//                            转换成当前index对应的Chapter
-                            return mAdvanceDataModel.getChapter(
-                                    new URL(book.getChapterList().getChapterUrlList().get(chapterIndex)));
-                        } catch (MalformedURLException e) {
-                            e.printStackTrace();
-                        }
-                        return null;
-                    }
-                })
-                .subscribe(new Subscriber<Chapter>() {
-                    @Override
-                    public void onCompleted() {
-
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        showSnackbar(e.getMessage());
-                    }
-
-                    @Override
-                    public void onNext(Chapter chapter) {
-                       /*
-                       * chapterIndex：
-                       *                0： 当前的viewPager处于第一页，后两页将加载后两章内容
-                       *                other: 当前viewPager处于第二页，第一页加载前一章内容，第三页加载后一章内容
-                       *                chapterSize-1: 当前viewPager处于第三页，前两页加载前两章内容
-                       * */
-                        chapter.setTitle(mChapterList.get(chapterIndex));
-                        setViewPagerConfigure(chapter);
-                    }
-                });
         mIdJieReaderContentVp.setAdapter(new CustomFragmentPagerAdapter(getSupportFragmentManager()));
-
+//        mViewPageTransformer = new DepthPageTransformer();
+//        mIdJieReaderContentVp.setPageTransformer(false,mViewPageTransformer);
         mIdJieReaderContentVp.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-//                Log.e("onPPageScrolled", "position:" + position+"positionOffset:"+positionOffset);
+                Log.e("onPPageScrolled", "position:" + position + "positionOffset:" + positionOffset);
 
                 /*
                 * 当由第一页切换至第二页或则第零页时，在切换成功的即页面滑动至完整的第二页或则第零页时，将当前页面强制设置为第一页（并且更新第一页的数据），给用户一种可以无限翻页的效果
@@ -304,6 +275,62 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
             mIdJieReaderContentVp.setCurrentItem(2);
         else
             mIdJieReaderContentVp.setCurrentItem(1);
+        //        进入activity后根据chapter索引分情况对viewpager进行初始化
+
+        Observable.just(mBook)
+                .map(new Func1<Book, Chapter>() {
+                    @Override
+                    public Chapter call(Book book) {
+                        try {
+//                            转换成当前index对应的Chapter
+                            return mAdvanceDataModel.getChapter(
+                                    new URL(book.getChapterList().getChapterUrlList().get(chapterIndex)));
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        }
+                        return null;
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Chapter>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        showSnackbar(e.getMessage());
+                    }
+
+                    @Override
+                    public void onNext(Chapter chapter) {
+                       /*
+                       * chapterIndex：
+                       *                0： 当前的viewPager处于第一页，后两页将加载后两章内容
+                       *                other: 当前viewPager处于第二页，第一页加载前一章内容，第三页加载后一章内容
+                       *                chapterSize-1: 当前viewPager处于第三页，前两页加载前两章内容
+                       * */
+                        chapter.setTitle(mChapterList.get(chapterIndex));
+//                        setViewPagerConfigure(chapter);
+                        switch ((int) ((float) chapterIndex / (float) (urlList.size() - 1))) {
+                            case 0:
+                                mFragmentReaderList.get(0).showChapter(chapter);
+                                mIdJieReaderContentVp.setCurrentItem(0);
+                                break;
+                            case 1:
+                                mFragmentReaderList.get(2).showChapter(chapter);
+                                mIdJieReaderContentVp.setCurrentItem(2);
+                                break;
+                            default:
+                                mFragmentReaderList.get(1).showChapter(chapter);
+                                mIdJieReaderContentVp.setCurrentItem(1);
+                                break;
+                        }
+
+                    }
+                });
     }
 
     private void setViewPagerConfigure(final Chapter chapter) {
@@ -423,7 +450,6 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
                                     chapter.setTitle(mChapterList.get(chapterIndex));
                                     setViewPagerConfigure(chapter);
                                     mDrawerLayout.closeDrawer(Gravity.LEFT);
-
                                     toogleScreenState();
                                 }
                             });
@@ -443,6 +469,7 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
 
     @Override
     protected void onStop() {
+        mBook.setHasUpdate(false);
         mAdvanceDataModel.updateBookReaderChapterIndex(mBook, chapterIndex);
         Log.e("onDestroy", "" + chapterIndex + "isCached:" + mBook.isCached());
         super.onStop();
@@ -465,7 +492,13 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
 //                如果手指点击屏幕中心区域，则表示用户想要唤醒底部bar
-                if (ev.getX() < mScreenWidth * 3 / 5 && ev.getX() > mScreenWidth * 2 / 5 && ev.getY() > mScreenHeight * 2 / 5 && ev.getY() < mScreenHeight * 3 / 5) {
+                if (ev.getX() < mScreenWidth * 3 / 5
+                        && ev.getX() > mScreenWidth * 2 / 5
+                        && ev.getY() > mScreenHeight * 2 / 5
+                        && ev.getY() < mScreenHeight * 3 / 5) {
+//                    当侧边栏打开的时候不对点击事件进行拦截
+                    if (mDrawerLayout.isDrawerOpen(Gravity.LEFT))
+                        return super.dispatchTouchEvent(ev);
                     return toogleScreenState();
                 }
         }
@@ -488,9 +521,9 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
                     @Override
                     public void call(Long aLong) {
                         mIdReaderBottomBar.setVisibility(flag ? View.INVISIBLE : View.VISIBLE);
-                       if(flag){
-                           mIdReaderBottomBar.setTranslationY(300);
-                       }
+                        if (flag) {
+                            mIdReaderBottomBar.setTranslationY(300);
+                        }
                     }
                 });
 
@@ -512,6 +545,8 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 
+    private TextView tvShowTextSize;
+
     @OnClick({R.id.id_include_context_btn, R.id.id_include_night_btn, R.id.id_include_setting_btn, R.id.id_reader_left_menu_bottom_btn, R.id.id_reader_left_menu_cache_ll})
     public void onClick(View view) {
         switch (view.getId()) {
@@ -529,6 +564,110 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
                 break;
 //            底栏设置
             case R.id.id_include_setting_btn:
+                toogleScreenState();
+                if (setPopupWindow == null) {
+                    View popupWindowView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.set_reader_config_popup, null, false);
+                    setPopupWindow = new PopupWindow(popupWindowView
+                            , WindowManager.LayoutParams.MATCH_PARENT
+                            , WindowManager.LayoutParams.WRAP_CONTENT);
+                    setPopupWindow.setFocusable(true);
+                    setPopupWindow.setBackgroundDrawable(new BitmapDrawable());
+                    //                    设置阅读背景
+                    ((RadioGroup) (popupWindowView.findViewById(R.id.id_set_popup_radio_group))).setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                        @Override
+                        public void onCheckedChanged(RadioGroup group, int checkedId) {
+
+                        }
+                    });
+                    //                    设置字体大小
+//                    加大字体
+                    (popupWindowView.findViewById(R.id.id_add_text_size_ibtn)).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            for (FragmentReader reader : mFragmentReaderList)
+                                reader.addTextSize();
+                        }
+                    });
+//                    减小字体
+                    (popupWindowView.findViewById(R.id.id_reduce_text_size_ibtn)).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            for (FragmentReader reader : mFragmentReaderList)
+                                reader.reduceTextSize();
+                        }
+                    });
+//                    显示字体大小
+                    tvShowTextSize = (TextView) popupWindowView.findViewById(R.id.id_set_popup_textsize_tv);
+                    //                    设置亮度
+                    if (lightSeekBar == null)
+                        lightSeekBar = (SeekBar) popupWindowView.findViewById(R.id.id_set_popup_sb);
+                    //        设置进度条为当前亮度
+                    lightSeekBar.setProgress((android.provider.Settings.System.getInt(getContentResolver(),
+                            android.provider.Settings.System.SCREEN_BRIGHTNESS,
+                            255)));
+                    lightSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                        @Override
+                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+                        }
+
+                        @Override
+                        public void onStartTrackingTouch(SeekBar seekBar) {
+                            if (followSystemCheckBox.isChecked())
+                                followSystemCheckBox.setChecked(false);
+                        }
+
+                        @Override
+                        public void onStopTrackingTouch(SeekBar seekBar) {
+                            int progress = seekBar.getProgress();
+                            setScreenBrightness(progress);
+                            Log.e("seekBar", progress + "");
+                        }
+                    });
+//                    降低亮度
+                    popupWindowView.findViewById(R.id.id_set_popup_lightdown_ibtn).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (followSystemCheckBox.isChecked())
+                                followSystemCheckBox.setChecked(false);
+                            lightSeekBar.setProgress(lightSeekBar.getProgress() - 5);
+                            setScreenBrightness(lightSeekBar.getProgress());
+                        }
+                    });
+//                    增加亮度
+                    popupWindowView.findViewById(R.id.id_set_popup_lightup_ibtn).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (followSystemCheckBox.isChecked())
+                                followSystemCheckBox.setChecked(false);
+                            lightSeekBar.setProgress(lightSeekBar.getProgress() + 5);
+                            setScreenBrightness(lightSeekBar.getProgress());
+                        }
+                    });
+                    if (followSystemCheckBox == null) {
+                        followSystemCheckBox = (CheckBox) popupWindowView.findViewById(R.id.id_set_popup_light_follow_sys_cb);
+                    }
+                    //设置跟随系统亮度
+                    followSystemCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                        @Override
+                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                            Log.e("cb", isChecked + "");
+                            if (isChecked) {
+                                try {
+                                    int systemLightLevel = Settings.System.getInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS);
+                                    lightSeekBar.setProgress(systemLightLevel);
+                                    setScreenBrightness(systemLightLevel);
+                                } catch (Settings.SettingNotFoundException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                        }
+                    });
+                }
+                setPopupWindow.showAtLocation((
+                        (ViewGroup) JieReader.this.findViewById(android.R.id.content))
+                        .getChildAt(0), Gravity.BOTTOM, 0, 0);
                 break;
 //            侧边栏直达底部
             case R.id.id_reader_left_menu_bottom_btn:
@@ -579,6 +718,26 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
                 });
                 break;
         }
+    }
+
+    //设置屏幕亮度的函数
+    private void setScreenBrightness(float tmpInt) {
+        if (tmpInt < 80) {
+            tmpInt = 80;
+        }
+
+        // 根据当前进度改变亮度
+        Settings.System.putInt(getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS, (int) tmpInt);
+        tmpInt = Settings.System.getInt(getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS, -1);
+        WindowManager.LayoutParams wl = getWindow().getAttributes();
+
+        float tmpFloat = tmpInt / 255;
+        if (tmpFloat > 0 && tmpFloat <= 1) {
+            wl.screenBrightness = tmpFloat;
+        }
+        getWindow().setAttributes(wl);
     }
 
     int cachedChapterCount = 0;

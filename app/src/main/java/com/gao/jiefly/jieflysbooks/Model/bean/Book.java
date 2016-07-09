@@ -23,6 +23,21 @@ public class Book implements Serializable {
     private int readChapterIndex = 0;
     private boolean isCached = false;
 
+    public boolean isHasUpdate() {
+        return hasUpdate;
+    }
+
+    public void setHasUpdate(boolean hasUpdate) {
+        this.hasUpdate = hasUpdate;
+    }
+    public void setHsaUpdateByShort(int hasUpdate){
+        this.hasUpdate = hasUpdate == 0x10;
+    }
+    public int getHasUpdate(){
+        return hasUpdate?0x10:0x01;
+    }
+    private boolean hasUpdate = false;
+
 
     @Override
     public String toString() {

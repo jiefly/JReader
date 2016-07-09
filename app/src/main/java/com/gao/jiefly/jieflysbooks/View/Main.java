@@ -107,7 +107,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                     deletePopup.setBackgroundDrawable(new BitmapDrawable());
                     deletePopup.showAtLocation((
                             (ViewGroup) Main.this.findViewById(android.R.id.content))
-                            .getChildAt(0), Gravity.CENTER_VERTICAL, 0, 0);
+                            .getChildAt(0), Gravity.BOTTOM, 0, 0);
 //删除
                     popupWindow.findViewById(R.id.id_popup_delete_btn)
                             .setOnClickListener(
@@ -324,10 +324,9 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     }
 
     @Override
-    public NumberProgressBar getNumProgressBar(int position) {
-        return ((BookListRecycleViewAdapter.ItemViewHolder)mIdRv
-                .getChildViewHolder(mIdRv.getChildAt(position + 1)))
-                .getNumberProgressBar();
+    public BookListRecycleViewAdapter.ItemViewHolder getViewHolder(int position) {
+        return (BookListRecycleViewAdapter.ItemViewHolder)mIdRv
+                .getChildViewHolder(mIdRv.getChildAt(position + 1));
     }
 
     // 下拉刷新
@@ -377,7 +376,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     public static final int TYPE_HEADER = 2;
     public static final int TYPE_FOOTER = 3;
 
-    class BookListRecycleViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    public class BookListRecycleViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private OnItemClickListener mListener = null;
 
 
@@ -423,6 +422,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                 itemViewHolder.tvRecentUpdateTopic.setText(data.get(position).getBookNewTopicTitle());
                 itemViewHolder.tvRecentUpdateTime.setText(data.get(position).getBookLastUpdate());
                 itemViewHolder.ivBook.setImageDrawable(getDrawable(R.mipmap.ic_launcher));
+                itemViewHolder.ivBookUpdateFlag.setVisibility(data.get(position).isHasUpdate()? android.view.View.VISIBLE: android.view.View.INVISIBLE);
                 if (mListener != null) {
                     itemViewHolder.itemView.setOnClickListener(new android.view.View.OnClickListener() {
                         @Override
@@ -458,6 +458,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
             TextView tvRecentUpdateTopic;
             TextView tvRecentUpdateTime;
             ImageView ivBook;
+            ImageView ivBookUpdateFlag;
 
             public NumberProgressBar getNumberProgressBar() {
                 return mNumberProgressBar;
@@ -474,6 +475,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                 tvRecentUpdateTime = (TextView) itemView.findViewById(R.id.id_item_book_recent_update_time);
                 tvRecentUpdateTopic = (TextView) itemView.findViewById(R.id.id_item_book_recent_update);
                 ivBook = (ImageView) itemView.findViewById(R.id.id_iv_book);
+                ivBookUpdateFlag = (ImageView) itemView.findViewById(R.id.id_item_book_new_flag_iv);
                 mNumberProgressBar = (NumberProgressBar) itemView.findViewById(R.id.id_main_progress_bar);
 /*                tvUpdateInfo = (TextView) itemView.findViewById(R.id.id_item_update_info_tv);
                 pbCacheAllChapter = (ProgressBar) itemView.findViewById(R.id.id_item_progress_bar);*/
