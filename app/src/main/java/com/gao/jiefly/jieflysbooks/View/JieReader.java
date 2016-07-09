@@ -2,6 +2,7 @@ package com.gao.jiefly.jieflysbooks.View;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -39,6 +40,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -91,6 +93,9 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
     private List<FragmentReader> mFragmentReaderList;
     private int chapterIndex;
     private List<String> urlList;
+    Animation animationShow;
+    Animation animationDismiss;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +106,8 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
         initData();
         initViewPager();
         initRecycleView();
+        initAnimation();
+
         if (mBook.isCached()) {
             mIdReaderLeftMenuCacheLl.setVisibility(View.GONE);
             mIdReaderLeftMenuProgressBar.setProgress(View.GONE);
@@ -108,6 +115,13 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
             mIdReaderLeftMenuInfoCached.setVisibility(View.GONE);
         }
         Log.e("chapterListSize", mChapterList.size() + "" + "isCached" + mBook.isCached());
+    }
+
+    private void initAnimation() {
+        animationShow = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.bottom_bar_show);
+        animationDismiss = AnimationUtils.loadAnimation(this, R.anim.bottom_bar_dismiss);
+        animationShow.setDuration(500);
+        animationDismiss.setDuration(500);
     }
 
     private void initViewPager() {
@@ -407,18 +421,10 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
                                         return;
                                     }
                                     chapter.setTitle(mChapterList.get(chapterIndex));
-                                    /*if (chapterIndex == 0) {
-                                        (mFragmentReaderList.get(0)).showChapter(chapter);
-                                        mIdJieReaderContentVp.setCurrentItem(0);
-                                    } else if (chapterIndex == mChapterList.size()) {
-                                        (mFragmentReaderList.get(2)).showChapter(chapter);
-                                        mIdJieReaderContentVp.setCurrentItem(2);
-                                    } else {
-                                        ( mFragmentReaderList.get(1)).showChapter(chapter);
-                                        mIdJieReaderContentVp.setCurrentItem(1);
-                                    }*/
                                     setViewPagerConfigure(chapter);
                                     mDrawerLayout.closeDrawer(Gravity.LEFT);
+
+                                    toogleScreenState();
                                 }
                             });
                 }
@@ -460,18 +466,43 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
             case MotionEvent.ACTION_DOWN:
 //                如果手指点击屏幕中心区域，则表示用户想要唤醒底部bar
                 if (ev.getX() < mScreenWidth * 3 / 5 && ev.getX() > mScreenWidth * 2 / 5 && ev.getY() > mScreenHeight * 2 / 5 && ev.getY() < mScreenHeight * 3 / 5) {
-                    boolean flag = mIdReaderBottomBar.isShown();
-                    mIdReaderBottomBar.setVisibility(flag ? View.INVISIBLE : View.VISIBLE);
-                    if (flag) {
-                        setFullScreen();
-                    } else {
-                        cancelFullScreen();
-                    }
-                    return false;
+                    return toogleScreenState();
                 }
         }
         return super.dispatchTouchEvent(ev);
     }
+
+    private boolean toogleScreenState() {
+        final boolean flag = mIdReaderBottomBar.isShown();
+        if (flag) {
+            mIdReaderBottomBar.startAnimation(animationDismiss);
+        } else {
+            mIdReaderBottomBar.setTranslationY(0);
+            mIdReaderBottomBar.startAnimation(animationShow);
+        }
+
+        Observable.timer(600, TimeUnit.MILLISECONDS, Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Long>() {
+                    @Override
+                    public void call(Long aLong) {
+                        mIdReaderBottomBar.setVisibility(flag ? View.INVISIBLE : View.VISIBLE);
+                       if(flag){
+                           mIdReaderBottomBar.setTranslationY(300);
+                       }
+                    }
+                });
+
+        if (flag) {
+            setFullScreen();
+        } else {
+            cancelFullScreen();
+        }
+        return false;
+    }
+
+    Handler mHandler = new Handler();
 
     private void setFullScreen() {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
