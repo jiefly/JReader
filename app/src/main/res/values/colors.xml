@@ -1,8 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<color name="colorPrimary">#a27a24</color>
-	<color name="colorPrimaryDark">#d1721f</color>
-	<color name="colorAccent">#FF4081</color>
+	<color name="colorPrimaryDark">@color/colorBackgroundDark</color>
+	<color name="colorAccent">#7a7375</color>
+	<color name="textColorPrimary">#c1c7c1</color>
 	<color name="colorTextGray">#a9a9b1</color>
 	<color name="colorBackgroundDark">#2e2e27</color>
+	<color name="colorDefaultBackgroundText">#101020</color>
+	<color name="colorNovelReadBackgroundWhite">#ffffff</color>
+	<color name="colorNovelReadBackgroundWhiteText">#5b5555</color>
+	<!--文字：亮白 背景：暗蓝-->
+	<color name="colorNovelReadBackgroundBlue">#415062</color>
+	<color name="colorNovelReadBackgroundBlueText">#fff6e6</color>
+	<!--文字：灰白 背景：深灰-->
+	<color name="colorNovelReadBackgroundgray">#414441</color>
+	<color name="colorNovelReadBackgroundgrayText">#d5cecd </color>
+
+	<!--文字：暗绿 背景：灰绿-->
+	<color name="colorNovelReadBackgroundGraygreen">#6a7962</color>
+	<color name="colorNovelReadBackgroundGraygreenText">#081408 </color>
+
+	<!--文字：墨绿 背景：若竹-->
+	<color name="colorNovelReadBackgroundgreen1">#b5eecd</color>
+	<color name="colorNovelReadBackgroundgreen1Text">#414c41 </color>
+
 </resources>

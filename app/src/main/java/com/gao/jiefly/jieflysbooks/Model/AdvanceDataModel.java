@@ -231,6 +231,8 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
 
     public Chapter getChapter(String bookName, int index, String title) {
         Chapter chapter = getChapter(bookName, index);
+        if (chapter == null)
+            return chapter;
         chapter.setTitle(title);
         chapter.setIndex(index);
         return chapter;

@@ -3,7 +3,7 @@
 
 	<!-- 圆角 -->
 	<corners
-		android:radius="20dp"
+		android:radius="5dp"
 		/><!-- 设置圆角半径 -->
 
 	<!-- 渐变
@@ -32,7 +32,7 @@
 
 	<!-- 填充 -->
 	<solid
-		android:color="#7e273c75"/><!-- 填充的颜色 -->
+		android:color="#8dbab6"/><!-- 填充的颜色 -->
 
 <!--	 描边
 	<stroke

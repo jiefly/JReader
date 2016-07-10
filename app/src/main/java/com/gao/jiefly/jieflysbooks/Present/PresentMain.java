@@ -126,7 +126,7 @@ public class PresentMain implements OnDataModelListener {
 
     //    缓存所有章节
     public void cacheAllChapter(final int position) {
-//        Log.e("tag",""+position);
+//        Log.back_btn_bg("tag",""+position);
         if (mBookList.get(position).isCached()){
             mView.showSnackbar("该小说已经缓存，请勿重复缓存");
             return;

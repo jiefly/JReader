@@ -23,8 +23,8 @@ public class PresentReader {
         mAdvanceDataModel = AdvanceDataModel.build(context);
         /*try {
             mChapterList = mAdvanceDataModel.getChapterList(book.getBookName());
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+        } catch (MalformedURLException back_btn_bg) {
+            back_btn_bg.printStackTrace();
         }*/
     }
 

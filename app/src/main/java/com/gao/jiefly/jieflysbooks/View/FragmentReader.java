@@ -12,4 +12,5 @@ public interface FragmentReader {
     Chapter getChapter();
     void addTextSize();
     void reduceTextSize();
+    void setTextColor(int color);
 }

@@ -188,7 +188,7 @@ public class BaseDataModel implements DataModel {
                     //http://so.biquge.la/cse/search?q=%E5%AE%8C%E7%BE%8E%E4%B8%96%E7%95%8C&click=1&s=7138806708853866527&nsid=
 //                    http://www.uctxt.com/toplist/lastupdate-1
                     URL url = new URL("http://www.uctxt.com/modules/article/search.php?searchkey=" + Utils.UrlEncoder(bookName, "gbk"));
-//                    Log.e("jielfy", url.toString());
+//                    Log.back_btn_bg("jielfy", url.toString());
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "gbk"));
 //                    connection.disconnect();
@@ -201,9 +201,9 @@ public class BaseDataModel implements DataModel {
                     String tmp = null;
                     if (m.find()) {
                         tmp = m.group();
-                        Log.e("jiefly", "find title");
+                        Log.back_btn_bg("jiefly", "find title");
                     } else {
-                        Log.e("jiefly", "can not find title");
+                        Log.back_btn_bg("jiefly", "can not find title");
 
                         return;
                     }
@@ -212,14 +212,14 @@ public class BaseDataModel implements DataModel {
                     Book book;
                     if (p.matcher(tmp).find()) {
                         book = findBookInfoInSearch();
-                        Log.e("jiefly", "find search");
+                        Log.back_btn_bg("jiefly", "find search");
                     } else {
                         book = findBookInfoInDetail();
-                        Log.e("jiefly", "can not find search");
+                        Log.back_btn_bg("jiefly", "can not find search");
                     }
                     mOnDataStateListener.onSuccess(book);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (IOException back_btn_bg) {
+                    back_btn_bg.printStackTrace();
                 }
             }
         }).start();*/
@@ -274,7 +274,7 @@ public class BaseDataModel implements DataModel {
         String tmp;
         if (m.find()) {
             tmp = m.group();
-//            Log.e("jiefly", tmp);
+//            Log.back_btn_bg("jiefly", tmp);
         } else {
             mOnDataStateListener.onFailed(null);
             return null;

@@ -112,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements OnDataStateListen
                             @Override
                             public void call(String s) {
                                 mIdTest.setText(s);
-                                Log.e("jielf", s);
+                                Log.back_btn_bg("jielf", s);
                             }
                         });*//*
                 *//*Observable.just(result)
@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements OnDataStateListen
                                 List<String> list = new ArrayList<>();
                                 while (m.find())
                                     list.add(m.group(1)+"\n");
-                                Log.e("jiefly", list.size()+"");
+                                Log.back_btn_bg("jiefly", list.size()+"");
                                 return Observable.from(list);
                             }
                         })
@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements OnDataStateListen
                                     list.add(book);
                                 }
 //                               list.add(m.group(1)+":"+m.group(2)+"\n");
-//                                Log.e("jiefly", list.size()+"");
+//                                Log.back_btn_bg("jiefly", list.size()+"");
                                 return Observable.from(list);
                             }
                         })
@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements OnDataStateListen
                             }
 
                             @Override
-                            public void onError(Throwable e) {
+                            public void onError(Throwable back_btn_bg) {
 
                             }
 
@@ -202,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements OnDataStateListen
         if (cursor.moveToFirst()){
             do {
                 String author = cursor.getString(cursor.getColumnIndex("author"));
-                Log.e("jiefly----db",author);
+                Log.back_btn_bg("jiefly----db",author);
             }while (cursor.moveToNext());
         }*//*
 //        mIdTest.setText(s);
@@ -251,8 +251,8 @@ public class MainActivity extends AppCompatActivity implements OnDataStateListen
                     if (response.isSuccessful()) {
                         System.out.printf(new String(response.body().bytes(),"UTF-8"));
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (IOException back_btn_bg) {
+                    back_btn_bg.printStackTrace();
                 }*/
                 /*try {
                     StringBuilder sb = new StringBuilder();
@@ -264,8 +264,8 @@ public class MainActivity extends AppCompatActivity implements OnDataStateListen
                     String lines;
                     while ((lines = bufferedReader.readLine())!=null)
                         sb.append(lines);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (IOException back_btn_bg) {
+                    back_btn_bg.printStackTrace();
                 }
             }
         }).start();*/
@@ -281,15 +281,15 @@ public class MainActivity extends AppCompatActivity implements OnDataStateListen
                     response = okHttpClient.newCall(request).execute();
                     if (response.isSuccessful()) {
                         subscriber.onNext(new String(response.body().bytes(),"UTF-8"));
-                        Log.e("jiiie",new String(response.body().bytes()));
+                        Log.back_btn_bg("jiiie",new String(response.body().bytes()));
                     }
                     else{
                         subscriber.onError(new Throwable("did not get data"));
-                        Log.e("jiiie","no data");
+                        Log.back_btn_bg("jiiie","no data");
                     }
 
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (IOException back_btn_bg) {
+                    back_btn_bg.printStackTrace();
                 }
             }
         }).observeOn(Schedulers.io())
@@ -297,18 +297,18 @@ public class MainActivity extends AppCompatActivity implements OnDataStateListen
                 .subscribe(new Subscriber<String>() {
                     @Override
                     public void onCompleted() {
-                        Log.e("jiefly", "complete");
+                        Log.back_btn_bg("jiefly", "complete");
                     }
 
                     @Override
-                    public void onError(Throwable e) {
-                        Log.e("jiefly", e.getMessage());
+                    public void onError(Throwable back_btn_bg) {
+                        Log.back_btn_bg("jiefly", back_btn_bg.getMessage());
                     }
 
                     @Override
                     public void onNext(String s) {
                         mIdTest.setText(s);
-                        Log.e("jiefly", s);
+                        Log.back_btn_bg("jiefly", s);
                     }
                 });*/
 

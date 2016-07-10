@@ -192,7 +192,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     protected void onRestart() {
         super.onRestart();
         data = mPresentMain.getBookList();
-        Log.e("onRestart", data.size() + "");
+        Log.back_btn_bg("onRestart", data.size() + "");
     }*/
 
 

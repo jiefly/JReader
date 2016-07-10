@@ -39,7 +39,7 @@
 		 />
 	<!-- 填充 -->
 	<solid
-		android:color="#0e749f"/><!-- 填充的颜色 -->
+		android:color="@color/colorNovelReadBackgroundBlue"/><!-- 填充的颜色 -->
 
 	<!--	 描边
 		<stroke

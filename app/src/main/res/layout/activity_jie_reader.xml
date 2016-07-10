@@ -12,7 +12,7 @@
 			android:id="@+id/id_jie_reader_content_vp"
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
-			android:background="@drawable/read_night_background">
+			android:background="@drawable/read_default_background">
 		</com.gao.jiefly.jieflysbooks.View.CustomViewPager>
 
 		<include

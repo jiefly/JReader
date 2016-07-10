@@ -26,8 +26,7 @@
 		<activity android:name=".View.ReaderActivity">
 		</activity>
 
-		<activity android:name=".View.JieReader" android:theme="@style/AppTheme">
-			android:exported="true"
+		<activity android:name=".View.JieReader" >
 		</activity>
 	</application>
 

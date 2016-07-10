@@ -102,6 +102,18 @@ public class FragmentReaderImpl extends Fragment implements FragmentReader {
         tvShowContent.setTextSize(TypedValue.COMPLEX_UNIT_PX,tvShowContent.getTextSize() - 1);
     }
 
+    @Override
+    public void setTextColor(int color) {
+        if (tvShowPersent == null)
+            return;
+        if (color != 0){
+            tvShowTitle.setTextColor(color);
+            tvShowContent.setTextColor(color);
+            tvShowPersent.setTextColor(color);
+            tvShowTime.setTextColor(color);
+        }
+    }
+
     Date mDate = new Date();
     Handler handler = new Handler();
     Runnable runnable = new Runnable() {
@@ -116,7 +128,6 @@ public class FragmentReaderImpl extends Fragment implements FragmentReader {
                 foMateTime();
                 tvShowTime.setText(mHour + ":" + mMinutes);
             } catch (Exception e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
                 System.out.println("exception...");
             }
