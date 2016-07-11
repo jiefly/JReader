@@ -1,6 +1,9 @@
 package com.gao.jiefly.jieflysbooks.Model.bean;
 
 import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -26,6 +29,7 @@ public class Book implements Serializable {
     public boolean isHasUpdate() {
         return hasUpdate;
     }
+    private SimpleDateFormat mSimpleDateFormat;
 
     public void setHasUpdate(boolean hasUpdate) {
         this.hasUpdate = hasUpdate;
@@ -155,6 +159,19 @@ public class Book implements Serializable {
 
     public void setChapterList(ChapterList chapterList) {
         mChapterList = chapterList;
+    }
+
+    public Date getUpdateDate() {
+        if (mSimpleDateFormat == null)
+            mSimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        String s = getBookLastUpdate();
+        Date date = null ;
+        try {
+            date = mSimpleDateFormat.parse(getBookLastUpdate());
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return date;
     }
 
     public static class ChapterList implements Serializable{

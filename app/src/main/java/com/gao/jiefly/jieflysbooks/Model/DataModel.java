@@ -51,7 +51,7 @@ interface DataModel {
     //    获取某一章节
     Chapter getChapter(String bookName, int index);
 
-    Chapter getChapter(URL url);
+    Chapter getChapter(String url);
 
     void getChapterSyn(String bookName , String title , String url);
 

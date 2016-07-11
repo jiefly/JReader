@@ -16,5 +16,6 @@ public interface View {
     void addBook(Book book);
     void removeBook(Book book);
     void showSnackbar(String value);
+    void stopRefreshAnim();
     Main.BookListRecycleViewAdapter.ItemViewHolder getViewHolder(int position);
 }

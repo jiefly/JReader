@@ -4,6 +4,18 @@
 	<color name="colorPrimaryDark">@color/colorBackgroundDark</color>
 	<color name="colorAccent">#7a7375</color>
 	<color name="textColorPrimary">#c1c7c1</color>
+
+	<!---->
+	<color name="white">#fafafa</color>
+	<color name="white_dark">#f3f3f3</color>
+	<color name="gray_light">#cccccc</color>
+	<color name="gray">#777</color>
+	<color name="gray_dark">#383838</color>
+	<color name="green_light">#8e9ea4</color>
+	<color name="green">#34515c</color>
+	<color name="green_dark">#1e3e4a</color>
+	<color name="night_mask">#90000000</color>
+	<!---->
 	<color name="colorTextGray">#a9a9b1</color>
 	<color name="colorBackgroundDark">#2e2e27</color>
 	<color name="colorDefaultBackgroundText">#101020</color>

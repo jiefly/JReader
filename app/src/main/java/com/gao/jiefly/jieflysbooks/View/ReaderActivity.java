@@ -20,7 +20,6 @@ import com.gao.jiefly.jieflysbooks.R;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -105,14 +104,7 @@ public class ReaderActivity extends Activity {
                     public String call(String s) {
                         if (mChapterList.size() < 1)
                             initData();
-                        Chapter chapter = null;
-                        try {
-                            chapter = mAdvanceDataModel.getChapter(new URL(url));
-                        } catch (MalformedURLException e) {
-                            e.printStackTrace();
-                        }
-                        assert chapter != null;
-                        return chapter.getContent();
+                        return mAdvanceDataModel.getChapter(url).getContent();
                     }
                 })
                 .subscribeOn(AndroidSchedulers.mainThread())

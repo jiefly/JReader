@@ -122,9 +122,10 @@ public class BaseDataModel implements DataModel {
     }
 
     @Override
-    public Chapter getChapter(URL url) {
+    public Chapter getChapter(String url) {
         return null;
     }
+
 
     @Override
     public void getChapterSyn(String bookName, String title, String url) {

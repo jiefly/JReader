@@ -67,7 +67,7 @@ public class FragmentReaderImpl extends Fragment implements FragmentReader {
 
                         @Override
                         public void onError(Throwable e) {
-                            Log.e("FragmentReader", e.getMessage());
+//                            Log.e("FragmentReader", e.getMessage());
                         }
 
                         @Override
@@ -76,7 +76,7 @@ public class FragmentReaderImpl extends Fragment implements FragmentReader {
                             svWrapper.scrollTo(0, 0);
                             tvShowContent.setText(chapter.getContent());
                             tvShowTitle.setText(chapter.getTitle());
-                            Log.e("fragment", "index:" + mChapter.getIndex() + "size:" + chapterSize);
+                            Log.e("fragment", "content:" + mChapter.getContent());
                             tvShowPersent.setText(df.format((float) (chapter.getIndex() + 1) * 100 / (float) chapterSize) + "%");
                         }
                     });

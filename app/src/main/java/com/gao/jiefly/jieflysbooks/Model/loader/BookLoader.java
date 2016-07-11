@@ -14,6 +14,7 @@ import com.gao.jiefly.jieflysbooks.Utils.Utils;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -168,7 +169,7 @@ public class BookLoader {
         * */
         Cursor cursor = db.query("Book", null, null, null, null, null, null);
         if (cursor.moveToFirst()) {
-            data = new LinkedList<>();
+            data = new ArrayList<>();
             do {
                 Book book = new Book();
                 book.setBookName(cursor.getString(cursor.getColumnIndex("name")));

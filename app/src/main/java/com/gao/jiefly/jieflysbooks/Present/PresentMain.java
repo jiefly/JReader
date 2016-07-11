@@ -14,6 +14,9 @@ import com.gao.jiefly.jieflysbooks.View.Main;
 import com.gao.jiefly.jieflysbooks.View.View;
 
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +33,7 @@ import rx.schedulers.Schedulers;
  * Fighting_jiiiiie
  */
 public class PresentMain implements OnDataModelListener {
-    private List<Book> mBookList;
+    private List<Book> mBookList = new ArrayList<>();
     private static PresentMain instance = null;
     private AdvanceDataModel mAdvanceDataModel;
     View mView;
@@ -38,7 +41,22 @@ public class PresentMain implements OnDataModelListener {
     private PresentMain(Context context, View view) {
         mAdvanceDataModel = AdvanceDataModel.build(context, this);
         mView = view;
-        mBookList = mAdvanceDataModel.getBookList();
+        if (mAdvanceDataModel.getBookList() != null)
+            mBookList.addAll(mAdvanceDataModel.getBookList());
+        sortListByUpdateTime(mBookList);
+    }
+
+    private void sortListByUpdateTime(List<Book> bookList) {
+        if (bookList == null)
+            return;
+        Collections.sort(bookList, new Comparator<Book>() {
+            @Override
+            public int compare(Book lhs, Book rhs) {
+                if (lhs.getUpdateDate().after(rhs.getUpdateDate()))
+                    return -1;
+                return 1;
+            }
+        });
     }
 
     public static PresentMain getInstance(Context context, View view) {
@@ -127,7 +145,7 @@ public class PresentMain implements OnDataModelListener {
     //    缓存所有章节
     public void cacheAllChapter(final int position) {
 //        Log.back_btn_bg("tag",""+position);
-        if (mBookList.get(position).isCached()){
+        if (mBookList.get(position).isCached()) {
             mView.showSnackbar("该小说已经缓存，请勿重复缓存");
             return;
         }
@@ -191,6 +209,7 @@ public class PresentMain implements OnDataModelListener {
 
     public List<Book> getBookList() {
         mBookList = mAdvanceDataModel.getBookList();
+        sortListByUpdateTime(mBookList);
         return mBookList;
     }
 
@@ -204,12 +223,20 @@ public class PresentMain implements OnDataModelListener {
     public void onBookAddFailed() {
         mView.showSnackbar("添加书籍失败\n请检查您的网络或者输入的小说名字是否正确");
     }
+
     private Main.BookListRecycleViewAdapter.ItemViewHolder mItemViewHolder;
+
     @Override
     public void onBookUpdateSuccess(String bookName) {
         mView.updateBook(bookName);
+        if (countUpdate++ >= mBookList.size() - 1) {
+            mView.stopRefreshAnim();
+            countUpdate = 0;
+        }
         Log.e("updateBook", "更新书籍完毕");
     }
+
+    int countUpdate = 0;
 
     @Override
     public void onBookUpdateFailed() {

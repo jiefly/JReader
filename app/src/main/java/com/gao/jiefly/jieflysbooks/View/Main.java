@@ -2,6 +2,7 @@ package com.gao.jiefly.jieflysbooks.View;
 
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -23,7 +24,6 @@ import android.widget.Toast;
 
 import com.daimajia.numberprogressbar.NumberProgressBar;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
-import com.gao.jiefly.jieflysbooks.Model.download.VolleyClient;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnDataStateListener;
 import com.gao.jiefly.jieflysbooks.Present.PresentMain;
 import com.gao.jiefly.jieflysbooks.R;
@@ -65,17 +65,6 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         ButterKnife.inject(this);
-        VolleyClient.build(getApplicationContext()).getWebResource("http://www.uctxt.com/book/1/1269/392327.html", new OnDataStateListener() {
-            @Override
-            public void onSuccess(String result) {
-                Log.e("jiefly",result);
-            }
-
-            @Override
-            public void onFailed(Exception e) {
-                Log.e("jiefly",e.getMessage());
-            }
-        });
         mPresentMain = PresentMain.getInstance(getApplicationContext(), this);
 //        mPresentMain.updateBookList();
         data = mPresentMain.getBookList();
@@ -149,7 +138,6 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
             mIdRv.setAdapter(adapter);
             mIdMainAddBookFab.attachToRecyclerView(mIdRv);
         }
-
     }
 
     private void initPopupWindow() {
@@ -159,6 +147,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                 WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.MATCH_PARENT);
         mPopupWindow.setFocusable(true);
+        mPopupWindow.setBackgroundDrawable(new BitmapDrawable());
         etAddBookName = (EditText) popupWindow.findViewById(R.id.id_popup_book_name_et);
 //                        取消
         Button btnCancle = (Button) popupWindow.findViewById(R.id.id_popup_cancle_btn);
@@ -181,20 +170,24 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                         } catch (MalformedURLException e) {
                             e.printStackTrace();
                         }
-                        etAddBookName.setText("");
+                        Observable.just(1).subscribeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Integer>() {
+                            @Override
+                            public void call(Integer integer) {
+                                etAddBookName.setText("");
+                            }
+                        });
                     }
                 }).start();
                 mPopupWindow.dismiss();
             }
         });
     }
-/*    @Override
+    /*@Override
     protected void onRestart() {
         super.onRestart();
         data = mPresentMain.getBookList();
         Log.back_btn_bg("onRestart", data.size() + "");
     }*/
-
 
 
     @OnClick(R.id.id_main_add_book_fab)
@@ -222,7 +215,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
 
                     @Override
                     public void onError(Throwable e) {
-                        Toast.makeText(getApplicationContext(), "add show book failed", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "show book failed", Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
@@ -308,6 +301,8 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
             removeItem++;
         }
         adapter.notifyItemRemoved(removeItem);
+        if (data.size()<4)
+            mIdMainAddBookFab.show();
     }
 
     @Override
@@ -325,13 +320,17 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
 
     @Override
     public BookListRecycleViewAdapter.ItemViewHolder getViewHolder(int position) {
-        return (BookListRecycleViewAdapter.ItemViewHolder)mIdRv
+        return (BookListRecycleViewAdapter.ItemViewHolder) mIdRv
                 .getChildViewHolder(mIdRv.getChildAt(position + 1));
     }
 
     // 下拉刷新
     @Override
     public void onRefresh() {
+        if (data == null) {
+            stopRefreshAnim();
+            return;
+        }
         Observable.just(1)
                 .map(new Func1<Integer, Integer>() {
                     @Override
@@ -349,10 +348,19 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                         if (data != null) {
                             adapter.notifyItemRangeChanged(1, data.size());
                         }
-                        mIdMainSwipeRefreshLayout.setRefreshing(false);
                     }
                 });
 
+    }
+
+    @Override
+    public void stopRefreshAnim() {
+        Observable.just(1).subscribeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Integer>() {
+            @Override
+            public void call(Integer integer) {
+                mIdMainSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
     }
 
     @Override
@@ -412,7 +420,9 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
         public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
             if (holder instanceof HeadViewHolder) {
                 HeadViewHolder headViewHolder = (HeadViewHolder) holder;
-                headViewHolder.ivHead.setImageDrawable(getDrawable(R.drawable.head_canvas));
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    headViewHolder.ivHead.setImageDrawable(getApplicationContext().getDrawable(R.drawable.head_canvas));
+                }
             } else if (holder instanceof ItemViewHolder) {
                 position -= 1;
                 final ItemViewHolder itemViewHolder = (ItemViewHolder) holder;
@@ -421,8 +431,9 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                 itemViewHolder.tvBookName.setText(data.get(position).getBookName());
                 itemViewHolder.tvRecentUpdateTopic.setText(data.get(position).getBookNewTopicTitle());
                 itemViewHolder.tvRecentUpdateTime.setText(data.get(position).getBookLastUpdate());
-                itemViewHolder.ivBook.setImageDrawable(getDrawable(R.mipmap.ic_launcher));
-                itemViewHolder.ivBookUpdateFlag.setVisibility(data.get(position).isHasUpdate()? android.view.View.VISIBLE: android.view.View.INVISIBLE);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    itemViewHolder.ivBook.setImageDrawable(getApplicationContext().getDrawable(R.mipmap.ic_launcher));}
+                itemViewHolder.ivBookUpdateFlag.setVisibility(data.get(position).isHasUpdate() ? android.view.View.VISIBLE : android.view.View.INVISIBLE);
                 if (mListener != null) {
                     itemViewHolder.itemView.setOnClickListener(new android.view.View.OnClickListener() {
                         @Override

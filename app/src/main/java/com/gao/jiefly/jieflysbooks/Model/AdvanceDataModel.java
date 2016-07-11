@@ -193,13 +193,9 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
             @Override
             public void run() {
                 Chapter chapter = null;
-                try {
-                    chapter = getChapter(new URL(url));
-                    chapter.setBookName(bookName);
-                    chapter.setTitle(title);
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
+                chapter = getChapter(url);
+                chapter.setBookName(bookName);
+                chapter.setTitle(title);
                 onChapterLoadSuccess(chapter);
             }
         }).start();
@@ -220,9 +216,9 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
             chapter.setContent("前面没有更多内容了，客官别翻啦");
             return chapter;
         }
-        URL url = null;
+        String url = null;
         try {
-            url = new URL(mBookLoader.getChapterList(bookName).get(index).getUrl());
+            url = mBookLoader.getChapterList(bookName).get(index).getUrl();
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -240,9 +236,9 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
 
 
     @Override
-    public Chapter getChapter(URL url) {
+    public Chapter getChapter(String url) {
         try {
-            return mChapterLoader.getChapterLoaderResult(url.toString());
+            return mChapterLoader.getChapterLoaderResult(url);
         } catch (IOException e) {
             e.printStackTrace();
         }

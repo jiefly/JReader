@@ -10,6 +10,8 @@ import android.util.AttributeSet;
  * Fighting_jiiiiie
  */
 public class CustomViewPager extends ViewPager {
+    private boolean isCanScroll = true;
+
     public CustomViewPager(Context context) {
         super(context);
     }
@@ -18,4 +20,13 @@ public class CustomViewPager extends ViewPager {
         super(context, attrs);
     }
 
+    void setCanScroll(boolean flag) {
+        isCanScroll = flag;
+    }
+
+    @Override
+    public void scrollTo(int x, int y) {
+        if (isCanScroll)
+            super.scrollTo(x, y);
+    }
 }
