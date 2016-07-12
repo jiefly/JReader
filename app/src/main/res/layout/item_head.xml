@@ -14,5 +14,5 @@
 	             android:background="@drawable/mian_set_selector"
 	             android:layout_alignParentTop="true"
 	             android:layout_alignParentRight="true" android:layout_marginTop="10dp"
-	             android:layout_marginRight="10dp"/>
+	             android:layout_marginRight="10dp" android:id="@+id/id_item_main_options_ibtn"/>
 </RelativeLayout>

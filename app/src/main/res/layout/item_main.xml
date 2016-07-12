@@ -18,12 +18,12 @@
 				android:id="@+id/id_iv_book"
 				android:layout_width="match_parent"
 				android:layout_height="match_parent"
-				android:src="@mipmap/ic_launcher"
+				android:src="@drawable/nocover"
 			/>
 			<ImageView android:layout_width="60dp" android:layout_height="60dp"
 			android:src="@drawable/has_newer_chapter"
 			           android:id="@+id/id_item_book_new_flag_iv"
-			           android:visibility="invisible"
+
 			           android:layout_alignParentTop="true"
 			           android:layout_alignParentEnd="true"
 			           android:layout_alignParentRight="true"/>

@@ -56,7 +56,6 @@ public class FragmentReaderImpl extends Fragment implements FragmentReader {
 
     @Override
     public void showChapter(Chapter chapter) {
-        if (tvShowContent != null) {
             Observable.just(chapter)
                     .subscribeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Subscriber<Chapter>() {
@@ -80,7 +79,7 @@ public class FragmentReaderImpl extends Fragment implements FragmentReader {
                             tvShowPersent.setText(df.format((float) (chapter.getIndex() + 1) * 100 / (float) chapterSize) + "%");
                         }
                     });
-        }
+
     }
 
     java.text.DecimalFormat df = new java.text.DecimalFormat("#.00");

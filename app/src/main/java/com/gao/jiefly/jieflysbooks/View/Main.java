@@ -12,13 +12,16 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,6 +33,7 @@ import com.gao.jiefly.jieflysbooks.R;
 import com.melnykov.fab.FloatingActionButton;
 
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.ButterKnife;
@@ -56,7 +60,8 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     RecyclerView mIdRv;
     private List<Book> data;
     BookListRecycleViewAdapter adapter;
-    PopupWindow mPopupWindow = null;
+    PopupWindow itemMainPop = null;
+    PopupWindow itemHeadPop = null;
     EditText etAddBookName;
     PresentMain mPresentMain;
 
@@ -73,8 +78,35 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
         adapter.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(android.view.View view, final int position) {
-                Toast.makeText(getApplicationContext(), position + "click", Toast.LENGTH_SHORT).show();
                 if (position == 0) {
+                    if (itemHeadPop == null) {
+                        android.view.View viewHeadPop = LayoutInflater.from(getApplicationContext()).inflate(R.layout.item_head_popup, null, false);
+                        itemHeadPop = new PopupWindow(viewHeadPop, WindowManager.LayoutParams.MATCH_PARENT,
+                                WindowManager.LayoutParams.MATCH_PARENT);
+                        ((RadioGroup) viewHeadPop.findViewById(R.id.id_item_head_rg))
+                                .setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                            @Override
+                            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                                switch (checkedId) {
+                                    case 1:
+                                        data = mPresentMain.getBookListOrderByUpdateTime();
+                                        Log.e("change", data + "");
+                                        break;
+                                    case 2:
+                                        data = mPresentMain.getBookListOrderByAddTime();
+                                        Log.e("change", data + "");
+                                        break;
+                                }
+                                adapter.notifyItemRangeChanged(1, data.size());
+                                itemHeadPop.dismiss();
+                            }
+                        });
+                    }
+                    itemHeadPop.showAtLocation((
+                            (ViewGroup) Main.this.findViewById(android.R.id.content))
+                            .getChildAt(0), Gravity.LEFT, 0, 0);
+
+
                     return;
                 }
                 try {
@@ -143,18 +175,18 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     private void initPopupWindow() {
         android.view.View popupWindow = LayoutInflater
                 .from(Main.this).inflate(R.layout.add_book_popupwindow, null);
-        mPopupWindow = new PopupWindow(popupWindow,
+        itemMainPop = new PopupWindow(popupWindow,
                 WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.MATCH_PARENT);
-        mPopupWindow.setFocusable(true);
-        mPopupWindow.setBackgroundDrawable(new BitmapDrawable());
+        itemMainPop.setFocusable(true);
+        itemMainPop.setBackgroundDrawable(new BitmapDrawable());
         etAddBookName = (EditText) popupWindow.findViewById(R.id.id_popup_book_name_et);
 //                        取消
         Button btnCancle = (Button) popupWindow.findViewById(R.id.id_popup_cancle_btn);
         btnCancle.setOnClickListener(new android.view.View.OnClickListener() {
             @Override
             public void onClick(android.view.View v) {
-                mPopupWindow.dismiss();
+                itemMainPop.dismiss();
             }
         });
 //                        确定
@@ -178,7 +210,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                         });
                     }
                 }).start();
-                mPopupWindow.dismiss();
+                itemMainPop.dismiss();
             }
         });
     }
@@ -192,10 +224,10 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
 
     @OnClick(R.id.id_main_add_book_fab)
     public void onClick() {
-        if (mPopupWindow == null) {
+        if (itemMainPop == null) {
             initPopupWindow();
         }
-        mPopupWindow.showAtLocation(((ViewGroup)
+        itemMainPop.showAtLocation(((ViewGroup)
                 Main.this.findViewById(android.R.id.content))
                 .getChildAt(0), Gravity.NO_GRAVITY, 0, 0);
 
@@ -279,11 +311,14 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
 
                     @Override
                     public void onError(Throwable e) {
+                        Log.e("error",e.getMessage());
                         showSnackbar(e.getMessage());
                     }
 
                     @Override
                     public void onNext(Book book) {
+                        if (data == null)
+                            data = new ArrayList<>();
                         data.add(book);
                         adapter.notifyItemInserted(data.size() + 1);
                     }
@@ -301,7 +336,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
             removeItem++;
         }
         adapter.notifyItemRemoved(removeItem);
-        if (data.size()<4)
+        if (data.size() < 4)
             mIdMainAddBookFab.show();
     }
 
@@ -312,7 +347,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                 .subscribe(new Action1<String>() {
                     @Override
                     public void call(String s) {
-                        Snackbar.make(mIdMainAddBookFab, s, Snackbar.LENGTH_LONG)
+                        Snackbar.make(mIdMainAddBookFab, s, Snackbar.LENGTH_SHORT)
                                 .setAction("Action", null).show();
                     }
                 });
@@ -373,6 +408,31 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
 
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (itemHeadPop.isShowing()) {
+                itemHeadPop.dismiss();
+                return false;
+            }
+            exit();
+            return false;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    public void exit() {
+        if ((System.currentTimeMillis() - exitTime) > 2000) {
+            Toast.makeText(getApplicationContext(), "再按一次退出程序",
+                    Toast.LENGTH_SHORT).show();
+            exitTime = System.currentTimeMillis();
+        } else {
+            finish();
+            System.exit(0);
+        }
+    }
+
+    private long exitTime = 0;
 
     public interface OnItemClickListener {
         void onItemClick(android.view.View view, int position);
@@ -423,6 +483,12 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     headViewHolder.ivHead.setImageDrawable(getApplicationContext().getDrawable(R.drawable.head_canvas));
                 }
+                headViewHolder.mImageButton.setOnClickListener(new android.view.View.OnClickListener() {
+                    @Override
+                    public void onClick(android.view.View v) {
+                        mListener.onItemClick(v, 0);
+                    }
+                });
             } else if (holder instanceof ItemViewHolder) {
                 position -= 1;
                 final ItemViewHolder itemViewHolder = (ItemViewHolder) holder;
@@ -431,8 +497,9 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                 itemViewHolder.tvBookName.setText(data.get(position).getBookName());
                 itemViewHolder.tvRecentUpdateTopic.setText(data.get(position).getBookNewTopicTitle());
                 itemViewHolder.tvRecentUpdateTime.setText(data.get(position).getBookLastUpdate());
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    itemViewHolder.ivBook.setImageDrawable(getApplicationContext().getDrawable(R.mipmap.ic_launcher));}
+                /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    itemViewHolder.ivBook.setImageDrawable(getApplicationContext().getDrawable(R.mipmap.ic_launcher));
+                }*/
                 itemViewHolder.ivBookUpdateFlag.setVisibility(data.get(position).isHasUpdate() ? android.view.View.VISIBLE : android.view.View.INVISIBLE);
                 if (mListener != null) {
                     itemViewHolder.itemView.setOnClickListener(new android.view.View.OnClickListener() {
@@ -495,10 +562,12 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
 
         public class HeadViewHolder extends RecyclerView.ViewHolder {
             ImageView ivHead;
+            ImageButton mImageButton;
 
             public HeadViewHolder(android.view.View itemView) {
                 super(itemView);
                 ivHead = (ImageView) itemView.findViewById(R.id.id_iv_head);
+                mImageButton = (ImageButton) itemView.findViewById(R.id.id_item_main_options_ibtn);
             }
         }
     }

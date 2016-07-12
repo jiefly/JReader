@@ -58,7 +58,14 @@ public class PresentMain implements OnDataModelListener {
             }
         });
     }
-
+    public List<Book> getBookListOrderByUpdateTime(){
+        sortListByUpdateTime(mBookList);
+        return mBookList;
+    }
+    public List<Book> getBookListOrderByAddTime(){
+        mBookList = mAdvanceDataModel.getBookList();
+        return mBookList;
+    }
     public static PresentMain getInstance(Context context, View view) {
         if (instance == null) {
             synchronized (PresentMain.class) {
@@ -91,6 +98,7 @@ public class PresentMain implements OnDataModelListener {
         }
         mAdvanceDataModel.addBookSyn(bookName);
         Log.e("addBook", "正在加载书籍");
+        mView.showSnackbar("正在从网络上获取书籍，请稍后");
         /*Book book = mAdvanceDataModel.addBook(bookName);
         Log.i("addBook", book.toString());
         //            mBookList.add(book);

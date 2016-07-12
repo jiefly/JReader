@@ -19,9 +19,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -128,16 +125,6 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
             public void onClick(View v) {
                 doBeforeClose();
                 finish();
-            }
-        });
-        mIdToolBar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                if (item.getItemId() == R.id.home) {
-                    Log.e("d", "click");
-                    finish();
-                }
-                return false;
             }
         });
         initData();
@@ -310,7 +297,6 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
                                 book.getChapterList().getChapterUrlList().get(chapterIndex));
                     }
                 })
-                .timeout(100,TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Chapter>() {
@@ -766,14 +752,13 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
                 break;
         }
     }
-
-    @Override
+/*    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.activity_jie_read_drawer, menu);
         return true;
-    }
+    }*/
 
     //    设置text大小
     private void setTextColor(int color) {
