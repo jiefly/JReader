@@ -80,27 +80,29 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
             public void onItemClick(android.view.View view, final int position) {
                 if (position == 0) {
                     if (itemHeadPop == null) {
-                        android.view.View viewHeadPop = LayoutInflater.from(getApplicationContext()).inflate(R.layout.item_head_popup, null, false);
+                        android.view.View viewHeadPop = LayoutInflater.from(Main.this)
+                                .inflate(R.layout.item_head_popup, null);
                         itemHeadPop = new PopupWindow(viewHeadPop, WindowManager.LayoutParams.MATCH_PARENT,
                                 WindowManager.LayoutParams.MATCH_PARENT);
                         ((RadioGroup) viewHeadPop.findViewById(R.id.id_item_head_rg))
                                 .setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-                            @Override
-                            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                                switch (checkedId) {
-                                    case 1:
-                                        data = mPresentMain.getBookListOrderByUpdateTime();
-                                        Log.e("change", data + "");
-                                        break;
-                                    case 2:
-                                        data = mPresentMain.getBookListOrderByAddTime();
-                                        Log.e("change", data + "");
-                                        break;
-                                }
-                                adapter.notifyItemRangeChanged(1, data.size());
-                                itemHeadPop.dismiss();
-                            }
-                        });
+                                    @Override
+                                    public void onCheckedChanged(RadioGroup group, int checkedId) {
+                                        switch (checkedId) {
+                                            case 1:
+                                                data = mPresentMain.getBookListOrderByUpdateTime();
+                                                Log.e("change", data + "");
+                                                break;
+                                            case 2:
+                                                data = mPresentMain.getBookListOrderByAddTime();
+                                                Log.e("change", data + "");
+                                                break;
+                                        }
+                                        if (data != null)
+                                            adapter.notifyItemRangeChanged(1, data.size());
+                                        itemHeadPop.dismiss();
+                                    }
+                                });
                     }
                     itemHeadPop.showAtLocation((
                             (ViewGroup) Main.this.findViewById(android.R.id.content))
@@ -311,7 +313,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.e("error",e.getMessage());
+                        Log.e("error", e.getMessage());
                         showSnackbar(e.getMessage());
                     }
 
@@ -411,7 +413,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (itemHeadPop.isShowing()) {
+            if (itemHeadPop != null && itemHeadPop.isShowing()) {
                 itemHeadPop.dismiss();
                 return false;
             }

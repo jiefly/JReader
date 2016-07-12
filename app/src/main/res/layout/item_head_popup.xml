@@ -8,11 +8,17 @@
 	<RadioGroup android:layout_width="wrap_content"
 	            android:layout_marginTop="30dp"
 	            android:padding="10dp"
-	            android:layout_height="wrap_content" android:background="#cf4bb8b8" android:id="@+id/id_item_head_rg"
-	>
-		<RadioButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="按更新时间排序"
+	            android:layout_height="wrap_content"
+	            android:background="#cf4bb8b8"
+	            android:id="@+id/id_item_head_rg">
+		<RadioButton android:layout_width="wrap_content"
+		             android:layout_height="wrap_content"
+		             android:text="按更新时间排序"
 		             android:checked="false"/>
 
-		<RadioButton android:layout_width="wrap_content" android:layout_marginTop="10dp" android:layout_height="wrap_content" android:text="按加入时间排序"/>
+		<RadioButton android:layout_width="wrap_content"
+		             android:layout_marginTop="10dp"
+		             android:layout_height="wrap_content"
+		             android:text="按加入时间排序"/>
 	</RadioGroup>
 </LinearLayout>
