@@ -746,7 +746,7 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
 
                     @Override
                     public void onFailed(String url) {
-                        Log.e("onFailed", url);
+//                        Log.e("onFailed", url);
                     }
                 });
                 break;
