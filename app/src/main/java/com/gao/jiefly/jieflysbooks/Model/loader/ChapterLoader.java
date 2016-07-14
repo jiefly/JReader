@@ -6,8 +6,9 @@ import android.util.Log;
 import android.util.LruCache;
 
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
-import com.gao.jiefly.jieflysbooks.Model.download.BaseHttpURLClient;
+import com.gao.jiefly.jieflysbooks.Model.download.VolleyClient;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnChapterCacheListener;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnDataStateListener;
 import com.gao.jiefly.jieflysbooks.Utils.Utils;
 
 import java.io.BufferedOutputStream;
@@ -58,9 +59,39 @@ public class ChapterLoader {
     }
 
     //    缓存所有章节
-    public void cacheAllChapter(final List<String> urlList, final OnChapterCacheListener onChapterCacheListener) {
+    public void cacheAllChapter(final List<String> urlList, final OnChapterCacheListener onChapterCacheListener){
         mOnChapterCacheListener = onChapterCacheListener;
-        new Thread(new Runnable() {
+        for (final String url : urlList) {
+            Chapter chapter = null;
+            try {
+                chapter = loadChapterFromDiskCache(url);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (chapter != null) {
+                mOnChapterCacheListener.onSuccess();
+            } else {
+                VolleyClient.build(mContext).getWebResource(url, new OnDataStateListener() {
+                    @Override
+                    public void onSuccess(String result) {
+                        Chapter chapter = new Chapter(url);
+                        chapter.setContent(getChapterFromHtml(result));
+                        try {
+                            addChapterToDiskCache(url, chapter);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        mOnChapterCacheListener.onSuccess();
+                    }
+
+                    @Override
+                    public void onFailed(Exception e) {
+                        mOnChapterCacheListener.onFailed(e.getMessage());
+                    }
+                });
+            }
+        }
+        /*new Thread(new Runnable() {
             @Override
             public void run() {
                 int count;
@@ -80,7 +111,7 @@ public class ChapterLoader {
                     }
                 }
             }
-        }).start();
+        }).start();*/
     }
 
     //    缓存章节
@@ -136,7 +167,8 @@ public class ChapterLoader {
         StringBuilder sb = new StringBuilder();
         String result;
         try {
-            result = new BaseHttpURLClient().getWebResourse(new URL(url));
+//            result = new BaseHttpURLClient().getWebResourse(new URL(url));
+            result = VolleyClient.build(mContext).getWebResourse(new URL(url));
             String tmp = Utils.delHTMLTag(result);
             Pattern p = Pattern.compile("下一章书签([\\w\\W]*)推荐上一章");
             final Matcher m = p.matcher(tmp);
@@ -147,6 +179,19 @@ public class ChapterLoader {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
+        return sb.toString();
+    }
+
+    private String getChapterFromHtml(String content) {
+        StringBuilder sb = new StringBuilder();
+        String tmp = Utils.delHTMLTag(content);
+        Pattern p = Pattern.compile("下一章书签([\\w\\W]*)推荐上一章");
+        final Matcher m = p.matcher(tmp);
+        if (m.find())
+            Log.e("jiefly---", "从网络中获取章节数据");
+        else
+            return null;
+        sb.append(m.group(1));
         return sb.toString();
     }
 

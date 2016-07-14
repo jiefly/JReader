@@ -152,7 +152,7 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
         }).start();
     }
 
-    public void cacheChapterFromList(List<String> urlList, OnChapterCacheListener onChapterCacheListener) {
+    public void cacheChapterFromList(List<String> urlList, OnChapterCacheListener onChapterCacheListener){
         mChapterLoader.cacheAllChapter(urlList, onChapterCacheListener);
     }
 

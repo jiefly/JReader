@@ -1,5 +1,10 @@
 package com.gao.jiefly.jieflysbooks;
 
+import android.util.Log;
+
+import com.gao.jiefly.jieflysbooks.Model.download.VolleyClient;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnDataStateListener;
+
 import org.junit.Test;
 
 /**

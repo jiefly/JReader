@@ -12,4 +12,5 @@ import java.net.URL;
 public interface HttpURLClient {
     String getWebResourse(URL url);
     void getWebResource(String url, OnDataStateListener onDataStateListener);
+    String getWebResourse(String url);
 }

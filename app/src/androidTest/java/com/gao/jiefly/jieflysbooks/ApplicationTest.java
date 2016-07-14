@@ -4,8 +4,8 @@ import android.app.Application;
 import android.test.ApplicationTestCase;
 import android.util.Log;
 
-import com.gao.jiefly.jieflysbooks.Model.bean.Book;
-import com.gao.jiefly.jieflysbooks.Model.loader.BookLoader;
+import com.gao.jiefly.jieflysbooks.Model.download.VolleyClient;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnDataStateListener;
 
 /**
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
@@ -13,6 +13,16 @@ import com.gao.jiefly.jieflysbooks.Model.loader.BookLoader;
 public class ApplicationTest extends ApplicationTestCase<Application> {
     public ApplicationTest() {
         super(Application.class);
+        VolleyClient.build(getContext()).getWebResource("www.baidu.com", new OnDataStateListener() {
+            @Override
+            public void onSuccess(String result) {
+                Log.e("onsuccess",result);
+            }
 
+            @Override
+            public void onFailed(Exception e) {
+
+            }
+        });
     }
 }

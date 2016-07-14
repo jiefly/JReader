@@ -1,15 +1,18 @@
 package com.gao.jiefly.jieflysbooks.Model.download;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnDataStateListener;
 
 import java.net.URL;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by jiefly on 2016/7/8.
@@ -44,7 +47,8 @@ public class VolleyClient implements HttpURLClient {
 
     @Override
     public void getWebResource(String url, final OnDataStateListener onDataStateListener) {
-        mStringRequest = new StringRequest(url, new Response.Listener<String>() {
+        Log.e("VolleyClient",url);
+        mStringRequest = new StringRequestForGBK(url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 onDataStateListener.onSuccess(response);
@@ -56,6 +60,20 @@ public class VolleyClient implements HttpURLClient {
             }
         });
         mRequestQueue.add(mStringRequest);
+    }
+
+    @Override
+    public String getWebResourse(String url) {
+        RequestFuture future = RequestFuture.newFuture();
+        StringRequestForGBK requestForGBK = new StringRequestForGBK(url,future,future);
+        mRequestQueue.add(requestForGBK);
+        String result = null;
+        try {
+            result = (String) future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
 }

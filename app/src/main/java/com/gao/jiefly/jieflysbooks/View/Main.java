@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 import com.daimajia.numberprogressbar.NumberProgressBar;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
+import com.gao.jiefly.jieflysbooks.Model.download.VolleyClient;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnDataStateListener;
 import com.gao.jiefly.jieflysbooks.Present.PresentMain;
 import com.gao.jiefly.jieflysbooks.R;
@@ -72,6 +73,18 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
         ButterKnife.inject(this);
         mPresentMain = PresentMain.getInstance(getApplicationContext(), this);
 //        mPresentMain.updateBookList();
+        VolleyClient.build(getApplicationContext()).getWebResource("http://www.uctxt.com/book/1/1678/6804351.html", new OnDataStateListener() {
+            @Override
+            public void onSuccess(String result) {
+                Log.e("onSuccess",result);
+                    String value = result;
+            }
+
+            @Override
+            public void onFailed(Exception e) {
+                Log.e("onFailed",e.getMessage());
+            }
+        });
         data = mPresentMain.getBookList();
         mIdMainSwipeRefreshLayout.setOnRefreshListener(this);
         adapter = new BookListRecycleViewAdapter();

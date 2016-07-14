@@ -10,6 +10,8 @@ import com.gao.jiefly.jieflysbooks.Model.CustomDatabaseHelper;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
 import com.gao.jiefly.jieflysbooks.Model.download.BaseHttpURLClient;
+import com.gao.jiefly.jieflysbooks.Model.download.VolleyClient;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnDataStateListener;
 import com.gao.jiefly.jieflysbooks.Utils.Utils;
 
 import java.net.MalformedURLException;
@@ -25,15 +27,17 @@ import java.util.regex.Pattern;
  * Email:jiefly1993@gmail.com
  * Fighting_jiiiiie
  */
-public class BookLoader {
+public class BookLoader implements OnDataStateListener {
     private StringBuilder sb;
     private static final String TAG = "BookLoader";
     private CustomDatabaseHelper mBookDatabaseHelper;
     private CustomDatabaseHelper mChapterListDatabaseHelper;
+    private Context mContext;
 
     public BookLoader(Context context) {
         mBookDatabaseHelper = new CustomDatabaseHelper(context, "bookStore.db", null, 1, CustomDatabaseHelper.BOOK_TYPE);
         mChapterListDatabaseHelper = new CustomDatabaseHelper(context, "chapterList.db", null, 1, CustomDatabaseHelper.CHAPTER_LIST_TYPE);
+        mContext = context;
     }
 
     public static BookLoader build(Context context) {
@@ -313,23 +317,24 @@ public class BookLoader {
     private Book getBookFromHttp(String bookName) {
         if (sb == null)
             sb = new StringBuilder();
-        try {
-            String result = new BaseHttpURLClient()
-                    .getWebResourse(new URL("http://www.uctxt.com/modules/article/search.php?searchkey="
-                            + Utils.UrlEncoder(bookName, "gbk")));
-            if (sb.length() > 0)
-                sb.delete(0, sb.length());
-            sb.append(result);
+        //            VolleyClient.build(mContext).getWebResource("http://www.uctxt.com/modules/article/search.php?searchkey=",this);
+//            String result = new BaseHttpURLClient()
+//                    .getWebResourse(new URL("http://www.uctxt.com/modules/article/search.php?searchkey="
+//                            + Utils.UrlEncoder(bookName, "gbk")));
+        String result = VolleyClient.build(mContext)
+                .getWebResourse("http://www.uctxt.com/modules/article/search.php?searchkey="
+                        + Utils.UrlEncoder(bookName, "gbk"));
 
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
+        if (sb.length() > 0)
+            sb.delete(0, sb.length());
+        sb.append(result);
+
         return findBookInHtml(bookName, sb.toString());
     }
 
     //从web源码中获取小说
     private Book findBookInHtml(String bookName, String values) {
-        Pattern p = Pattern.compile("<title>(.*?)</title>");
+        Pattern p = Pattern.compile("<title>([\\w\\W]*)</title>");
         Matcher m = p.matcher(values);
         String tmp;
         if (m.find()) {
@@ -357,7 +362,7 @@ public class BookLoader {
     //从小说index web页面获取小说
     private Book findBookInfoInDetailWeb(String values) {
         Book book = new Book();
-        Pattern p = Pattern.compile("<div class=\"book-about clrfix\"(.*?) <dl class=\"chapter-list clrfix\">");
+        Pattern p = Pattern.compile("<div class=\"book-about clrfix\"([\\w\\W]*) <dl class=\"chapter-list clrfix\">");
         Matcher m = p.matcher(values);
         String tmp;
         if (m.find()) {
@@ -366,7 +371,7 @@ public class BookLoader {
             Log.e(TAG, "can't find book in method >>>>findBookInfoInDetailWeb<<<<");
             return null;
         }
-        p = Pattern.compile("<div class=\"l\"><h1>(.*?)</h1><em>作者.(.*?)</em></div>(.*?)onClick=\"recom*\\((.*?)\\);\"(.*?)</b><a href=\"(.*?)\">(.*?)</a>(.*?)状态.<i>(.*?)</i>(.*?)更新时间.<i>(.*?)</i>");
+        p = Pattern.compile("<div class=\"l\"><h1>([\\w\\W]*)</h1><em>作者.([\\w\\W]*)</em></div>([\\w\\W]*)onClick=\"recom*\\(([\\w\\W]*)\\);\"([\\w\\W]*)</b><a href=\"([\\w\\W]*)\">([\\w\\W]*)</a>([\\w\\W]*)状态.<i>([\\w\\W]*)</i>([\\w\\W]*)更新时间.<i>([\\w\\W]*)</i>");
         m = p.matcher(tmp);
         if (m.find()) {
             book.setBookName(m.group(1));
@@ -438,5 +443,15 @@ public class BookLoader {
             title.add(c.getTitle());
         }
         return new Book.ChapterList(chapters.get(0).getBookName(), url, title);
+    }
+
+    @Override
+    public void onSuccess(String result) {
+
+    }
+
+    @Override
+    public void onFailed(Exception e) {
+
     }
 }
