@@ -393,7 +393,7 @@ public class BookLoader implements OnDataStateListener {
 
     //从搜索web页面获取小说
     private Book findBookInfoInSearchWeb(String bookName, String values) {
-        Pattern p = Pattern.compile("<div class=\"list-lastupdate\">(.*?)</div>");
+        Pattern p = Pattern.compile("<div class=\"list-lastupdate\">([\\w\\W]*)</div>");
         Matcher m = p.matcher(values);
         String tmp;
         if (m.find()) {
@@ -402,7 +402,7 @@ public class BookLoader implements OnDataStateListener {
             Log.e(TAG, "can't find book in method >>>>findBookInfoInSearchWeb<<<<");
             return null;
         }
-        p = Pattern.compile("<span class=\"class\">(.*?)</span><span class=\"name\"><a href=\"(.*?)\">(.*?)</a><small> / <a href=\"(.*?)\">(.*?)</a></small></span><span class=\"other\">(.*?)<small>(.*?)</small><small>(.*?)</small><small>(.*?)</small></span>");
+        p = Pattern.compile("<span class=\"class\">([\\w\\W]*)</span><span class=\"name\"><a href=\"([\\w\\W]*)\">([\\w\\W]*)</a><small> / <a href=\"([\\w\\W]*)\">([\\w\\W]*)</a></small></span><span class=\"other\">([\\w\\W]*)<small>([\\w\\W]*)</small><small>([\\w\\W]*)</small><small>([\\w\\W]*)</small></span>");
         m = p.matcher(tmp);
         Book book = new Book();
         while (m.find()) {
