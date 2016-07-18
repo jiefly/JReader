@@ -106,7 +106,6 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
     private PopupWindow setPopupWindow;
     private SeekBar lightSeekBar;
     private CheckBox followSystemCheckBox;
-    private Thread cacheOtherPageThread;
     private CustomFragmentPagerAdapter mCustomFragmentPagerAdapter;
 
     @Override
@@ -542,7 +541,6 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
     }
 
     private TextView tvShowTextSize;
-
     @OnClick({R.id.id_include_context_btn, R.id.id_include_night_btn, R.id.id_include_setting_btn, R.id.id_reader_left_menu_bottom_btn, R.id.id_reader_left_menu_cache_ll})
     public void onClick(View view) {
         switch (view.getId()) {

@@ -21,8 +21,6 @@
 			</intent-filter>
 		</activity>
 
-		<activity android:name=".TestActivity">android:exported="true"
-		</activity>
 		<activity android:name=".View.ReaderActivity" android:theme="@style/AppTheme.night">
 		</activity>
 
