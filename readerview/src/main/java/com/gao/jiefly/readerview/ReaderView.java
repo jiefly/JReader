@@ -2,7 +2,9 @@ package com.gao.jiefly.readerview;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -16,6 +18,10 @@ import android.util.Log;
 import android.util.Size;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Scroller;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by jiefly on 2016/7/18.
@@ -27,10 +33,20 @@ public class ReaderView extends View {
     private Bitmap prevBitmap;
     private Bitmap nextBitmap;
 
+    private static final String CURRENT_BITMAP = "current";
+    private static final String NEXT_BITMAP = "next";
+    private static final String PREV_BITMAP = "prev";
+
+
+
+    private Map<String, Bitmap> mBitmaps = new HashMap<>();
+
     private static final String TAG = "jiefly";
     boolean isPositionCenter = false;
     private int mWidth;
     private int mHeight;
+
+    private Scroller mScroller = new Scroller(getContext());
 
     private int mCornerX = 0; // 拖拽点对应的页脚
     private int mCornerY = 0;
@@ -105,6 +121,21 @@ public class ReaderView extends View {
         canvas.drawColor(Color.GREEN);
         canvas.drawBitmap(nextBitmap, 0, 0, paint);
 
+        prevBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
+        canvas = new Canvas(prevBitmap);
+        canvas.drawColor(Color.RED);
+        canvas.drawBitmap(prevBitmap, 0, 0, paint);
+
+        mBitmaps.put(CURRENT_BITMAP, currentBitmap);
+        mBitmaps.put(PREV_BITMAP, prevBitmap);
+        mBitmaps.put(NEXT_BITMAP, nextBitmap);
+
+        /*currentBitmap = decodeSampledBitmapFromResource(getResources(),R.drawable.currentbg,mWidth,mHeight);
+        Log.e("size",currentBitmap.getWidth()+"-=-=-=-"+currentBitmap.getHeight());
+        nextBitmap = decodeSampledBitmapFromResource(getResources(),R.drawable.nextbg,mWidth,mHeight);
+        prevBitmap = decodeSampledBitmapFromResource(getResources(),R.drawable.prevbg,mWidth,mHeight);*/
+
+
 //        mPaint = new Paint();
 //        mPaint.setStyle(Paint.Style.FILL);
 //
@@ -133,6 +164,56 @@ public class ReaderView extends View {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
+    /*
+    * 获取降采样之后的bitmap
+    * */
+    private Bitmap decodeSampledBitmapFromResource(Resources res,
+                                                   int resId, int reqWidth, int reqHeight) {
+        // First decode with inJustDecodeBounds=true to check dimensions
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeResource(res, resId, options);
+
+        // Calculate inSampleSize
+        options.inSampleSize = calculateInSampleSize(options, reqWidth,
+                reqHeight);
+
+        // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false;
+        return BitmapFactory.decodeResource(res, resId, options);
+    }
+
+    /*
+    * 计算图片采样率
+    * */
+    private int calculateInSampleSize(BitmapFactory.Options options,
+                                      int reqWidth, int reqHeight) {
+        if (reqWidth == 0 || reqHeight == 0) {
+            return 1;
+        }
+
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        Log.d(TAG, "origin, w= " + width + " h=" + height);
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and
+            // keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) >= reqHeight
+                    && (halfWidth / inSampleSize) >= reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        Log.d(TAG, "sampleSize:" + inSampleSize);
+        return inSampleSize;
+    }
 
     private void calcPoints() {
         mMiddleX = (mTouch.x + mCornerX) / 2;
@@ -205,7 +286,9 @@ public class ReaderView extends View {
 
     }
 
-
+    /*
+    * 绘制当前页
+    * */
     private void drawCurrentPageArea(Canvas canvas, Bitmap bitmap, Path path) {
         mPath0.reset();
         mPath0.moveTo(mBezierStart1.x, mBezierStart1.y);
@@ -223,6 +306,15 @@ public class ReaderView extends View {
         canvas.restore();
     }
 
+    private void drawCurrentPageArea(Canvas canvas, Bitmap bitmap) {
+        canvas.save();
+        canvas.drawBitmap(bitmap, 0, 0, null);
+        canvas.restore();
+    }
+
+    /*
+    * 绘制下一页和下一页的阴影(上一页)
+    * */
     private void drawNextPageAreaAndShadow(Canvas canvas, Bitmap bitmap) {
         int leftx;
         int rightx;
@@ -266,7 +358,7 @@ public class ReaderView extends View {
     }
 
     /**
-     * Author : hmg25 Version: 1.0 Description : 创建阴影的GradientDrawable
+     * 创建阴影的GradientDrawable
      */
     private void createDrawable() {
         int[] color = {0x333333, 0xb0333333};
@@ -311,9 +403,11 @@ public class ReaderView extends View {
     }
 
     /**
-     * Author : hmg25 Version: 1.0 Description : 绘制翻起页的阴影
+     * 绘制当前页翻起的阴影
      */
     public void drawCurrentPageShadow(Canvas canvas) {
+        int mShadowWidth = Math.min(35, (int) (mTouchToCornerDis / 6));
+
         double degree;
         if (mIsRTandLB) {
             degree = Math.PI
@@ -325,8 +419,8 @@ public class ReaderView extends View {
                     - Math.atan2(mTouch.y - mBezierControl1.y, mTouch.x - mBezierControl1.x);
         }
         // 翻起页阴影顶点与touch点的距离
-        double d1 = (float) 35 * 1.414 * Math.cos(degree);
-        double d2 = (float) 35 * 1.414 * Math.sin(degree);
+        double d1 = (float) mShadowWidth * 1.414 * Math.cos(degree);
+        double d2 = (float) mShadowWidth * 1.414 * Math.sin(degree);
         float x = (float) (mTouch.x + d1);
         float y;
 
@@ -335,6 +429,7 @@ public class ReaderView extends View {
         } else {
             y = (float) (mTouch.y - d2);
         }
+
         mPath1.reset();
         mPath1.moveTo(x, y);
         mPath1.lineTo(mTouch.x, mTouch.y);
@@ -351,11 +446,11 @@ public class ReaderView extends View {
         GradientDrawable mCurrentPageShadow;
         if (mIsRTandLB) {
             leftx = (int) (mBezierControl1.x);
-            rightx = (int) mBezierControl1.x + 25;
+            rightx = (int) mBezierControl1.x + mShadowWidth;
             mCurrentPageShadow = mFrontShadowDrawableVLR;
         } else {
-            leftx = (int) (mBezierControl1.x - 25);
-            rightx = (int) mBezierControl1.x + 1;
+            leftx = (int) (mBezierControl1.x - mShadowWidth);
+            rightx = (int) mBezierControl1.x + 2;
             mCurrentPageShadow = mFrontShadowDrawableVRL;
         }
 
@@ -379,11 +474,11 @@ public class ReaderView extends View {
         canvas.clipPath(mPath1, Region.Op.INTERSECT);
         if (mIsRTandLB) {
             leftx = (int) (mBezierControl2.y);
-            rightx = (int) (mBezierControl2.y + 25);
+            rightx = (int) (mBezierControl2.y + mShadowWidth);
             mCurrentPageShadow = mFrontShadowDrawableHTB;
         } else {
-            leftx = (int) (mBezierControl2.y - 25);
-            rightx = (int) (mBezierControl2.y + 1);
+            leftx = (int) (mBezierControl2.y - mShadowWidth);
+            rightx = (int) (mBezierControl2.y + 2);
             mCurrentPageShadow = mFrontShadowDrawableHBT;
         }
         rotateDegrees = (float) Math.toDegrees(Math.atan2(mBezierControl2.y
@@ -398,7 +493,7 @@ public class ReaderView extends View {
         int hmg = (int) Math.hypot(mBezierControl2.x, temp);
         if (hmg > mMaxLength)
             mCurrentPageShadow
-                    .setBounds((int) (mBezierControl2.x - 25) - hmg, leftx,
+                    .setBounds((int) (mBezierControl2.x - mShadowWidth) - hmg, leftx,
                             (int) (mBezierControl2.x + mMaxLength) - hmg,
                             rightx);
         else
@@ -412,17 +507,98 @@ public class ReaderView extends View {
         canvas.restore();
     }
 
+    private boolean isNextPage = false;
+
     @Override
     protected void onDraw(Canvas canvas) {
         canvas.drawColor(0xFFAAAAAA);
-        calcPoints();
-        drawCurrentPageArea(canvas, currentBitmap, mPath0);
-        drawNextPageAreaAndShadow(canvas, nextBitmap);
-        drawCurrentPageShadow(canvas);
+
+        if (mTouch.x < mWidth - 1 && mTouch.x > 1) {
+            calcPoints();
+            drawCurrentPageArea(canvas, mBitmaps.get(CURRENT_BITMAP), mPath0);
+            if (isNextPage)
+                drawNextPageAreaAndShadow(canvas, mBitmaps.get(NEXT_BITMAP));
+            else
+                drawNextPageAreaAndShadow(canvas, mBitmaps.get(PREV_BITMAP));
+            drawCurrentPageShadow(canvas);
+        } else
+            drawCurrentPageArea(canvas, mBitmaps.get(CURRENT_BITMAP));
+    }
+
+    /*
+    * 抬手后的动画
+    * */
+    public void startAnimation(int delayMillis) {
+        int dx, dy;
+        // dx 水平方向滑动的距离，负值会使滚动向左滚动
+        // dy 垂直方向滑动的距离，负值会使滚动向上滚动
+        if (isPositionCenter) {
+            if (isNextPage) {
+                dx = (int) (-mTouch.x);
+                dy = (int) (mHeight - mTouch.y);
+            } else {
+                dx = (int) (mWidth - mTouch.x);
+                dy = (int) (mHeight - mTouch.y);
+            }
+        } else {
+            if (isNextPage) {
+                if (!mIsRTandLB) {
+                    dx = (int) (-mTouch.x);
+                    dy = (int) (mHeight - mTouch.y);
+                } else {
+                    dx = (int) (-mTouch.x);
+                    dy = (int) (-mTouch.y);
+                }
+            } else {
+                if (!mIsRTandLB) {
+                    dx = (int) (mWidth - mTouch.x);
+                    dy = (int) (-mTouch.y);
+                } else {
+                    dx = (int) (mWidth - mTouch.x);
+                    dy = (int) (mHeight - mTouch.y);
+                    Log.e("dx,dy", dx + "-=-=-" + dy);
+                }
+            }
+
+        }
+//        if (mCornerX > 0) {
+//            dx = -(int) (mWidth + mTouch.x);
+//        } else {
+//            dx = (int) (mWidth - mTouch.x + mWidth);
+//        }
+//        if (mCornerY > 0) {
+//            dy = (int) (mHeight - mTouch.y);
+//        } else {
+//            dy = (int) (1 - mTouch.y); // 防止mTouch.y最终变为0
+//        }
+        mScroller.startScroll((int) mTouch.x, (int) mTouch.y, dx, dy,
+                delayMillis);
+    }
+
+    /*
+    * 取消动画
+    * */
+    public void abortAnimation() {
+        if (!mScroller.isFinished()) {
+            mScroller.abortAnimation();
+        }
+    }
+
+    @Override
+    public void computeScroll() {
+        super.computeScroll();
+        if (mScroller.computeScrollOffset()) {
+            float x = mScroller.getCurrX();
+            float y = mScroller.getCurrY();
+            mTouch.x = x;
+            mTouch.y = y;
+            Log.e("touch", x + "-=-" + y);
+            postInvalidate();
+        }
     }
 
     /**
-     * Author : hmg25 Version: 1.0 Description : 求解直线P1P2和直线P3P4的交点坐标
+     * 求解直线P1P2和直线P3P4的交点坐标
      */
     public PointF getCross(PointF P1, PointF P2, PointF P3, PointF P4) {
         PointF CrossP = new PointF();
@@ -438,13 +614,16 @@ public class ReaderView extends View {
     }
 
     /**
-     * Author : hmg25 Version: 1.0 Description : 计算拖拽点对应的拖拽脚
+     * 计算拖拽点对应的拖拽脚
      */
     public void calcCornerXY(float x, float y) {
-        if (x <= mWidth / 2)
+        if (x <= mWidth / 2) {
             mCornerX = 0;
-        else
+            isNextPage = false;
+        } else {
             mCornerX = mWidth;
+            isNextPage = true;
+        }
         if (y <= mHeight / 2)
             mCornerY = 0;
         else
@@ -464,8 +643,11 @@ public class ReaderView extends View {
                 if (event.getY() > mHeight / 3 && event.getY() < mHeight * 2 / 3) {
                     isPositionCenter = true;
                     mTouch.y = mHeight - 0.01f;
-                } else
+                } else {
                     mTouch.y = event.getY();
+                    isPositionCenter = false;
+                }
+                isNextPage = event.getX() >= mWidth / 2;
                 mTouch.x = event.getX();
                 calcCornerXY(mTouch.x, mTouch.y);
                 Log.e("jjiefluy", "+" + isPositionCenter);
@@ -482,13 +664,26 @@ public class ReaderView extends View {
                 break;
             case MotionEvent.ACTION_UP:
                 mCanvas.drawColor(0xFFAAAAAA);
-                mTouch.x = mCornerX;
-                mTouch.y = mCornerY;
-                isPositionCenter = false;
-                Log.e("jjiefluy", "up" + isPositionCenter);
+                abortAnimation();
+                startAnimation(1200);
+//                mTouch.x = mCornerX;
+//                mTouch.y = mCornerY;
                 this.postInvalidate();
                 break;
         }
         return true;
+    }
+
+    public void changeBitmaps(Bitmap bitmap,boolean isTurnNext) {
+        if (isTurnNext){
+            mBitmaps.put(PREV_BITMAP,mBitmaps.get(CURRENT_BITMAP));
+            mBitmaps.put(CURRENT_BITMAP,mBitmaps.get(NEXT_BITMAP));
+            mBitmaps.put(NEXT_BITMAP,bitmap);
+        }else {
+            mBitmaps.put(NEXT_BITMAP,mBitmaps.get(CURRENT_BITMAP));
+            mBitmaps.put(CURRENT_BITMAP,mBitmaps.get(PREV_BITMAP));
+            mBitmaps.put(PREV_BITMAP,bitmap);
+        }
+        mBitmaps.put(CURRENT_BITMAP,bitmap);
     }
 }
