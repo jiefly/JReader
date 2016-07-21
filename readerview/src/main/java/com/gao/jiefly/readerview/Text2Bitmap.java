@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.os.Build;
+import android.util.Log;
 import android.util.Size;
 
 import java.io.BufferedReader;
@@ -23,7 +24,7 @@ import java.util.List;
  */
 public class Text2Bitmap {
     private static final int DEFAULT_TEXT_SIZE = 40;
-    private static final int DEFAULT_WORDE_MARGINH = 2;
+    private static final int DEFAULT_WORDE_MARGINH = 10;
     private static final int DEFAULT_TEXT_LINE_MATGINV = 10;
     private static final int DEFAULT_TEXT_COLOR = Color.BLACK;
     //    所需图像宽度
@@ -52,9 +53,11 @@ public class Text2Bitmap {
     private List<Bitmap> mBitmaps = new LinkedList<>();
     //    用于写字的paint
     private Paint textPaint;
+    //    是否到最后一张图片
+    private boolean isLastBitmap = false;
 
     private Canvas mCanvas;
-    private String[] chapter = new String[1024];
+    private char[] chapter = new char[1024];
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public Text2Bitmap(Bitmap bitmapBackground, InputStream inputStream, Size size) {
@@ -67,13 +70,18 @@ public class Text2Bitmap {
     }
 
     private void init() {
-        mCanvas = new Canvas(mBitmapBackground);
+        mBitmaps.add(mBitmapBackground.copy(Bitmap.Config.ARGB_8888, true));
+        mCanvas = new Canvas(mBitmaps.get(0));
+        mCanvas.save();
         textPaint = new Paint();
         textPaint.setAntiAlias(true);
+        textPaint.setTextAlign(Paint.Align.LEFT);
         textPaint.setColor(DEFAULT_TEXT_COLOR);
         textPaint.setTextSize(DEFAULT_TEXT_SIZE);
         mTextLineMarginV = DEFAULT_TEXT_LINE_MATGINV;
         mWordMarginH = DEFAULT_WORDE_MARGINH;
+        mTextSize = DEFAULT_TEXT_SIZE;
+        mWordsInLine = (mBitmapWidth - 2 * mWordMarginH) / mTextSize;
     }
 
 
@@ -110,27 +118,35 @@ public class Text2Bitmap {
         int y = mTextHeight;
         while ((line = mReader.readLine()) != null) {
             int length = line.length();
-            int x= (int) Math.ceil(length / mWordsInLine);
-//            对于一局太长的话进行分割
+//            对于一句太长的话进行分割
             if (length > mWordsInLine) {
-                for (int i = 0; i < Math.ceil(length / mWordsInLine)+1; i++) {
+                //            一句话有几行
+                int x = (int) Math.ceil(length / mWordsInLine);
+                for (int i = 0; i <= x; i++) {
                     int start = i * mWordsInLine;
-                    int end = (i + 1) * mWordsInLine > length ? length:(i + 1) * mWordsInLine;
-                    mCanvas.drawText(
-                            line.substring(start, end)
-                            , 10, y, textPaint);
+                    int end = (i + 1) * mWordsInLine > length ? length : (i + 1) * mWordsInLine;
+                    String s = line.substring(start, end);
+                    mCanvas.drawText(s, mWordMarginH, y, textPaint);
                     y += mTextHeight;
+//                判断一段话是否超过了一页的内容
+                    if (y > mBitmapHeight - mTextHeight / 2 - 2 * mTextLineMarginV) {
+                        y = mTextHeight;
+                        mBitmaps.add(mBitmapBackground.copy(Bitmap.Config.ARGB_8888, true));
+                        mCanvas = new Canvas(mBitmaps.get(mBitmaps.size() - 1));
+                    }
                 }
                 continue;
+            } else {
+                mCanvas.drawText(line, mWordMarginH, y, textPaint);
+                y += mTextHeight;
             }
-            mCanvas.drawText(line, 10, y, textPaint);
-            y += mTextHeight;
-            if (y > mBitmapHeight) {
-                mBitmaps.add(mBitmapBackground);
+            if (y > mBitmapHeight - mTextHeight / 2 - 2 * mTextLineMarginV) {
+                mBitmaps.add(mBitmapBackground.copy(Bitmap.Config.ARGB_8888, true));
+                mCanvas = new Canvas(mBitmaps.get(mBitmaps.size() - 1));
                 break;
             }
         }
-        mBitmaps.add(mBitmapBackground);
+        Log.e("bitmap num", mBitmaps.size() + "");
         return mBitmaps;
     }
 

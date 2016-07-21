@@ -32,11 +32,11 @@ public class ReaderView extends View {
     private Bitmap currentBitmap;
     private Bitmap prevBitmap;
     private Bitmap nextBitmap;
+    private Bitmap backgroundBitmap;
 
     private static final String CURRENT_BITMAP = "current";
     private static final String NEXT_BITMAP = "next";
     private static final String PREV_BITMAP = "prev";
-
 
 
     private Map<String, Bitmap> mBitmaps = new HashMap<>();
@@ -165,6 +165,15 @@ public class ReaderView extends View {
     }
 
     /*
+    * 设置翻页事件监听器
+    * */
+    public void setOnPageChangeListener(OnPageChangeListener listener) {
+        mOnPageChangeListener = listener;
+    }
+
+    private OnPageChangeListener mOnPageChangeListener;
+
+    /*
     * 获取降采样之后的bitmap
     * */
     private Bitmap decodeSampledBitmapFromResource(Resources res,
@@ -215,6 +224,9 @@ public class ReaderView extends View {
         return inSampleSize;
     }
 
+    /*
+    * 计算各个点的值
+    * */
     private void calcPoints() {
         mMiddleX = (mTouch.x + mCornerX) / 2;
         mMiddleY = (mTouch.y + mCornerY) / 2;
@@ -515,14 +527,23 @@ public class ReaderView extends View {
 
         if (mTouch.x < mWidth - 1 && mTouch.x > 1) {
             calcPoints();
-            drawCurrentPageArea(canvas, mBitmaps.get(CURRENT_BITMAP), mPath0);
-            if (isNextPage)
-                drawNextPageAreaAndShadow(canvas, mBitmaps.get(NEXT_BITMAP));
+            if (mBitmaps.get(CURRENT_BITMAP) != null)
+                drawCurrentPageArea(canvas, mBitmaps.get(CURRENT_BITMAP), mPath0);
+            if (isNextPage) {
+                if (mBitmaps.get(NEXT_BITMAP) != null)
+                    drawNextPageAreaAndShadow(canvas, mBitmaps.get(NEXT_BITMAP));
+            } else {
+                if (mBitmaps.get(PREV_BITMAP) != null)
+                    drawNextPageAreaAndShadow(canvas, mBitmaps.get(PREV_BITMAP));
+            }
+            if (mBitmaps.get(CURRENT_BITMAP) != null)
+                drawCurrentPageShadow(canvas);
+        } else {
+            if (mBitmaps.get(CURRENT_BITMAP) != null)
+                drawCurrentPageArea(canvas, mBitmaps.get(CURRENT_BITMAP));
             else
-                drawNextPageAreaAndShadow(canvas, mBitmaps.get(PREV_BITMAP));
-            drawCurrentPageShadow(canvas);
-        } else
-            drawCurrentPageArea(canvas, mBitmaps.get(CURRENT_BITMAP));
+                drawCurrentPageArea(canvas, backgroundBitmap);
+        }
     }
 
     /*
@@ -573,6 +594,7 @@ public class ReaderView extends View {
 //        }
         mScroller.startScroll((int) mTouch.x, (int) mTouch.y, dx, dy,
                 delayMillis);
+        isAnimFinish = false;
     }
 
     /*
@@ -581,6 +603,7 @@ public class ReaderView extends View {
     public void abortAnimation() {
         if (!mScroller.isFinished()) {
             mScroller.abortAnimation();
+            isAnimFinish = true;
         }
     }
 
@@ -592,9 +615,34 @@ public class ReaderView extends View {
             float y = mScroller.getCurrY();
             mTouch.x = x;
             mTouch.y = y;
-            Log.e("touch", x + "-=-" + y);
+            Log.e("touch", x + "-=-" + y + "offset:" + (float) mScroller.timePassed() / 1200f);
+
+//            翻页快动画结束的时候通知model更改数据
+            if (mScroller.timePassed() > 0.7 * 1200) {
+                if (!isChangingBitmap && isAnimFinish){
+                    isChangingBitmap = true;
+                    Log.e("jie", isNextPage + "<----isNextPage");
+                    if (isNextPage)
+                        mOnPageChangeListener.onNextPage(mCurrentPageIndex++);
+                    else
+                        mOnPageChangeListener.onPrevPage(mCurrentPageIndex--);
+                }
+            }
+            if (mScroller.isFinished())
+                isAnimFinish = true;
             postInvalidate();
         }
+    }
+
+    private boolean isChangingBitmap = false;
+    private int mChapterPageNum;
+    private int mCurrentPageIndex = 1;
+
+    /*
+    * 设置当前章节的页数
+    * */
+    public void setChapterPageNum(int num) {
+        mChapterPageNum = num;
     }
 
     /**
@@ -632,7 +680,7 @@ public class ReaderView extends View {
         mIsRTandLB = (mCornerX == 0 && mCornerY == mHeight) || (mCornerX == mWidth && mCornerY == 0);
 
     }
-
+    private boolean isAnimFinish = true;
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         // TODO Auto-generated method stub
@@ -674,16 +722,19 @@ public class ReaderView extends View {
         return true;
     }
 
-    public void changeBitmaps(Bitmap bitmap,boolean isTurnNext) {
-        if (isTurnNext){
-            mBitmaps.put(PREV_BITMAP,mBitmaps.get(CURRENT_BITMAP));
-            mBitmaps.put(CURRENT_BITMAP,mBitmaps.get(NEXT_BITMAP));
-            mBitmaps.put(NEXT_BITMAP,bitmap);
-        }else {
-            mBitmaps.put(NEXT_BITMAP,mBitmaps.get(CURRENT_BITMAP));
-            mBitmaps.put(CURRENT_BITMAP,mBitmaps.get(PREV_BITMAP));
-            mBitmaps.put(PREV_BITMAP,bitmap);
+    public void changeBitmaps(Bitmap bitmap, boolean isTurnNext) {
+        if (isTurnNext) {
+            mBitmaps.put(PREV_BITMAP, mBitmaps.get(CURRENT_BITMAP));
+            mBitmaps.put(CURRENT_BITMAP, mBitmaps.get(NEXT_BITMAP));
+            long time = System.currentTimeMillis();
+            mBitmaps.put(NEXT_BITMAP, bitmap);
+            Log.e("time", System.currentTimeMillis() - time + "");
+        } else {
+            mBitmaps.put(NEXT_BITMAP, mBitmaps.get(CURRENT_BITMAP));
+            mBitmaps.put(CURRENT_BITMAP, mBitmaps.get(PREV_BITMAP));
+            mBitmaps.put(PREV_BITMAP, bitmap);
         }
-        mBitmaps.put(CURRENT_BITMAP,bitmap);
+        isChangingBitmap = false;
+        postInvalidate();
     }
 }
