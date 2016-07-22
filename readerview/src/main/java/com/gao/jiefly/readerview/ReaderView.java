@@ -1,4 +1,4 @@
-package com.gao.jiefly.readerview;
+package com.gao.jiefly.bookreaderview;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -6,7 +6,9 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
@@ -20,6 +22,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Scroller;
 
+import com.gao.jiefly.readerview.OnPageChangeListener;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +33,9 @@ import java.util.Map;
  * Fighting_jiiiiie
  */
 public class ReaderView extends View {
+    private ColorMatrixColorFilter mColorMatrixFilter;
+    Matrix mMatrix;
+    float[] mMatrixArray = {0, 0, 0, 0, 0, 0, 0, 0, 1.0f};
     private Bitmap currentBitmap;
     private Bitmap prevBitmap;
     private Bitmap nextBitmap;
@@ -37,6 +44,10 @@ public class ReaderView extends View {
     private static final String CURRENT_BITMAP = "current";
     private static final String NEXT_BITMAP = "next";
     private static final String PREV_BITMAP = "prev";
+
+    public boolean isFirstPage = true;
+
+    public boolean isLastPage = false;
 
 
     private Map<String, Bitmap> mBitmaps = new HashMap<>();
@@ -94,7 +105,8 @@ public class ReaderView extends View {
     private Bitmap mBitmap;
     private Canvas mCanvas;
     private Paint mBitmapPaint;
-    Paint paint;
+    Paint mPaint;
+    private boolean isNeedShowOtherAfterEndAnim = false;
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public ReaderView(Context context, Size screenSize) {
@@ -110,7 +122,7 @@ public class ReaderView extends View {
         mCanvas = new Canvas(mBitmap);
         mCanvas.drawColor(0xFFAAAAAA);
 
-        currentBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
+        /*currentBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(currentBitmap);
         Paint paint = new Paint();
         canvas.drawColor(Color.YELLOW);
@@ -128,7 +140,7 @@ public class ReaderView extends View {
 
         mBitmaps.put(CURRENT_BITMAP, currentBitmap);
         mBitmaps.put(PREV_BITMAP, prevBitmap);
-        mBitmaps.put(NEXT_BITMAP, nextBitmap);
+        mBitmaps.put(NEXT_BITMAP, nextBitmap);*/
 
         /*currentBitmap = decodeSampledBitmapFromResource(getResources(),R.drawable.currentbg,mWidth,mHeight);
         Log.e("size",currentBitmap.getWidth()+"-=-=-=-"+currentBitmap.getHeight());
@@ -136,15 +148,15 @@ public class ReaderView extends View {
         prevBitmap = decodeSampledBitmapFromResource(getResources(),R.drawable.prevbg,mWidth,mHeight);*/
 
 
-//        mPaint = new Paint();
-//        mPaint.setStyle(Paint.Style.FILL);
-//
-//        ColorMatrix cm = new ColorMatrix();
-//        float array[] = { 0.55f, 0, 0, 0, 80.0f, 0, 0.55f, 0, 0, 80.0f, 0, 0,
-//                0.55f, 0, 80.0f, 0, 0, 0, 0.2f, 0 };
-//        cm.set(array);
-//        mColorMatrixFilter = new ColorMatrixColorFilter(cm);
-//        mMatrix = new Matrix();
+        mPaint = new Paint();
+        mPaint.setStyle(Paint.Style.FILL);
+
+        ColorMatrix cm = new ColorMatrix();
+        float array[] = {0.55f, 0, 0, 0, 80.0f, 0, 0.55f, 0, 0, 80.0f, 0, 0,
+                0.55f, 0, 80.0f, 0, 0, 0, 0.2f, 0};
+        cm.set(array);
+        mColorMatrixFilter = new ColorMatrixColorFilter(cm);
+        mMatrix = new Matrix();
 //        mScroller = new Scroller(getContext());
 
         mTouch.x = 0.01f; // 不让x,y为0,否则在点计算时会有问题
@@ -519,13 +531,107 @@ public class ReaderView extends View {
         canvas.restore();
     }
 
+    private void drawCurrentBackArea(Canvas canvas, Bitmap bitmap) {
+        int i = (int) (mBezierStart1.x + mBezierControl1.x) / 2;
+        float f1 = Math.abs(i - mBezierControl1.x);
+        int i1 = (int) (mBezierStart2.y + mBezierControl2.y) / 2;
+        float f2 = Math.abs(i1 - mBezierControl2.y);
+        float f3 = Math.min(f1, f2);
+        mPath1.reset();
+        mPath1.moveTo(mBeziervertex2.x, mBeziervertex2.y);
+        mPath1.lineTo(mBeziervertex1.x, mBeziervertex1.y);
+        mPath1.lineTo(mBezierEnd1.x, mBezierEnd1.y);
+        mPath1.lineTo(mTouch.x, mTouch.y);
+        mPath1.lineTo(mBezierEnd2.x, mBezierEnd2.y);
+        mPath1.close();
+        GradientDrawable mFolderShadowDrawable;
+        int left;
+        int right;
+        if (mIsRTandLB) {
+            left = (int) (mBezierStart1.x - 1);
+            right = (int) (mBezierStart1.x + f3 + 1);
+            mFolderShadowDrawable = mFolderShadowDrawableLR;
+        } else {
+            left = (int) (mBezierStart1.x - f3 - 1);
+            right = (int) (mBezierStart1.x + 1);
+            mFolderShadowDrawable = mFolderShadowDrawableRL;
+        }
+        canvas.save();
+        canvas.clipPath(mPath0);
+        canvas.clipPath(mPath1, Region.Op.INTERSECT);
+
+        mPaint.setColorFilter(mColorMatrixFilter);
+
+        float dis = (float) Math.hypot(mCornerX - mBezierControl1.x,
+                mBezierControl2.y - mCornerY);
+        float f8 = (mCornerX - mBezierControl1.x) / dis;
+        float f9 = (mBezierControl2.y - mCornerY) / dis;
+        mMatrixArray[0] = 1 - 2 * f9 * f9;
+        mMatrixArray[1] = 2 * f8 * f9;
+        mMatrixArray[3] = mMatrixArray[1];
+        mMatrixArray[4] = 1 - 2 * f8 * f8;
+        mMatrix.reset();
+        mMatrix.setValues(mMatrixArray);
+        mMatrix.preTranslate(-mBezierControl1.x, -mBezierControl1.y);
+        mMatrix.postTranslate(mBezierControl1.x, mBezierControl1.y);
+        canvas.drawBitmap(bitmap, mMatrix, mPaint);
+        // canvas.drawBitmap(bitmap, mMatrix, null);
+        mPaint.setColorFilter(null);
+        canvas.rotate(mDegrees, mBezierStart1.x, mBezierStart1.y);
+        mFolderShadowDrawable.setBounds(left, (int) mBezierStart1.y, right,
+                (int) (mBezierStart1.y + mMaxLength));
+        mFolderShadowDrawable.draw(canvas);
+        canvas.restore();
+    }
+
     private boolean isNextPage = false;
+    private volatile int status = FIGURE_SMOOTH;
+    private static final int CAN_NOT_SMOOTH = 0x00;
+    private static final int ANIM = 0x01;
+    private static final int FIGURE_SMOOTH = 0x10;
+    private static final int ANIM_FINISH = 0x11;
+
 
     @Override
     protected void onDraw(Canvas canvas) {
+        switch (status) {
+            case ANIM_FINISH:
+                status = CAN_NOT_SMOOTH;
+            case CAN_NOT_SMOOTH:
+                drawCurrentPageArea(canvas, mBitmaps.get(CURRENT_BITMAP));
+                break;
+            case ANIM:
+            case FIGURE_SMOOTH:
+                canvas.drawColor(0xFFAAAAAA);
+                calcPoints();
+                drawCurrentPageArea(canvas, mBitmaps.get(CURRENT_BITMAP), mPath0);
+                if (isNextPage) {
+                    if (mBitmaps.get(NEXT_BITMAP) != null)
+                        drawNextPageAreaAndShadow(canvas, mBitmaps.get(NEXT_BITMAP));
+                } else {
+                    if (mBitmaps.get(PREV_BITMAP) != null)
+                        drawNextPageAreaAndShadow(canvas, mBitmaps.get(PREV_BITMAP));
+                }
+                drawCurrentPageShadow(canvas);
+                drawCurrentBackArea(canvas, mBitmaps.get(CURRENT_BITMAP));
+                break;
+        }
+/*//        如果是第一页，则不能向前翻页,如果是最后一页，则不能向后翻页
+        if (isNextPage && isLastPage || !isNextPage && isFirstPage) {
+            drawCurrentPageArea(canvas, mBitmaps.get(CURRENT_BITMAP));
+            return;
+        }
+*//*        if (isNeedShowOtherAfterEndAnim){
+            isNeedShowOtherAfterEndAnim = false;
+            if (isNextPage)
+                drawCurrentPageArea(canvas, mBitmaps.get(NEXT_BITMAP));
+            else
+                drawCurrentPageArea(canvas, mBitmaps.get(PREV_BITMAP));
+            return;
+        }*//*
+//        绘制画布背景颜色
         canvas.drawColor(0xFFAAAAAA);
-
-        if (mTouch.x < mWidth - 1 && mTouch.x > 1) {
+        if (!isAnimFinish || mScroller.isFinished()) {
             calcPoints();
             if (mBitmaps.get(CURRENT_BITMAP) != null)
                 drawCurrentPageArea(canvas, mBitmaps.get(CURRENT_BITMAP), mPath0);
@@ -538,12 +644,14 @@ public class ReaderView extends View {
             }
             if (mBitmaps.get(CURRENT_BITMAP) != null)
                 drawCurrentPageShadow(canvas);
+
+            drawCurrentBackArea(canvas, mBitmaps.get(CURRENT_BITMAP));
         } else {
             if (mBitmaps.get(CURRENT_BITMAP) != null)
                 drawCurrentPageArea(canvas, mBitmaps.get(CURRENT_BITMAP));
             else
                 drawCurrentPageArea(canvas, backgroundBitmap);
-        }
+        }*/
     }
 
     /*
@@ -577,21 +685,11 @@ public class ReaderView extends View {
                 } else {
                     dx = (int) (mWidth - mTouch.x);
                     dy = (int) (mHeight - mTouch.y);
-                    Log.e("dx,dy", dx + "-=-=-" + dy);
+//                    Log.e("dx,dy", dx + "-=-=-" + dy);
                 }
             }
 
         }
-//        if (mCornerX > 0) {
-//            dx = -(int) (mWidth + mTouch.x);
-//        } else {
-//            dx = (int) (mWidth - mTouch.x + mWidth);
-//        }
-//        if (mCornerY > 0) {
-//            dy = (int) (mHeight - mTouch.y);
-//        } else {
-//            dy = (int) (1 - mTouch.y); // 防止mTouch.y最终变为0
-//        }
         mScroller.startScroll((int) mTouch.x, (int) mTouch.y, dx, dy,
                 delayMillis);
         isAnimFinish = false;
@@ -607,29 +705,56 @@ public class ReaderView extends View {
         }
     }
 
+    public void initBitmap(Bitmap currentBitmap, Bitmap nextBitmap) {
+        mBitmaps.put(CURRENT_BITMAP, currentBitmap);
+        mBitmaps.put(NEXT_BITMAP, nextBitmap);
+        isFirstPage = true;
+        mCurrentPageIndex = 0;
+    }
+
     @Override
     public void computeScroll() {
         super.computeScroll();
         if (mScroller.computeScrollOffset()) {
+            status = ANIM;
             float x = mScroller.getCurrX();
             float y = mScroller.getCurrY();
             mTouch.x = x;
             mTouch.y = y;
-            Log.e("touch", x + "-=-" + y + "offset:" + (float) mScroller.timePassed() / 1200f);
-
 //            翻页快动画结束的时候通知model更改数据
-            if (mScroller.timePassed() > 0.7 * 1200) {
-                if (!isChangingBitmap && isAnimFinish){
+            if ((float) mScroller.timePassed() / 1200f > 0.1) {
+                if (!isChangingBitmap) {
                     isChangingBitmap = true;
                     Log.e("jie", isNextPage + "<----isNextPage");
-                    if (isNextPage)
+                    if (isNextPage) {
                         mOnPageChangeListener.onNextPage(mCurrentPageIndex++);
-                    else
+                        isLastPage = mChapterPageNum == mCurrentPageIndex;
+                        isFirstPage = false;
+                    } else {
                         mOnPageChangeListener.onPrevPage(mCurrentPageIndex--);
+                        isFirstPage = mCurrentPageIndex == 0;
+                        isLastPage = false;
+                    }
                 }
             }
-            if (mScroller.isFinished())
+            if (mScroller.isFinished()) {
+                Log.e("finish", "finish");
+                isChangingBitmap = false;
+                isNeedShowOtherAfterEndAnim = true;
                 isAnimFinish = true;
+                if (isNextPage) {
+                    mBitmaps.put(PREV_BITMAP, mBitmaps.get(CURRENT_BITMAP));
+                    mBitmaps.put(CURRENT_BITMAP, mBitmaps.get(NEXT_BITMAP));
+                    long time = System.currentTimeMillis();
+                    mBitmaps.put(NEXT_BITMAP, tmpBitmap);
+                    Log.e("time", System.currentTimeMillis() - time + "");
+                } else {
+                    mBitmaps.put(NEXT_BITMAP, mBitmaps.get(CURRENT_BITMAP));
+                    mBitmaps.put(CURRENT_BITMAP, mBitmaps.get(PREV_BITMAP));
+                    mBitmaps.put(PREV_BITMAP, tmpBitmap);
+                }
+                status = ANIM_FINISH;
+            }
             postInvalidate();
         }
     }
@@ -680,13 +805,22 @@ public class ReaderView extends View {
         mIsRTandLB = (mCornerX == 0 && mCornerY == mHeight) || (mCornerX == mWidth && mCornerY == 0);
 
     }
+
     private boolean isAnimFinish = true;
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        // TODO Auto-generated method stub
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 mCanvas.drawColor(0xFFAAAAAA);
+                boolean is = event.getX() >= mWidth / 2;
+                Log.e("down", ">0.5:" + is + "islastPage:" + isLastPage);
+                if ((event.getX() >= mWidth / 2 && isLastPage) || (event.getX() <= mWidth / 2 && isFirstPage)) {
+                    status = CAN_NOT_SMOOTH;
+                    break;
+                }
+                if (isAnimFinish)
+                    status = FIGURE_SMOOTH;
                 Log.e("position", event.getX() + "--=-=--" + event.getY());
                 if (event.getY() > mHeight / 3 && event.getY() < mHeight * 2 / 3) {
                     isPositionCenter = true;
@@ -711,9 +845,12 @@ public class ReaderView extends View {
                 this.postInvalidate();
                 break;
             case MotionEvent.ACTION_UP:
+                if (status == CAN_NOT_SMOOTH)
+                    break;
                 mCanvas.drawColor(0xFFAAAAAA);
                 abortAnimation();
                 startAnimation(1200);
+                status = ANIM;
 //                mTouch.x = mCornerX;
 //                mTouch.y = mCornerY;
                 this.postInvalidate();
@@ -722,19 +859,12 @@ public class ReaderView extends View {
         return true;
     }
 
+    private Bitmap tmpBitmap;
+
     public void changeBitmaps(Bitmap bitmap, boolean isTurnNext) {
-        if (isTurnNext) {
-            mBitmaps.put(PREV_BITMAP, mBitmaps.get(CURRENT_BITMAP));
-            mBitmaps.put(CURRENT_BITMAP, mBitmaps.get(NEXT_BITMAP));
-            long time = System.currentTimeMillis();
-            mBitmaps.put(NEXT_BITMAP, bitmap);
-            Log.e("time", System.currentTimeMillis() - time + "");
-        } else {
-            mBitmaps.put(NEXT_BITMAP, mBitmaps.get(CURRENT_BITMAP));
-            mBitmaps.put(CURRENT_BITMAP, mBitmaps.get(PREV_BITMAP));
-            mBitmaps.put(PREV_BITMAP, bitmap);
-        }
-        isChangingBitmap = false;
-        postInvalidate();
+        tmpBitmap = bitmap;
+
+//        isChangingBitmap = false;
+//        postInvalidate();
     }
 }
