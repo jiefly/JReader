@@ -1,4 +1,4 @@
-package com.gao.jiefly.bookreaderview;
+package com.gao.jiefly.readerview;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -21,8 +21,6 @@ import android.util.Size;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Scroller;
-
-import com.gao.jiefly.readerview.OnPageChangeListener;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -710,6 +708,7 @@ public class ReaderView extends View {
         mBitmaps.put(NEXT_BITMAP, nextBitmap);
         isFirstPage = true;
         mCurrentPageIndex = 0;
+        postInvalidate();
     }
 
     @Override
@@ -727,11 +726,11 @@ public class ReaderView extends View {
                     isChangingBitmap = true;
                     Log.e("jie", isNextPage + "<----isNextPage");
                     if (isNextPage) {
-                        mOnPageChangeListener.onNextPage(mCurrentPageIndex++);
+                        mOnPageChangeListener.onNextPage(++mCurrentPageIndex);
                         isLastPage = mChapterPageNum == mCurrentPageIndex;
                         isFirstPage = false;
                     } else {
-                        mOnPageChangeListener.onPrevPage(mCurrentPageIndex--);
+                        mOnPageChangeListener.onPrevPage(--mCurrentPageIndex);
                         isFirstPage = mCurrentPageIndex == 0;
                         isLastPage = false;
                     }
@@ -743,15 +742,18 @@ public class ReaderView extends View {
                 isNeedShowOtherAfterEndAnim = true;
                 isAnimFinish = true;
                 if (isNextPage) {
+
                     mBitmaps.put(PREV_BITMAP, mBitmaps.get(CURRENT_BITMAP));
                     mBitmaps.put(CURRENT_BITMAP, mBitmaps.get(NEXT_BITMAP));
-                    long time = System.currentTimeMillis();
-                    mBitmaps.put(NEXT_BITMAP, tmpBitmap);
-                    Log.e("time", System.currentTimeMillis() - time + "");
+//                    long time = System.currentTimeMillis();
+                    if (!isLastPage)
+                        mBitmaps.put(NEXT_BITMAP, tmpBitmap);
+//                    Log.e("time", System.currentTimeMillis() - time + "");
                 } else {
                     mBitmaps.put(NEXT_BITMAP, mBitmaps.get(CURRENT_BITMAP));
                     mBitmaps.put(CURRENT_BITMAP, mBitmaps.get(PREV_BITMAP));
-                    mBitmaps.put(PREV_BITMAP, tmpBitmap);
+                    if (!isFirstPage)
+                        mBitmaps.put(PREV_BITMAP, tmpBitmap);
                 }
                 status = ANIM_FINISH;
             }

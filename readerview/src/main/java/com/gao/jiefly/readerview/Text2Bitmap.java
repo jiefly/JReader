@@ -10,10 +10,9 @@ import android.os.Build;
 import android.util.Log;
 import android.util.Size;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -23,7 +22,7 @@ import java.util.List;
  * Fighting_jiiiiie
  */
 public class Text2Bitmap {
-    private static final int DEFAULT_TEXT_SIZE = 40;
+    private static final int DEFAULT_TEXT_SIZE = 50;
     private static final int DEFAULT_WORDE_MARGINH = 10;
     private static final int DEFAULT_TEXT_LINE_MATGINV = 10;
     private static final int DEFAULT_TEXT_COLOR = Color.BLACK;
@@ -48,7 +47,10 @@ public class Text2Bitmap {
     //    图像背景
     private Bitmap mBitmapBackground;
     //    所需要转换的文本（小说的话最好以章节为单位）
-    private BufferedReader mReader;
+//    private BufferedReader mReader;
+    private InputStream mInputStream;
+    //    private Scanner mScanner;
+    private int mNumOfRead;
     //    生成的Bitmap
     private List<Bitmap> mBitmaps = new LinkedList<>();
     //    用于写字的paint
@@ -57,17 +59,30 @@ public class Text2Bitmap {
     private boolean isLastBitmap = false;
 
     private Canvas mCanvas;
-    private char[] chapter = new char[1024];
+    private byte[] chapter;
+    private List<String> lines;
+    Charset mCharset;
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public Text2Bitmap(Bitmap bitmapBackground, InputStream inputStream, Size size) {
+    public Text2Bitmap(Bitmap bitmapBackground, InputStream inputStream, Size size,Charset charset) {
         mBitmapWidth = size.getWidth();
         mBitmapHeight = size.getHeight();
         mBitmapBackground = bitmapBackground;
         checkAndChangeBitmapSize();
-        mReader = new BufferedReader(new InputStreamReader(inputStream));
+        mInputStream = inputStream;
+        try {
+            mNumOfRead = mInputStream.available();
+            chapter = new byte[mNumOfRead];
+            mInputStream.read(chapter);
+            getLinesFromChapter(chapter,charset);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        mCharset = charset;
+//        mReader = new BufferedReader(new InputStreamReader(inputStream));
         init();
     }
+
 
     private void init() {
         mBitmaps.add(mBitmapBackground.copy(Bitmap.Config.ARGB_8888, true));
@@ -111,12 +126,53 @@ public class Text2Bitmap {
         return matrix;
     }
 
+    private List<String> getLinesFromChapter(byte[] bytes, Charset charset) throws IOException {
+        List<String> result = new LinkedList<>();
+        int x;
+        switch (charset.displayName()) {
+            case "UTF-8":
+                x = 3;
+                break;
+            case "gbk":
+                x = 2;
+                break;
+            default:
+                x = 4;
+                break;
+        }
+        int len = mNumOfRead;
+        int start = 0;
+        int end = 0;
+        for (int i = 0; i < len; ) {
+//            /n  or /r
+            if (bytes[i] == 10 || bytes[i] == 13) {
+//                /r/n换行
+                if (bytes[i] == 13 && bytes[i + 1] == 10)
+                    i++;
+                Log.e("index", "start:" + start + "end:" + end);
+                result.add(new String(bytes, start, end - start + 1, charset));
+                i++;
+                start = i;
+                end = i;
+            } else {
+
+                if (bytes[i] > 0)
+                    i++;
+                else
+                    i += x;
+                end = i;
+
+            }
+        }
+        Log.e("result", result.size() + "");
+        return result;
+    }
 
     public List<Bitmap> getBitmaps() throws IOException {
         calTextLines();
-        String line;
         int y = mTextHeight;
-        while ((line = mReader.readLine()) != null) {
+        lines = getLinesFromChapter(chapter,mCharset);
+        for (String line : lines){
             int length = line.length();
 //            对于一句太长的话进行分割
             if (length > mWordsInLine) {
@@ -140,13 +196,15 @@ public class Text2Bitmap {
                 mCanvas.drawText(line, mWordMarginH, y, textPaint);
                 y += mTextHeight;
             }
-            if (y > mBitmapHeight - mTextHeight / 2 - 2 * mTextLineMarginV) {
+            if (y > mBitmapHeight - 2 * mTextLineMarginV) {
                 mBitmaps.add(mBitmapBackground.copy(Bitmap.Config.ARGB_8888, true));
                 mCanvas = new Canvas(mBitmaps.get(mBitmaps.size() - 1));
                 break;
             }
         }
         Log.e("bitmap num", mBitmaps.size() + "");
+        if (mInputStream != null)
+            mInputStream.close();
         return mBitmaps;
     }
 
