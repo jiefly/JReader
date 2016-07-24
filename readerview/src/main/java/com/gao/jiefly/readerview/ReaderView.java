@@ -34,10 +34,6 @@ public class ReaderView extends View {
     private ColorMatrixColorFilter mColorMatrixFilter;
     Matrix mMatrix;
     float[] mMatrixArray = {0, 0, 0, 0, 0, 0, 0, 0, 1.0f};
-    private Bitmap currentBitmap;
-    private Bitmap prevBitmap;
-    private Bitmap nextBitmap;
-    private Bitmap backgroundBitmap;
 
     private static final String CURRENT_BITMAP = "current";
     private static final String NEXT_BITMAP = "next";
@@ -97,14 +93,25 @@ public class ReaderView extends View {
     GradientDrawable mFrontShadowDrawableVLR;
     GradientDrawable mFrontShadowDrawableVRL;
 
+    GradientDrawable mAnimFishShadowDrableLR;
+    GradientDrawable mAnimFishShadowDrableRL;
+
     private float mMaxLength;
 
 
     private Bitmap mBitmap;
     private Canvas mCanvas;
-    private Paint mBitmapPaint;
     Paint mPaint;
-    private boolean isNeedShowOtherAfterEndAnim = false;
+
+    private boolean isNextPage = false;
+    private volatile int status = FIGURE_SMOOTH;
+    private static final int CAN_NOT_SMOOTH = 0x000;
+    private static final int ANIM = 0x001;
+    private static final int FIGURE_SMOOTH = 0x010;
+    private static final int ANIM_FINISH = 0x011;
+    private static final int END_ANIM = 0x100;
+    private boolean isDebug = false;
+    private int endPosition;
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public ReaderView(Context context, Size screenSize) {
@@ -119,33 +126,6 @@ public class ReaderView extends View {
         mBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
         mCanvas = new Canvas(mBitmap);
         mCanvas.drawColor(0xFFAAAAAA);
-
-        /*currentBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(currentBitmap);
-        Paint paint = new Paint();
-        canvas.drawColor(Color.YELLOW);
-        canvas.drawBitmap(currentBitmap, 0, 0, paint);
-
-        nextBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
-        canvas = new Canvas(nextBitmap);
-        canvas.drawColor(Color.GREEN);
-        canvas.drawBitmap(nextBitmap, 0, 0, paint);
-
-        prevBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
-        canvas = new Canvas(prevBitmap);
-        canvas.drawColor(Color.RED);
-        canvas.drawBitmap(prevBitmap, 0, 0, paint);
-
-        mBitmaps.put(CURRENT_BITMAP, currentBitmap);
-        mBitmaps.put(PREV_BITMAP, prevBitmap);
-        mBitmaps.put(NEXT_BITMAP, nextBitmap);*/
-
-        /*currentBitmap = decodeSampledBitmapFromResource(getResources(),R.drawable.currentbg,mWidth,mHeight);
-        Log.e("size",currentBitmap.getWidth()+"-=-=-=-"+currentBitmap.getHeight());
-        nextBitmap = decodeSampledBitmapFromResource(getResources(),R.drawable.nextbg,mWidth,mHeight);
-        prevBitmap = decodeSampledBitmapFromResource(getResources(),R.drawable.prevbg,mWidth,mHeight);*/
-
-
         mPaint = new Paint();
         mPaint.setStyle(Paint.Style.FILL);
 
@@ -253,7 +233,7 @@ public class ReaderView extends View {
         mBezierStart1.x = mBezierControl1.x - (mCornerX - mBezierControl1.x) / 2;
         mBezierStart1.y = mCornerY;
 
-        // 当mBezierStart1.x < 0或者mBezierStart1.x > mWidth时
+        // 当mBezierStart1.x < 0或者mBezierStart1.x mMaxLengthWidth时
         // 如果继续翻页，会出现BUG故在此限制
         if (mTouch.x > 0 && mTouch.x < mWidth) {
             if (mBezierStart1.x < 0 || mBezierStart1.x > mWidth) {
@@ -329,6 +309,7 @@ public class ReaderView extends View {
     }
 
     private void drawCurrentPageArea(Canvas canvas, Bitmap bitmap) {
+        Log.e("find","drawcurrent ____1____");
         canvas.save();
         canvas.drawBitmap(bitmap, 0, 0, null);
         canvas.restore();
@@ -338,6 +319,7 @@ public class ReaderView extends View {
     * 绘制下一页和下一页的阴影(上一页)
     * */
     private void drawNextPageAreaAndShadow(Canvas canvas, Bitmap bitmap) {
+        Log.e("find","drawnext ____2____");
         int leftx;
         int rightx;
         GradientDrawable mBackShadowDrawable;
@@ -394,7 +376,7 @@ public class ReaderView extends View {
         mFolderShadowDrawableLR
                 .setGradientType(GradientDrawable.LINEAR_GRADIENT);
 
-        mBackShadowColors = new int[]{0xff111111, 0x111111};
+        mBackShadowColors = new int[]{0x90625959, 0x111111};
         mBackShadowDrawableRL = new GradientDrawable(
                 GradientDrawable.Orientation.RIGHT_LEFT, mBackShadowColors);
         mBackShadowDrawableRL.setGradientType(GradientDrawable.LINEAR_GRADIENT);
@@ -403,7 +385,7 @@ public class ReaderView extends View {
                 GradientDrawable.Orientation.LEFT_RIGHT, mBackShadowColors);
         mBackShadowDrawableLR.setGradientType(GradientDrawable.LINEAR_GRADIENT);
 
-        mFrontShadowColors = new int[]{0x80111111, 0x111111};
+        mFrontShadowColors = new int[]{0x90625959, 0x111111};
         mFrontShadowDrawableVLR = new GradientDrawable(
                 GradientDrawable.Orientation.LEFT_RIGHT, mFrontShadowColors);
         mFrontShadowDrawableVLR
@@ -422,6 +404,79 @@ public class ReaderView extends View {
                 GradientDrawable.Orientation.BOTTOM_TOP, mFrontShadowColors);
         mFrontShadowDrawableHBT
                 .setGradientType(GradientDrawable.LINEAR_GRADIENT);
+        mAnimFishShadowColor = new int[]{0x90625959, 0x111111};
+        mAnimFishShadowDrableLR = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, mAnimFishShadowColor);
+        mAnimFishShadowDrableRL = new GradientDrawable(GradientDrawable.Orientation.RIGHT_LEFT, mAnimFishShadowColor);
+    }
+
+    int[] mAnimFishShadowColor;
+
+    /*
+    * 绘制水平的当前页翻起页
+    * */
+    public void drawH(Canvas canvas, Bitmap current, Bitmap next, int position) {
+        if (position > mWidth || position < 0) {
+            isAnimFinish = true;
+            status = FIGURE_SMOOTH;
+            drawCurrentPageArea(canvas, next);
+            return;
+        }
+        int dis;
+        GradientDrawable mBackShadowDrawable;
+        GradientDrawable mFolderShadowDrawable;
+        canvas.drawColor(0xFFAAAAAA);
+        mPath0.reset();
+        mPath0.moveTo(position, 0);
+        if (isNextPage) {
+            mPath0.lineTo(mWidth, 0);
+            mPath0.lineTo(mWidth, mHeight);
+            dis = position;
+        } else {
+            mPath0.lineTo(0, 0);
+            mPath0.lineTo(0, mHeight);
+            dis = mWidth - position;
+        }
+        mPath0.lineTo(position, mHeight);
+        mPath0.close();
+        //绘制nextPage
+        canvas.save();
+        canvas.clipPath(mPath0, Region.Op.INTERSECT);
+        canvas.drawBitmap(next, 0, 0, null);
+        canvas.restore();
+
+        if (!isNextPage) {
+            mBackShadowDrawable = mAnimFishShadowDrableLR;
+            mFolderShadowDrawable = mAnimFishShadowDrableRL;
+        } else {
+            mBackShadowDrawable = mAnimFishShadowDrableLR;
+            mFolderShadowDrawable = mAnimFishShadowDrableRL;
+        }
+
+        mBackShadowDrawable.setBounds(position, 0, position + dis / 4, mHeight);
+
+        mMatrixArray[0] = -1;
+        mMatrixArray[1] = 0;
+        mMatrixArray[3] = 0;
+        mMatrixArray[4] = 1;
+        mMatrix.reset();
+        mMatrix.setValues(mMatrixArray);
+        mMatrix.preTranslate(-mWidth / 2, -mHeight / 2);
+        mMatrix.postTranslate(mWidth / 2, mHeight / 2);
+        mPaint.setColorFilter(mColorMatrixFilter);
+        canvas.save();
+        canvas.clipPath(mPath0, Region.Op.DIFFERENCE);
+        canvas.drawBitmap(current, mMatrix, mPaint);
+        canvas.restore();
+
+
+        canvas.rotate(mDegrees, mBezierStart1.x, mBezierStart1.y);
+        mFolderShadowDrawable.setBounds(position - dis / 4, 0, position, mHeight);
+        mFolderShadowDrawable.draw(canvas);
+        mPaint.setColorFilter(null);
+        canvas.save();
+        mBackShadowDrawable.draw(canvas);
+        canvas.restore();
+        postInvalidate();
     }
 
     /**
@@ -564,6 +619,9 @@ public class ReaderView extends View {
                 mBezierControl2.y - mCornerY);
         float f8 = (mCornerX - mBezierControl1.x) / dis;
         float f9 = (mBezierControl2.y - mCornerY) / dis;
+        if (!isAnimFinish) {
+            Log.e("fd", "fd");
+        }
         mMatrixArray[0] = 1 - 2 * f9 * f9;
         mMatrixArray[1] = 2 * f8 * f9;
         mMatrixArray[3] = mMatrixArray[1];
@@ -582,19 +640,22 @@ public class ReaderView extends View {
         canvas.restore();
     }
 
-    private boolean isNextPage = false;
-    private volatile int status = FIGURE_SMOOTH;
-    private static final int CAN_NOT_SMOOTH = 0x00;
-    private static final int ANIM = 0x01;
-    private static final int FIGURE_SMOOTH = 0x10;
-    private static final int ANIM_FINISH = 0x11;
+
 
 
     @Override
     protected void onDraw(Canvas canvas) {
+        if (isDebug) {
+            isNextPage = true;
+            drawH(canvas, mBitmaps.get(CURRENT_BITMAP), mBitmaps.get(NEXT_BITMAP), 300);
+            return;
+        }
+
+        Log.e("status",status+"");
         switch (status) {
             case ANIM_FINISH:
-                status = CAN_NOT_SMOOTH;
+//                break;
+//                status = CAN_NOT_SMOOTH;
             case CAN_NOT_SMOOTH:
                 drawCurrentPageArea(canvas, mBitmaps.get(CURRENT_BITMAP));
                 break;
@@ -613,43 +674,16 @@ public class ReaderView extends View {
                 drawCurrentPageShadow(canvas);
                 drawCurrentBackArea(canvas, mBitmaps.get(CURRENT_BITMAP));
                 break;
+            case END_ANIM:
+                if (isNextPage) {
+                    endPosition -= 30;
+                    drawH(canvas, mBitmaps.get(PREV_BITMAP),mBitmaps.get(CURRENT_BITMAP), endPosition);
+                } else {
+                    endPosition += 30;
+                    drawH(canvas, mBitmaps.get(NEXT_BITMAP), mBitmaps.get(CURRENT_BITMAP), endPosition);
+                }
+                break;
         }
-/*//        如果是第一页，则不能向前翻页,如果是最后一页，则不能向后翻页
-        if (isNextPage && isLastPage || !isNextPage && isFirstPage) {
-            drawCurrentPageArea(canvas, mBitmaps.get(CURRENT_BITMAP));
-            return;
-        }
-*//*        if (isNeedShowOtherAfterEndAnim){
-            isNeedShowOtherAfterEndAnim = false;
-            if (isNextPage)
-                drawCurrentPageArea(canvas, mBitmaps.get(NEXT_BITMAP));
-            else
-                drawCurrentPageArea(canvas, mBitmaps.get(PREV_BITMAP));
-            return;
-        }*//*
-//        绘制画布背景颜色
-        canvas.drawColor(0xFFAAAAAA);
-        if (!isAnimFinish || mScroller.isFinished()) {
-            calcPoints();
-            if (mBitmaps.get(CURRENT_BITMAP) != null)
-                drawCurrentPageArea(canvas, mBitmaps.get(CURRENT_BITMAP), mPath0);
-            if (isNextPage) {
-                if (mBitmaps.get(NEXT_BITMAP) != null)
-                    drawNextPageAreaAndShadow(canvas, mBitmaps.get(NEXT_BITMAP));
-            } else {
-                if (mBitmaps.get(PREV_BITMAP) != null)
-                    drawNextPageAreaAndShadow(canvas, mBitmaps.get(PREV_BITMAP));
-            }
-            if (mBitmaps.get(CURRENT_BITMAP) != null)
-                drawCurrentPageShadow(canvas);
-
-            drawCurrentBackArea(canvas, mBitmaps.get(CURRENT_BITMAP));
-        } else {
-            if (mBitmaps.get(CURRENT_BITMAP) != null)
-                drawCurrentPageArea(canvas, mBitmaps.get(CURRENT_BITMAP));
-            else
-                drawCurrentPageArea(canvas, backgroundBitmap);
-        }*/
     }
 
     /*
@@ -670,10 +704,10 @@ public class ReaderView extends View {
         } else {
             if (isNextPage) {
                 if (!mIsRTandLB) {
-                    dx = (int) (-mTouch.x);
+                    dx = (int) (-mTouch.x );
                     dy = (int) (mHeight - mTouch.y);
                 } else {
-                    dx = (int) (-mTouch.x);
+                    dx = (int) (-mTouch.x+ 1);
                     dy = (int) (-mTouch.y);
                 }
             } else {
@@ -703,6 +737,9 @@ public class ReaderView extends View {
         }
     }
 
+    /*
+    * 开始时必须设置当前和下一页的图片
+    * */
     public void initBitmap(Bitmap currentBitmap, Bitmap nextBitmap) {
         mBitmaps.put(CURRENT_BITMAP, currentBitmap);
         mBitmaps.put(NEXT_BITMAP, nextBitmap);
@@ -720,8 +757,9 @@ public class ReaderView extends View {
             float y = mScroller.getCurrY();
             mTouch.x = x;
             mTouch.y = y;
+
 //            翻页快动画结束的时候通知model更改数据
-            if ((float) mScroller.timePassed() / 1200f > 0.1) {
+            if (!mScroller.isFinished()) {
                 if (!isChangingBitmap) {
                     isChangingBitmap = true;
                     Log.e("jie", isNextPage + "<----isNextPage");
@@ -737,19 +775,16 @@ public class ReaderView extends View {
                 }
             }
             if (mScroller.isFinished()) {
-                Log.e("finish", "finish");
+                Log.e("finish111", "finish"+status);
                 isChangingBitmap = false;
-                isNeedShowOtherAfterEndAnim = true;
-                isAnimFinish = true;
                 if (isNextPage) {
-
+                    endPosition = 300;
                     mBitmaps.put(PREV_BITMAP, mBitmaps.get(CURRENT_BITMAP));
                     mBitmaps.put(CURRENT_BITMAP, mBitmaps.get(NEXT_BITMAP));
-//                    long time = System.currentTimeMillis();
                     if (!isLastPage)
                         mBitmaps.put(NEXT_BITMAP, tmpBitmap);
-//                    Log.e("time", System.currentTimeMillis() - time + "");
                 } else {
+                    endPosition = mWidth - 300;
                     mBitmaps.put(NEXT_BITMAP, mBitmaps.get(CURRENT_BITMAP));
                     mBitmaps.put(CURRENT_BITMAP, mBitmaps.get(PREV_BITMAP));
                     if (!isFirstPage)
@@ -851,22 +886,32 @@ public class ReaderView extends View {
                     break;
                 mCanvas.drawColor(0xFFAAAAAA);
                 abortAnimation();
-                startAnimation(1200);
+//                根据手指抬起的位置来设定动画时间
+                startAnimation(calAnimTime());
                 status = ANIM;
-//                mTouch.x = mCornerX;
-//                mTouch.y = mCornerY;
                 this.postInvalidate();
                 break;
         }
         return true;
     }
 
+    /*
+    * 计算动画时间
+    * */
+    private int calAnimTime() {
+        int x = (int) mTouch.x;
+        int time;
+        if (isNextPage) {
+            time = 1200 * x / mWidth;
+        } else {
+            time = 1200 * (mWidth - x) / mWidth;
+        }
+        return time;
+    }
+
     private Bitmap tmpBitmap;
 
-    public void changeBitmaps(Bitmap bitmap, boolean isTurnNext) {
+    public void changeBitmaps(Bitmap bitmap) {
         tmpBitmap = bitmap;
-
-//        isChangingBitmap = false;
-//        postInvalidate();
     }
 }
