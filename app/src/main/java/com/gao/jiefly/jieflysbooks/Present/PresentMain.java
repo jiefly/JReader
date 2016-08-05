@@ -1,6 +1,9 @@
 package com.gao.jiefly.jieflysbooks.Present;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.util.Log;
 
 import com.daimajia.numberprogressbar.NumberProgressBar;
@@ -9,6 +12,7 @@ import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnChapterCacheListener;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnDataModelListener;
+import com.gao.jiefly.jieflysbooks.Service.UpdateBookService;
 import com.gao.jiefly.jieflysbooks.Utils.Utils;
 import com.gao.jiefly.jieflysbooks.View.Main;
 import com.gao.jiefly.jieflysbooks.View.View;
@@ -37,7 +41,18 @@ public class PresentMain implements OnDataModelListener {
     private static PresentMain instance = null;
     private AdvanceDataModel mAdvanceDataModel;
     View mView;
+    private UpdateBookService.UpdateBookBinder mBookBinder;
+    private ServiceConnection updateBookService = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mBookBinder = (UpdateBookService.UpdateBookBinder) service;
+        }
 
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
     private PresentMain(Context context, View view) {
         mAdvanceDataModel = AdvanceDataModel.build(context, this);
         mView = view;
@@ -75,6 +90,11 @@ public class PresentMain implements OnDataModelListener {
             }
         }
         return instance;
+    }
+
+//    绑定后台更新service
+    public void bindUpdateBookService(){
+
     }
 
     //    显示书籍列表
@@ -258,6 +278,11 @@ public class PresentMain implements OnDataModelListener {
 
     @Override
     public void onChapterLoadSuccess(Chapter chapter) {
+
+    }
+
+    @Override
+    public void onBookUpdateCompleted() {
 
     }
 

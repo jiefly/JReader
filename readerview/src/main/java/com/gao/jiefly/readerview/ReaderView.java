@@ -309,7 +309,6 @@ public class ReaderView extends View {
     }
 
     private void drawCurrentPageArea(Canvas canvas, Bitmap bitmap) {
-        Log.e("find","drawcurrent ____1____");
         canvas.save();
         canvas.drawBitmap(bitmap, 0, 0, null);
         canvas.restore();
@@ -319,7 +318,6 @@ public class ReaderView extends View {
     * 绘制下一页和下一页的阴影(上一页)
     * */
     private void drawNextPageAreaAndShadow(Canvas canvas, Bitmap bitmap) {
-        Log.e("find","drawnext ____2____");
         int leftx;
         int rightx;
         GradientDrawable mBackShadowDrawable;

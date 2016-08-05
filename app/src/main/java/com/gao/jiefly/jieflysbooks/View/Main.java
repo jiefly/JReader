@@ -27,10 +27,10 @@ import android.widget.Toast;
 
 import com.daimajia.numberprogressbar.NumberProgressBar;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
-import com.gao.jiefly.jieflysbooks.Model.download.VolleyClient;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnDataStateListener;
 import com.gao.jiefly.jieflysbooks.Present.PresentMain;
 import com.gao.jiefly.jieflysbooks.R;
+import com.gao.jiefly.jieflysbooks.Service.UpdateBookService;
 import com.melnykov.fab.FloatingActionButton;
 
 import java.net.MalformedURLException;
@@ -72,19 +72,9 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
         setContentView(R.layout.main);
         ButterKnife.inject(this);
         mPresentMain = PresentMain.getInstance(getApplicationContext(), this);
-//        mPresentMain.updateBookList();
-        VolleyClient.build(getApplicationContext()).getWebResource("http://www.uctxt.com/book/1/1678/6804351.html", new OnDataStateListener() {
-            @Override
-            public void onSuccess(String result) {
-                Log.e("onSuccess",result);
-                    String value = result;
-            }
-
-            @Override
-            public void onFailed(Exception e) {
-                Log.e("onFailed",e.getMessage());
-            }
-        });
+        Intent intent = new Intent(Main.this, UpdateBookService.class);
+        intent.putExtra("time",10000);
+        startService(intent);
         data = mPresentMain.getBookList();
         mIdMainSwipeRefreshLayout.setOnRefreshListener(this);
         adapter = new BookListRecycleViewAdapter();

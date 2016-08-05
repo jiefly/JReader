@@ -28,12 +28,12 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
     private ChapterLoader mChapterLoader;
     private int chapterSize = 0;
     private static OnDataModelListener mOnDataModelListener;
+    private static OnDataModelListener mServiceOnDataModelListener;
 
     private AdvanceDataModel() {
         mBookLoader = new BookLoader(mContext);
         mChapterLoader = ChapterLoader.build(mContext);
     }
-
 
     public static AdvanceDataModel build(Context context) {
         if (mContext == null)
@@ -50,6 +50,8 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
     public static AdvanceDataModel build(Context context, OnDataModelListener modelListener) {
         if (mOnDataModelListener == null)
             mOnDataModelListener = modelListener;
+        if (mOnDataModelListener != modelListener)
+            mServiceOnDataModelListener = modelListener;
         return build(context);
     }
 
@@ -167,13 +169,14 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
             updateBookThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
+                    long time = System.currentTimeMillis();
                     for (Book b : books) {
                         if (!isUpdateFailed) {
                             while (!isUpdateComplete) {
                                 try {
                                     if (isUpdateFailed)
                                         break;
-                                    Thread.sleep(100);
+                                    Thread.sleep(50);
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
@@ -182,6 +185,7 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
                                 updateBookSyn(b);
                         }
                     }
+                    Log.e("updateTime",System.currentTimeMillis() - time+"ms");
                 }
             });
         updateBookThread.start();
@@ -290,6 +294,7 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
     public void onBookUpdateSuccess(String bookName) {
         isUpdateComplete = true;
         mOnDataModelListener.onBookUpdateSuccess(bookName);
+        mServiceOnDataModelListener.onBookUpdateSuccess(bookName);
     }
 
     @Override
@@ -306,5 +311,10 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
     @Override
     public void onChapterLoadSuccess(Chapter chapter) {
         mOnDataModelListener.onChapterLoadSuccess(chapter);
+    }
+
+    @Override
+    public void onBookUpdateCompleted() {
+
     }
 }

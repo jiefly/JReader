@@ -823,6 +823,11 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
         }*/
     }
 
+    @Override
+    public void onBookUpdateCompleted() {
+
+    }
+
 
     class CustomFragmentPagerAdapter extends FragmentPagerAdapter {
 

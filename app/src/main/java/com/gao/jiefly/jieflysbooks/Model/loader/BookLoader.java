@@ -295,6 +295,7 @@ public class BookLoader {
     //    通过书籍的网址，获取书籍的更新
     private Book updateBookByUrl(URL url) {
         String values = new BaseHttpURLClient().getWebResourse(url);
+//        String values = new VolleyClient(c)
         return findBookInfoInDetailWeb(values);
     }
 

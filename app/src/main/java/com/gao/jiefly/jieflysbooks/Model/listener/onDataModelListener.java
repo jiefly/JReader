@@ -15,4 +15,5 @@ public interface OnDataModelListener {
     void onBookUpdateFailed();
     void onBookRemoveSuccess();
     void onChapterLoadSuccess(Chapter chapter);
+    void onBookUpdateCompleted();
 }

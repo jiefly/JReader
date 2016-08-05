@@ -21,11 +21,11 @@ import java.util.concurrent.ExecutionException;
  */
 public class VolleyClient implements HttpURLClient {
 
-    public static VolleyClient instance = null;
+    private static VolleyClient instance = null;
     RequestQueue mRequestQueue = null;
     StringRequest mStringRequest;
 
-    public VolleyClient(Context context) {
+    private VolleyClient(Context context) {
         mRequestQueue = Volley.newRequestQueue(context);
     }
 

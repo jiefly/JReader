@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="#aaa"
+              android:orientation="horizontal">
+	<ImageView android:layout_width="wrap_content" android:layout_gravity="center"  android:id="@+id/id_notification_icon" android:layout_height="wrap_content" android:src="@mipmap/ic_launcher"/>
+	<RelativeLayout android:layout_width="0dp" android:layout_height="match_parent" android:padding="10dp" android:layout_weight="1" android:orientation="vertical">
+		<TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+		          android:textColor="#000"
+		          android:textSize="18sp"
+		          android:gravity="start" android:id="@+id/id_notification_title"/>
+		<TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+		          android:textSize="16sp"
+		          android:textColor="#000"
+		          android:gravity="start" android:id="@+id/id_notification_content"
+		          android:layout_below="@+id/id_notification_title"
+		          android:layout_alignParentLeft="true" android:layout_alignParentStart="true"/>
+	</RelativeLayout>
+
+
+
+
+</LinearLayout>
