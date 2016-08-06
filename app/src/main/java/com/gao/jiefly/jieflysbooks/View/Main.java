@@ -70,11 +70,11 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        ButterKnife.inject(this);
         mPresentMain = PresentMain.getInstance(getApplicationContext(), this);
         Intent intent = new Intent(Main.this, UpdateBookService.class);
-        intent.putExtra("time",10000);
+        intent.putExtra("time",6000000);
         startService(intent);
+        ButterKnife.inject(this);
         data = mPresentMain.getBookList();
         mIdMainSwipeRefreshLayout.setOnRefreshListener(this);
         adapter = new BookListRecycleViewAdapter();
