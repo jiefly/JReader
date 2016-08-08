@@ -1,7 +1,10 @@
 package com.gao.jiefly.jieflysbooks.Utils;
 
+import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.os.Environment;
+import android.text.TextUtils;
 
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
@@ -140,5 +143,29 @@ public class Utils {
             title.add(c.getTitle());
         }
         return new Book.ChapterList(chapters.get(0).getBookName(), url, title);
+    }
+
+    /**
+     * 判断某个界面是否在前台
+     *
+     * @param context
+     * @param className
+     *            某个界面名称
+     */
+    public static boolean isForeground(Context context, String className) {
+        if (context == null || TextUtils.isEmpty(className)) {
+            return false;
+        }
+
+        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningTaskInfo> list = am.getRunningTasks(1);
+        if (list != null && list.size() > 0) {
+            ComponentName cpn = list.get(0).topActivity;
+            if (className.equals(cpn.getClassName())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

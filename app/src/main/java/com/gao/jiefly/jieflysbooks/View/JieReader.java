@@ -403,7 +403,7 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
         mBook = (Book) bundle.getSerializable("book");
         mChapterList = mBook.getChapterList().getChapterTitleList();
         urlList = mBook.getChapterList().getChapterUrlList();
-        mAdvanceDataModel = AdvanceDataModel.build(getApplicationContext(), this);
+        mAdvanceDataModel = AdvanceDataModel.build(getApplicationContext(), this,OnDataModelListener.TYPE_ACTIVIT_LISTENER);
         chapterIndex = mBook.getReadChapterIndex();
     }
 

@@ -66,14 +66,16 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     EditText etAddBookName;
     PresentMain mPresentMain;
 
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         mPresentMain = PresentMain.getInstance(getApplicationContext(), this);
         Intent intent = new Intent(Main.this, UpdateBookService.class);
-        intent.putExtra("time",6000000);
+        intent.putExtra("time",10000);
         startService(intent);
+        mPresentMain.bindUpdateBookService();
         ButterKnife.inject(this);
         data = mPresentMain.getBookList();
         mIdMainSwipeRefreshLayout.setOnRefreshListener(this);
@@ -226,6 +228,23 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
         Log.back_btn_bg("onRestart", data.size() + "");
     }*/
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mPresentMain.setUpdateFlag(false);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mPresentMain.setUpdateFlag(true);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mPresentMain.unBindUpdateBookService();
+    }
 
     @OnClick(R.id.id_main_add_book_fab)
     public void onClick() {

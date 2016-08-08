@@ -47,11 +47,14 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
         return instance;
     }
 
-    public static AdvanceDataModel build(Context context, OnDataModelListener modelListener) {
-        if (mOnDataModelListener == null)
-            mOnDataModelListener = modelListener;
-        if (mOnDataModelListener != modelListener)
-            mServiceOnDataModelListener = modelListener;
+    public static AdvanceDataModel build(Context context, OnDataModelListener modelListener, int type) {
+        if (type == OnDataModelListener.TYPE_ACTIVIT_LISTENER) {
+            if (mOnDataModelListener == null)
+                mOnDataModelListener = modelListener;
+        } else if (type == OnDataModelListener.TYPE_SERVICE_LISTENER) {
+            if (mServiceOnDataModelListener == null)
+                mServiceOnDataModelListener = modelListener;
+        }
         return build(context);
     }
 
@@ -154,7 +157,7 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
         }).start();
     }
 
-    public void cacheChapterFromList(List<String> urlList, OnChapterCacheListener onChapterCacheListener){
+    public void cacheChapterFromList(List<String> urlList, OnChapterCacheListener onChapterCacheListener) {
         mChapterLoader.cacheAllChapter(urlList, onChapterCacheListener);
     }
 
@@ -185,7 +188,7 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
                                 updateBookSyn(b);
                         }
                     }
-                    Log.e("updateTime",System.currentTimeMillis() - time+"ms");
+                    Log.e("updateTime", System.currentTimeMillis() - time + "ms");
                 }
             });
         updateBookThread.start();

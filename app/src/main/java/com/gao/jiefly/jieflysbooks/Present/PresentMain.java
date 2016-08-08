@@ -1,7 +1,9 @@
 package com.gao.jiefly.jieflysbooks.Present;
 
+import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.util.Log;
@@ -40,8 +42,22 @@ public class PresentMain implements OnDataModelListener {
     private List<Book> mBookList = new ArrayList<>();
     private static PresentMain instance = null;
     private AdvanceDataModel mAdvanceDataModel;
+    private Service mService;
     View mView;
     private UpdateBookService.UpdateBookBinder mBookBinder;
+    private ServiceConnection mServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mBookBinder = (UpdateBookService.UpdateBookBinder) service;
+            Log.e("presentMain","bind service success ,connected");
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.e("presentMain","unbind service ,disconnected");
+        }
+    };
+
     private ServiceConnection updateBookService = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -54,7 +70,7 @@ public class PresentMain implements OnDataModelListener {
         }
     };
     private PresentMain(Context context, View view) {
-        mAdvanceDataModel = AdvanceDataModel.build(context, this);
+        mAdvanceDataModel = AdvanceDataModel.build(context, this,OnDataModelListener.TYPE_ACTIVIT_LISTENER);
         mView = view;
         if (mAdvanceDataModel.getBookList() != null)
             mBookList.addAll(mAdvanceDataModel.getBookList());
@@ -94,9 +110,19 @@ public class PresentMain implements OnDataModelListener {
 
 //    绑定后台更新service
     public void bindUpdateBookService(){
-
+        Intent intent = new Intent((Context) mView,UpdateBookService.class);
+        ((Context) mView).bindService(intent,mServiceConnection,Service.BIND_AUTO_CREATE);
     }
-
+//    在前台不可见的时候取消绑定
+    public void unBindUpdateBookService(){
+        ((Context) mView).unbindService(mServiceConnection);
+    }
+//  设置activity前台可见的时候不后台更新
+    public void setUpdateFlag(boolean isNeedUpdate){
+        if (mBookBinder == null)
+            return;
+        mBookBinder.setIsNeedUpdate(isNeedUpdate);
+    }
     //    显示书籍列表
     public void showBookList() {
         if (mBookList.size() == 0) {
