@@ -73,7 +73,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
         setContentView(R.layout.main);
         mPresentMain = PresentMain.getInstance(getApplicationContext(), this);
         Intent intent = new Intent(Main.this, UpdateBookService.class);
-        intent.putExtra("time",10000);
+        intent.putExtra("time", 1200000);
         startService(intent);
         mPresentMain.bindUpdateBookService();
         ButterKnife.inject(this);
@@ -237,13 +237,14 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     @Override
     protected void onPause() {
         super.onPause();
-        mPresentMain.setUpdateFlag(true);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mPresentMain.unBindUpdateBookService();
+//        mPresentMain.unBindUpdateBookService();
+//        getApplicationContext().unbindService(mPresentMain.mServiceConnection);
+        if (isFinishing()) {
+//            onDestroy 有bug activity finish 的时候ondestroy不会调用
+//            于是在onPause中判断当前是否是退出activity，是的话在这里做相关操作
+            mPresentMain.unBindUpdateBookService();
+        } else
+            mPresentMain.setUpdateFlag(true);
     }
 
     @OnClick(R.id.id_main_add_book_fab)

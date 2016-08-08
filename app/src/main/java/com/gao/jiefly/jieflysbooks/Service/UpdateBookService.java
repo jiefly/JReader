@@ -26,7 +26,7 @@ import java.util.TimerTask;
 public class UpdateBookService extends Service implements OnDataModelListener {
     private AdvanceDataModel mAdvanceDataModel;
     private static final int DEFAULT_UPDATE_TIME = 600000;
-    private int time;
+    private long time;
     private static final long[] VIBRATES = {0, 1000, 1000, 1000};
     private boolean isUpdateBackground = false;
     private List<String> updatedBooks = new ArrayList<>();

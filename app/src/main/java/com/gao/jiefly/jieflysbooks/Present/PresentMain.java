@@ -43,34 +43,26 @@ public class PresentMain implements OnDataModelListener {
     private static PresentMain instance = null;
     private AdvanceDataModel mAdvanceDataModel;
     private Service mService;
+    private boolean isBound = false;
     View mView;
+    private Context mContext;
     private UpdateBookService.UpdateBookBinder mBookBinder;
-    private ServiceConnection mServiceConnection = new ServiceConnection() {
+    public ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mBookBinder = (UpdateBookService.UpdateBookBinder) service;
-            Log.e("presentMain","bind service success ,connected");
+            Log.e("presentMain", "bind service success ,connected" + "isBound:" + isBound);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            Log.e("presentMain","unbind service ,disconnected");
+            Log.e("presentMain", "unbind service ,disconnected");
         }
     };
 
-    private ServiceConnection updateBookService = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            mBookBinder = (UpdateBookService.UpdateBookBinder) service;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-
-        }
-    };
     private PresentMain(Context context, View view) {
-        mAdvanceDataModel = AdvanceDataModel.build(context, this,OnDataModelListener.TYPE_ACTIVIT_LISTENER);
+        mContext = context;
+        mAdvanceDataModel = AdvanceDataModel.build(context, this, OnDataModelListener.TYPE_ACTIVIT_LISTENER);
         mView = view;
         if (mAdvanceDataModel.getBookList() != null)
             mBookList.addAll(mAdvanceDataModel.getBookList());
@@ -89,14 +81,17 @@ public class PresentMain implements OnDataModelListener {
             }
         });
     }
-    public List<Book> getBookListOrderByUpdateTime(){
+
+    public List<Book> getBookListOrderByUpdateTime() {
         sortListByUpdateTime(mBookList);
         return mBookList;
     }
-    public List<Book> getBookListOrderByAddTime(){
+
+    public List<Book> getBookListOrderByAddTime() {
         mBookList = mAdvanceDataModel.getBookList();
         return mBookList;
     }
+
     public static PresentMain getInstance(Context context, View view) {
         if (instance == null) {
             synchronized (PresentMain.class) {
@@ -108,21 +103,26 @@ public class PresentMain implements OnDataModelListener {
         return instance;
     }
 
-//    绑定后台更新service
-    public void bindUpdateBookService(){
-        Intent intent = new Intent((Context) mView,UpdateBookService.class);
-        ((Context) mView).bindService(intent,mServiceConnection,Service.BIND_AUTO_CREATE);
+    //    绑定后台更新service
+    public void bindUpdateBookService() {
+        Intent intent = new Intent(mContext, UpdateBookService.class);
+        isBound = mContext.bindService(intent, mServiceConnection, Service.BIND_AUTO_CREATE);
+        Log.e("bind","bind success:"+isBound);
     }
-//    在前台不可见的时候取消绑定
-    public void unBindUpdateBookService(){
-        ((Context) mView).unbindService(mServiceConnection);
+
+    //    在前台不可见的时候取消绑定
+    public void unBindUpdateBookService() {
+        if (isBound)
+            mContext.unbindService(mServiceConnection);
     }
-//  设置activity前台可见的时候不后台更新
-    public void setUpdateFlag(boolean isNeedUpdate){
+
+    //  设置activity前台可见的时候不后台更新
+    public void setUpdateFlag(boolean isNeedUpdate) {
         if (mBookBinder == null)
             return;
         mBookBinder.setIsNeedUpdate(isNeedUpdate);
     }
+
     //    显示书籍列表
     public void showBookList() {
         if (mBookList.size() == 0) {
