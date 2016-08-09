@@ -4,6 +4,7 @@
 
 	<uses-permission android:name="android.permission.INTERNET"/>
 	<uses-permission android:name="android.permission.WRITE_SETTINGS"/>
+	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
 	<application
 		android:allowBackup="true"
@@ -18,6 +19,7 @@
         -->
 		<activity
 			android:name=".View.Main"
+			android:launchMode="singleInstance"
 			android:theme="@style/ImageTranslucentTheme">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN"/>
@@ -43,6 +45,14 @@
 			android:enabled="true"
 			android:exported="true">
 		</receiver>
+
+		<activity android:name=".View.ScanTxtView">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN"/>
+
+				<category android:name="android.intent.category.LAUNCHER"/>
+			</intent-filter>
+		</activity>
 	</application>
 
 </manifest>

@@ -114,7 +114,6 @@ public class PresentMain implements OnDataModelListener {
     public void unBindUpdateBookService(Context context) {
         if (isBound){
             context.unbindService(mServiceConnection);
-
         }
     }
 

@@ -113,6 +113,10 @@ public class UpdateBookService extends Service implements OnDataModelListener {
     public void onBookUpdateCompleted() {
         updateNum = 0;
         List<Book> newBooks = mAdvanceDataModel.getBookList();
+        for (Book book : newBooks)
+            Log.e("TimerTask", "newBooks:" + book.getBookLastUpdate());
+        for (Book book : oldBooks)
+            Log.e("TimerTask", "oldBooks:" + book.getBookLastUpdate());
         for (int i = 0; i < oldBooks.size(); i++) {
             if (newBooks.get(i).getUpdateDate().after(oldBooks.get(i).getUpdateDate())) {
                 updatedBooks.add(newBooks.get(i));
@@ -124,7 +128,7 @@ public class UpdateBookService extends Service implements OnDataModelListener {
             String content = "没有";
             if (updatedBooks.size() == 1) {
                 title = "《" + updatedBooks.get(0).getBookName() + "》有更新";
-                content = "最新章节："+updatedBooks.get(0).getBookLastUpdate();
+                content = "最新章节：" + updatedBooks.get(0).getBookLastUpdate();
             } else if (updatedBooks.size() > 1)
                 content = "《" + updatedBooks.get(0) + "》" + "等" + updatedBooks.size() + "本小说更新...";
 
@@ -180,7 +184,7 @@ public class UpdateBookService extends Service implements OnDataModelListener {
                 return;
             //            如果当前正在更新中则推迟
             if (isUpdateBackground) {
-                Log.e("thread", "正在更新，当前更新任务将被取消");
+                Log.e("TimerTask", "正在更新，当前更新任务将被取消");
                 delayNum++;
                 if (delayNum > 5)
                     onBookUpdateFailed();

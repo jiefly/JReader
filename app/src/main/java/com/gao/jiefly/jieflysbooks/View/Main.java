@@ -221,6 +221,13 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
             }
         });
     }
+    @Override
+    protected void onDestroy() {
+        Log.e("main", "onDestroy");
+        mPresentMain.unBindUpdateBookService(getBaseContext());
+        super.onDestroy();
+    }
+
     /*@Override
     protected void onRestart() {
         super.onRestart();
@@ -244,13 +251,6 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.e("main", "onDestroy");
-//        mPresentMain.unBindUpdateBookService(getBaseContext());
-    }
-
-    @Override
     protected void onRestart() {
         super.onRestart();
         Log.e("main","onrestart");
@@ -260,11 +260,11 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     protected void onPause() {
         super.onPause();
         Log.e("main","onpause");
-        if (isFinishing()) {
-//            onDestroy 有bug activity finish 的时候ondestroy不会调用
-//            于是在onPause中判断当前是否是退出activity，是的话在这里做相关操作
-            mPresentMain.unBindUpdateBookService(getBaseContext());
-        }
+//        if (isFinishing()) {
+////            onDestroy 有bug activity ｅｘｉｔ 的时候ondestroy不会调用
+////            于是在onPause中判断当前是否是退出activity，是的话在这里做相关操作
+//            mPresentMain.unBindUpdateBookService(getBaseContext());
+//        }
         mPresentMain.setUpdateFlag(true);
     }
 
