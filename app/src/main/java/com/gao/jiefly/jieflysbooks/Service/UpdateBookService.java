@@ -29,7 +29,7 @@ public class UpdateBookService extends Service implements OnDataModelListener {
     private long time;
     private static final long[] VIBRATES = {0, 1000, 1000, 1000};
     private boolean isUpdateBackground = false;
-    private List<String> updatedBooks = new ArrayList<>();
+    private List<Book> updatedBooks = new ArrayList<>();
     private List<Book> oldBooks;
     private int updateNum;
     private Timer mTimer;
@@ -37,9 +37,11 @@ public class UpdateBookService extends Service implements OnDataModelListener {
     int delayNum = 0;
     private boolean isNeedUpdate = true;
     private Binder mBinder;
+    private boolean isBookListNull = true;
 
     public UpdateBookService() {
-        mAdvanceDataModel = AdvanceDataModel.build(this, this,OnDataModelListener.TYPE_SERVICE_LISTENER);
+        mAdvanceDataModel = AdvanceDataModel.build(this, this, OnDataModelListener.TYPE_SERVICE_LISTENER);
+        isBookListNull = mAdvanceDataModel.getBookList() == null;
         mTimer = new Timer();
     }
 
@@ -55,6 +57,12 @@ public class UpdateBookService extends Service implements OnDataModelListener {
 //        if (mUpdateBookThread == null)
 //            mUpdateBookThread = new UpdateBookThread();
 //        mUpdateBookThread.start();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.e("service onDestroy", "destroy");
     }
 
     @Override
@@ -76,17 +84,19 @@ public class UpdateBookService extends Service implements OnDataModelListener {
     }
 
     @Override
-    public void onBookUpdateSuccess(String bookName) {
+    public void onBookUpdateSuccess(String bookName, int type) {
+        if (type != OnDataModelListener.TYPE_SERVICE_LISTENER)
+            return;
         updateNum++;
         Log.e("update num", updateNum + "old book size:" + oldBooks.size());
-        if (updateNum == oldBooks.size())
+        if (updateNum >= oldBooks.size())
             onBookUpdateCompleted();
     }
 
     @Override
     public void onBookUpdateFailed() {
         isUpdateBackground = false;
-        Log.e("UpdateBookService","update book failed");
+        Log.e("UpdateBookService", "update book failed");
     }
 
     @Override
@@ -101,21 +111,22 @@ public class UpdateBookService extends Service implements OnDataModelListener {
 
     @Override
     public void onBookUpdateCompleted() {
-
+        updateNum = 0;
         List<Book> newBooks = mAdvanceDataModel.getBookList();
         for (int i = 0; i < oldBooks.size(); i++) {
             if (newBooks.get(i).getUpdateDate().after(oldBooks.get(i).getUpdateDate())) {
-                updatedBooks.add(newBooks.get(i).getBookName());
+                updatedBooks.add(newBooks.get(i));
             }
         }
-        if (updatedBooks.size() >= 0) {
+        if (updatedBooks.size() > 0) {
             Log.e("completed", "success");
-            String title = "有小说更新";
+            String title = "有多本小说更新";
             String content = "没有";
             if (updatedBooks.size() == 1) {
-                content = "《" + updatedBooks.get(0) + "》";
+                title = "《" + updatedBooks.get(0).getBookName() + "》有更新";
+                content = "最新章节："+updatedBooks.get(0).getBookLastUpdate();
             } else if (updatedBooks.size() > 1)
-                content = "《" + updatedBooks.get(0) + "》" + "等" + updatedBooks.size() + "小说更新...";
+                content = "《" + updatedBooks.get(0) + "》" + "等" + updatedBooks.size() + "本小说更新...";
 
 //            ------------------------------------------------------------------------------------
             NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext());
@@ -154,7 +165,7 @@ public class UpdateBookService extends Service implements OnDataModelListener {
     }
 
     public class UpdateBookBinder extends Binder {
-        public void setIsNeedUpdate(boolean mIsNeedUpdate){
+        public void setIsNeedUpdate(boolean mIsNeedUpdate) {
             isNeedUpdate = mIsNeedUpdate;
         }
     }
@@ -163,6 +174,8 @@ public class UpdateBookService extends Service implements OnDataModelListener {
 
         @Override
         public void run() {
+            if (isBookListNull)
+                return;
             if (!isNeedUpdate)
                 return;
             //            如果当前正在更新中则推迟
@@ -178,7 +191,7 @@ public class UpdateBookService extends Service implements OnDataModelListener {
             isUpdateBackground = true;
             updateNum = 0;
             oldBooks = mAdvanceDataModel.getBookList();
-            mAdvanceDataModel.updateAllBooks();
+            mAdvanceDataModel.updateAllBooks(OnDataModelListener.TYPE_SERVICE_LISTENER);
         }
     }
 }

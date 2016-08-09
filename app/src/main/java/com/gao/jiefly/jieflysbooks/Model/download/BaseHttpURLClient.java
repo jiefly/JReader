@@ -1,8 +1,11 @@
 package com.gao.jiefly.jieflysbooks.Model.download;
 
+import android.util.Log;
+
 import com.gao.jiefly.jieflysbooks.Model.listener.OnDataStateListener;
 
 import java.io.BufferedReader;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -32,6 +35,14 @@ public class BaseHttpURLClient implements HttpURLClient {
                 sb.delete(0, sb.length());
             while ((lines = mBufferedReader.readLine()) != null)
                 sb.append(lines);
+        } catch (EOFException eof) {
+            try {
+                Thread.sleep(10000);
+                getWebResourse(url);
+                Log.e("BaseHttpURLClient",eof.getMessage());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         } /*finally {

@@ -139,14 +139,14 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
     }
 
     @Override
-    public void updateBookSyn(final Book book) {
+    public void updateBookSyn(final Book book, final int type) {
         isUpdateComplete = false;
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     if (mBookLoader.update(book))
-                        onBookUpdateSuccess(book.getBookName());
+                        onBookUpdateSuccess(book.getBookName(), type);
                     else {
                         onBookUpdateFailed();
                     }
@@ -166,7 +166,7 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
     private boolean isUpdateFailed = false;
 
     @Override
-    public void updateAllBooks() {
+    public void updateAllBooks(final int type) {
         final List<Book> books = getBookList();
         if (books != null)
             updateBookThread = new Thread(new Runnable() {
@@ -185,7 +185,7 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
                                 }
                             }
                             if (!isUpdateFailed)
-                                updateBookSyn(b);
+                                updateBookSyn(b,type);
                         }
                     }
                     Log.e("updateTime", System.currentTimeMillis() - time + "ms");
@@ -294,10 +294,16 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
     }
 
     @Override
-    public void onBookUpdateSuccess(String bookName) {
+    public void onBookUpdateSuccess(String bookName, int type) {
         isUpdateComplete = true;
-        mOnDataModelListener.onBookUpdateSuccess(bookName);
-        mServiceOnDataModelListener.onBookUpdateSuccess(bookName);
+        switch (type) {
+            case OnDataModelListener.TYPE_ACTIVIT_LISTENER:
+                mOnDataModelListener.onBookUpdateSuccess(bookName, OnDataModelListener.TYPE_ACTIVIT_LISTENER);
+                break;
+            case OnDataModelListener.TYPE_SERVICE_LISTENER:
+                mServiceOnDataModelListener.onBookUpdateSuccess(bookName, OnDataModelListener.TYPE_SERVICE_LISTENER);
+                break;
+        }
     }
 
     @Override

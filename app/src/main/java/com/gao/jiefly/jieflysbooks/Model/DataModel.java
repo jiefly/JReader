@@ -43,10 +43,10 @@ interface DataModel {
     //    更新书籍
     void updateBook(Book book);
 //    更新书籍（异步）
-    void updateBookSyn(Book book);
+    void updateBookSyn(Book book,int type);
 
     //    更新所有书籍
-    void updateAllBooks();
+    void updateAllBooks(int type);
 
     //    获取某一章节
     Chapter getChapter(String bookName, int index);

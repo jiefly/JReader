@@ -104,16 +104,18 @@ public class PresentMain implements OnDataModelListener {
     }
 
     //    绑定后台更新service
-    public void bindUpdateBookService() {
-        Intent intent = new Intent(mContext, UpdateBookService.class);
-        isBound = mContext.bindService(intent, mServiceConnection, Service.BIND_AUTO_CREATE);
-        Log.e("bind","bind success:"+isBound);
+    public void bindUpdateBookService(Context context) {
+        Intent intent = new Intent(context, UpdateBookService.class);
+        isBound = context.bindService(intent, mServiceConnection, Service.BIND_AUTO_CREATE);
+        if (isBound) Log.e("bind", "bind success:" + isBound);
     }
 
     //    在前台不可见的时候取消绑定
-    public void unBindUpdateBookService() {
-        if (isBound)
-            mContext.unbindService(mServiceConnection);
+    public void unBindUpdateBookService(Context context) {
+        if (isBound){
+            context.unbindService(mServiceConnection);
+
+        }
     }
 
     //  设置activity前台可见的时候不后台更新
@@ -153,7 +155,7 @@ public class PresentMain implements OnDataModelListener {
 
     //    更新所有书籍
     public void updateBookList() {
-        mAdvanceDataModel.updateAllBooks();
+        mAdvanceDataModel.updateAllBooks(OnDataModelListener.TYPE_ACTIVIT_LISTENER);
         mBookList = mAdvanceDataModel.getBookList();
     }
 /*//    更新书籍的最近读取章节
@@ -189,6 +191,7 @@ public class PresentMain implements OnDataModelListener {
                     }
 
                     mView.readBook(book);
+                    setUpdateFlag(false);
                 }
             }).start();
         }
@@ -281,7 +284,7 @@ public class PresentMain implements OnDataModelListener {
     private Main.BookListRecycleViewAdapter.ItemViewHolder mItemViewHolder;
 
     @Override
-    public void onBookUpdateSuccess(String bookName) {
+    public void onBookUpdateSuccess(String bookName, int type) {
         mView.updateBook(bookName);
         if (countUpdate++ >= mBookList.size() - 1) {
             mView.stopRefreshAnim();

@@ -72,10 +72,10 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         mPresentMain = PresentMain.getInstance(getApplicationContext(), this);
-        Intent intent = new Intent(Main.this, UpdateBookService.class);
-        intent.putExtra("time", 1200000);
+//        mPresentMain.bindUpdateBookService(Main.this);
+        Intent intent = new Intent(getApplicationContext(), UpdateBookService.class);
+        intent.putExtra("time", 1000 * 10);
         startService(intent);
-        mPresentMain.bindUpdateBookService();
         ButterKnife.inject(this);
         data = mPresentMain.getBookList();
         mIdMainSwipeRefreshLayout.setOnRefreshListener(this);
@@ -232,19 +232,47 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     protected void onResume() {
         super.onResume();
         mPresentMain.setUpdateFlag(false);
+        Log.e("main", "onResume");
+        data = mPresentMain.getBookList();
+        adapter.notifyItemRangeChanged(0, data.size());
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mPresentMain.bindUpdateBookService(getBaseContext());
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.e("main", "onDestroy");
+//        mPresentMain.unBindUpdateBookService(getBaseContext());
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.e("main","onrestart");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-//        mPresentMain.unBindUpdateBookService();
-//        getApplicationContext().unbindService(mPresentMain.mServiceConnection);
+        Log.e("main","onpause");
         if (isFinishing()) {
 //            onDestroy 有bug activity finish 的时候ondestroy不会调用
 //            于是在onPause中判断当前是否是退出activity，是的话在这里做相关操作
-            mPresentMain.unBindUpdateBookService();
-        } else
-            mPresentMain.setUpdateFlag(true);
+            mPresentMain.unBindUpdateBookService(getBaseContext());
+        }
+        mPresentMain.setUpdateFlag(true);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.e("main","onstop");
+//        mPresentMain.setUpdateFlag(true);
     }
 
     @OnClick(R.id.id_main_add_book_fab)
@@ -453,7 +481,6 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
             exitTime = System.currentTimeMillis();
         } else {
             finish();
-            System.exit(0);
         }
     }
 

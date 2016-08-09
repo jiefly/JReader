@@ -107,12 +107,12 @@ public class BaseDataModel implements DataModel {
     }
 
     @Override
-    public void updateBookSyn(Book book) {
+    public void updateBookSyn(Book book ,int type) {
 
     }
 
     @Override
-    public void updateAllBooks() {
+    public void updateAllBooks(int type) {
 
     }
 

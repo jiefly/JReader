@@ -798,7 +798,7 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
     }
 
     @Override
-    public void onBookUpdateSuccess(String bookName) {
+    public void onBookUpdateSuccess(String bookName,int type) {
 
     }
 

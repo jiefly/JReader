@@ -13,7 +13,7 @@ public interface OnDataModelListener {
     int TYPE_ACTIVIT_LISTENER = 0x10;
     void onBookAddSuccess(Book book);
     void onBookAddFailed();
-    void onBookUpdateSuccess(String bookName);
+    void onBookUpdateSuccess(String bookName,int type);
     void onBookUpdateFailed();
     void onBookRemoveSuccess();
     void onChapterLoadSuccess(Chapter chapter);
