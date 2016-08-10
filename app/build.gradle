@@ -35,4 +35,5 @@ dependencies {
     compile 'com.daimajia.numberprogressbar:library:1.2@aar'
     compile 'com.melnykov:floatingactionbutton:1.2.0'
     compile 'eu.the4thfloor.volley:com.android.volley:2015.05.28'
+    compile 'com.readystatesoftware.systembartint:systembartint:1.0.3'
 }

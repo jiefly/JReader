@@ -118,6 +118,7 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
         mIdToolBar.setTitle("");
         setSupportActionBar(mIdToolBar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         getSupportActionBar().setShowHideAnimationEnabled(true);
         mIdToolBar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override

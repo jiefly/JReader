@@ -111,6 +111,7 @@ public class UpdateBookService extends Service implements OnDataModelListener {
 
     @Override
     public void onBookUpdateCompleted() {
+        updatedBooks.clear();
         updateNum = 0;
         List<Book> newBooks = mAdvanceDataModel.getBookList();
         for (Book book : newBooks)
