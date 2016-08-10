@@ -3,15 +3,13 @@ package com.gao.jiefly.jieflysbooks.View;
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuInflater;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -27,6 +25,10 @@ import java.util.List;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+
 /**
  * Created by jiefly on 2016/8/9.
  * Email:jiefly1993@gmail.com
@@ -40,9 +42,12 @@ public class ScanTxtView extends AppCompatActivity {
     Toolbar mIdScanToolBar;
     @InjectView(R.id.id_scan_dir_path_tv)
     TextView mIdScanDirPathTv;
+    @InjectView(R.id.id_scan_tool_bar_scan_tv)
+    TextView mIdScanToolBarScanTv;
     private FragmentManager fragmentManager = null;
     private FragmentTransaction fragmentTransaction = null;
     private DirectoryFragment mDirectoryFragment;
+    private FragmentScan mFragmentScan;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,10 +67,18 @@ public class ScanTxtView extends AppCompatActivity {
         setSupportActionBar(mIdScanToolBar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("");
-
+        mIdScanToolBarScanTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.replace(R.id.fragment_container, mFragmentScan, mFragmentScan.toString());
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit();
+            }
+        });
         fragmentManager = getSupportFragmentManager();
         fragmentTransaction = fragmentManager.beginTransaction();
-
+        mFragmentScan = new FragmentScan();
         mDirectoryFragment = new DirectoryFragment();
         mDirectoryFragment.setDelegate(new DirectoryFragment.DocumentSelectActivityDelegate() {
 
@@ -89,12 +102,22 @@ public class ScanTxtView extends AppCompatActivity {
         fragmentTransaction.commit();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
-        MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.activity_scan_txt, menu);
-        return true;
+    /* @Override
+     public boolean onCreateOptionsMenu(Menu menu) {
+         super.onCreateOptionsMenu(menu);
+         MenuInflater menuInflater = getMenuInflater();
+         menuInflater.inflate(R.menu.activity_scan_txt, menu);
+         return true;
+     }*/
+    public void hideScanTv(boolean isHide) {
+        Observable.just(isHide)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        mIdScanToolBarScanTv.setVisibility(!aBoolean ? View.VISIBLE : View.GONE);
+                    }
+                });
     }
 
     @Override
@@ -102,7 +125,7 @@ public class ScanTxtView extends AppCompatActivity {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
 //            到最上层的文件夹时才退出当前activity
             if (mDirectoryFragment.onBackPressed_())
-                return super.onKeyDown(keyCode,event);
+                return super.onKeyDown(keyCode, event);
             return false;
         }
         return super.onKeyDown(keyCode, event);
@@ -123,9 +146,14 @@ public class ScanTxtView extends AppCompatActivity {
 
     @OnClick(R.id.id_sacn_txt_btn)
     public void onClick() {
-        long time = System.currentTimeMillis();
-        walkdir(Environment.getExternalStorageDirectory(), ".txt");
-        Log.e("scantxt", "扫描时间：" + (System.currentTimeMillis() - time));
+        final long time = System.currentTimeMillis();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                walkdir(new File("/storage/emulated/0/91PandaReader/download"), ".txt");
+                Log.e("scantxt", "扫描时间：" + (System.currentTimeMillis() - time));
+            }
+        }).start();
     }
 
     public List<File> walkdir(File dir, String pattern) {
@@ -145,6 +173,16 @@ public class ScanTxtView extends AppCompatActivity {
                             //Do what ever u want
                             Log.e("scanTxt", "path:" + listFile[i].getAbsolutePath() + "name:" + listFile[i].getName());
                             result.add(listFile[i]);
+                            mFragmentScan.addItem(listFile[i]);
+                            String value = "扫描结果 " + mFragmentScan.mFiles.size() + " 本";
+                            Observable.just(value)
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(new Action1<String>() {
+                                        @Override
+                                        public void call(String s) {
+                                            mIdScanDirPathTv.setText(s);
+                                        }
+                                    });
                         }
                     }
                 }
@@ -161,4 +199,5 @@ public class ScanTxtView extends AppCompatActivity {
                 || ub == Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION || ub == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS
                 || ub == Character.UnicodeBlock.GENERAL_PUNCTUATION;
     }
+
 }

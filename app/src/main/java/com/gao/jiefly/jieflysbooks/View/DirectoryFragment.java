@@ -401,7 +401,7 @@ public class DirectoryFragment extends Fragment {
             }
         });
         for (File file : files) {
-            if (file.getName().startsWith(".")) {
+            if (file.getName().startsWith(".") ||(!file.getName().endsWith(".txt")&& !file.isDirectory())) {
                 continue;
             }
             ListItem item = new ListItem();
@@ -419,6 +419,8 @@ public class DirectoryFragment extends Fragment {
                 if (fname.endsWith(".jpg") || fname.endsWith(".png")
                         || fname.endsWith(".gif") || fname.endsWith(".jpeg")) {
                     item.thumb = file.getAbsolutePath();
+                }else if (fname.endsWith(".txt")){
+                    item.icon = R.drawable.txt_icon;
                 }
             }
             items.add(item);

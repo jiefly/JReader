@@ -24,6 +24,18 @@ import java.util.regex.Pattern;
  * Fighting_jiiiiie
  */
 public class Utils {
+//    获取文件大小
+    public static String formatFileSize(long size) {
+        if (size < 1024) {
+            return String.format("%d B", size);
+        } else if (size < 1024 * 1024) {
+            return String.format("%.1f KB", size / 1024.0f);
+        } else if (size < 1024 * 1024 * 1024) {
+            return String.format("%.1f MB", size / 1024.0f / 1024.0f);
+        } else {
+            return String.format("%.1f GB", size / 1024.0f / 1024.0f / 1024.0f);
+        }
+    }
 //    将文字转码
     public static String UrlEncoder(String value,String charsetName){
         String reslut = null;

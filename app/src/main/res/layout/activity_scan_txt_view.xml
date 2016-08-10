@@ -3,21 +3,34 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
-	android:fitsSystemWindows="true"
 	android:layout_height="match_parent"
+	android:fitsSystemWindows="true"
 	tools:context="com.gao.jiefly.jieflysbooks.View.ScanTxtView">
 	<android.support.v7.widget.Toolbar
 		android:id="@+id/id_scan_tool_bar"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:background="@color/theme_green">
-		<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center"
-		 android:text="添加书籍" android:textSize="20sp" android:textStyle="bold"/>
+		<TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+		          android:layout_gravity="center"
+		          android:textColor="@color/white"
+		          android:text="添加书籍" android:textSize="18sp" />
+		<TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+		          android:text="扫描"
+		          android:id="@+id/id_scan_tool_bar_scan_tv"
+		          android:textColor="@color/white"
+		          android:layout_marginEnd="10dp"
+		          android:textSize="16sp"
+		          android:layout_gravity="end" android:layout_marginRight="10dp"/>
 	</android.support.v7.widget.Toolbar>
-	<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/id_scan_dir_path_tv"
-	          android:layout_below="@id/id_scan_tool_bar" android:layout_alignParentLeft="true"
-	          android:layout_alignParentStart="true" android:textSize="15sp" android:layout_marginStart="10dp"
-	          android:layout_marginLeft="10dp"/>
+	<TextView android:id="@+id/id_scan_dir_path_tv" android:layout_width="match_parent"
+	          android:layout_height="wrap_content"
+	          android:layout_alignParentLeft="true" android:layout_alignParentStart="true"
+	          android:layout_below="@id/id_scan_tool_bar"
+	          android:layout_marginBottom="10dp"
+	          android:layout_marginLeft="10dp" android:layout_marginStart="10dp"
+	          android:layout_marginTop="10dp"
+	          android:textSize="15sp"/>
 	<RelativeLayout
 		android:id="@+id/fragment_container"
 		android:layout_width="match_parent"
