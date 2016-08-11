@@ -49,13 +49,17 @@ public class BookLoader {
         int result = db.delete("Book", "name=?", bookName);
         return result > 0;
     }
+
     //    关闭数据库
-    public void closeDB(){
+    public void closeDB() {
         mBookDatabaseHelper.close();
         mChapterListDatabaseHelper.close();
     }
+
     //    更新数据库中的小说章节列表
     private void updateChapterList(String bookName) throws MalformedURLException {
+        if (!getBook(bookName).getBookUrl().startsWith("http"))
+            return;
         List<Chapter> chaptersFromHttp = getChapterListFromHttp(getBook(bookName).getBookUrl());
         Book.ChapterList chaptersFromDB = getChapterListFromDB(bookName);
         if (chaptersFromHttp != null) {
@@ -80,7 +84,7 @@ public class BookLoader {
         ContentValues contentValues = new ContentValues();
         contentValues.put("chapterIndex", index);
         contentValues.put("isCached", book.isCached() ? 0x10 : 0x01);
-        contentValues.put("hasUpdate",book.getHasUpdate());
+        contentValues.put("hasUpdate", book.getHasUpdate());
         db.update("Book", contentValues, "name=?", new String[]{book.getBookName()});
         try {
             Log.e(TAG, "after index:" + getBook(book.getBookName()).getReadChapterIndex() + "isCached:" + getBook(book.getBookName()).isCached());
@@ -182,6 +186,7 @@ public class BookLoader {
                 book.setBookNewTopicUrl(cursor.getString(cursor.getColumnIndex("recentTopicUrl")));
                 book.setReadChapterIndex(cursor.getInt(cursor.getColumnIndex("chapterIndex")));
                 book.setCached(cursor.getInt(cursor.getColumnIndex("isCached")) == 0x10);
+                book.setLocal(cursor.getInt(cursor.getColumnIndex("isLocal")) == 0x10);
                 book.setHsaUpdateByShort(cursor.getInt(cursor.getColumnIndex("hasUpdate")));
                 data.add(book);
             } while (cursor.moveToNext());
@@ -207,6 +212,7 @@ public class BookLoader {
             book.setBookNewTopicUrl(cursor.getString(cursor.getColumnIndex("recentTopicUrl")));
             book.setReadChapterIndex(cursor.getInt(cursor.getColumnIndex("chapterIndex")));
             book.setCached(cursor.getInt(cursor.getColumnIndex("isCached")) == 0x10);
+            book.setLocal(cursor.getInt(cursor.getColumnIndex("isLocal")) == 0x10);
             book.setHsaUpdateByShort(cursor.getInt(cursor.getColumnIndex("hasUpdate")));
             cursor.close();
             return book;
@@ -217,8 +223,16 @@ public class BookLoader {
         return null;
     }
 
+    //    由本地txt向数据库中添加小说
+    public void addBookFromLocal(Book book) {
+        if (book == null)
+            return;
+        addBookToDB(book);
+        addChapterList(book.getChapterList());
+    }
+
     //    向数据库中添加小说
-    public Book addBook(final String bookName) throws MalformedURLException {
+    public Book addBookFromInternet(final String bookName) throws MalformedURLException {
         /*if (getBook(bookName) != null) {
             Log.w(TAG, "This book is exist,don't add again");
             return null;
@@ -227,25 +241,7 @@ public class BookLoader {
         if (book == null) {
             return null;
         }
-        SQLiteDatabase db = mBookDatabaseHelper.getWritableDatabase();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put("author", book.getBookAuthor());
-        contentValues.put("name", book.getBookName());
-        contentValues.put("recentTopic", book.getBookNewTopicTitle());
-        contentValues.put("recentTopicUrl", book.getBookNewTopicUrl());
-        contentValues.put("bookUrl", book.getBookUrl());
-        contentValues.put("recentUpdate", book.getBookLastUpdate());
-        contentValues.put("bookType", book.getBookStyle());
-        contentValues.put("statue", book.getBookStatu());
-        contentValues.put("chapterIndex", book.getReadChapterIndex());
-        contentValues.put("isCached", book.isCached() ? 0x10 : 0x01);
-        contentValues.put("hasUpdate",book.getHasUpdate());
-        db.insert("Book", null, contentValues);
-        db.close();
-        if (!checkAddSuccess(bookName)) {
-            Log.e(TAG, "add book failed");
-            return null;
-        }
+        if (addBookToDB(book)) return null;
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -259,9 +255,40 @@ public class BookLoader {
         return book;
     }
 
+    private boolean addBookToDB(Book book) {
+        String bookName = book.getBookName();
+        SQLiteDatabase db = mBookDatabaseHelper.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("author", book.getBookAuthor());
+        contentValues.put("name", book.getBookName());
+        contentValues.put("recentTopic", book.getBookNewTopicTitle());
+        contentValues.put("recentTopicUrl", book.getBookNewTopicUrl());
+        contentValues.put("bookUrl", book.getBookUrl());
+        contentValues.put("recentUpdate", book.getBookLastUpdate());
+        contentValues.put("bookType", book.getBookStyle());
+        contentValues.put("statue", book.getBookStatu());
+        contentValues.put("chapterIndex", book.getReadChapterIndex());
+        contentValues.put("isCached", book.isCached() ? 0x10 : 0x01);
+        contentValues.put("hasUpdate", book.getHasUpdate());
+        contentValues.put("isLocal", book.isLocal() ? 0x10 : 0x01);
+        db.insert("Book", null, contentValues);
+        db.close();
+        if (!checkAddSuccess(bookName)) {
+            Log.e(TAG, "add book failed");
+            return false;
+        }
+        return true;
+    }
+
     //    更新数据库中的书籍信息
-    public boolean update(Book book) throws MalformedURLException {
-        Book updateBook = updateBookByUrl(new URL(book.getBookUrl()));
+    public boolean update(Book book) {
+        Book updateBook = null;
+        try {
+            updateBook = updateBookByUrl(new URL(book.getBookUrl()));
+        } catch (MalformedURLException e) {
+//            e.printStackTrace();
+            return true;
+        }
         if (updateBook == null)
             return false;
         SQLiteDatabase db = mBookDatabaseHelper.getWritableDatabase();
@@ -269,9 +296,13 @@ public class BookLoader {
         contentValues.put("recentTopic", updateBook.getBookNewTopicTitle());
         contentValues.put("recentTopicUrl", updateBook.getBookNewTopicUrl());
         contentValues.put("recentUpdate", updateBook.getBookLastUpdate());
-        if (!book.getBookLastUpdate().equals(updateBook.getBookLastUpdate())){
-            contentValues.put("hasUpdate",0x10);
-            updateChapterList(book.getBookName());
+        if (!book.getBookLastUpdate().equals(updateBook.getBookLastUpdate())) {
+            contentValues.put("hasUpdate", 0x10);
+            try {
+                updateChapterList(book.getBookName());
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
         }
         int result = db.update("Book", contentValues, "name=?", new String[]{updateBook.getBookName()});
         return result > 0;

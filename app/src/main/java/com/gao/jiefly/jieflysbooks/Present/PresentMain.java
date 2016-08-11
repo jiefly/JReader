@@ -144,12 +144,12 @@ public class PresentMain implements OnDataModelListener {
             }
         }
         mAdvanceDataModel.addBookSyn(bookName);
-        Log.e("addBook", "正在加载书籍");
+        Log.e("addBookFromInternet", "正在加载书籍");
         mView.showSnackbar("正在从网络上获取书籍，请稍后");
-        /*Book book = mAdvanceDataModel.addBook(bookName);
-        Log.i("addBook", book.toString());
+        /*Book book = mAdvanceDataModel.addBookFromInternet(bookName);
+        Log.i("addBookFromInternet", book.toString());
         //            mBookList.add(book);
-        mView.addBook(book);*/
+        mView.addBookFromInternet(book);*/
     }
 
     //    更新所有书籍
@@ -272,7 +272,7 @@ public class PresentMain implements OnDataModelListener {
     @Override
     public void onBookAddSuccess(Book book) {
         mView.addBook(book);
-        Log.e("addBook", "加载书籍完毕");
+        Log.e("addBookFromInternet", "加载书籍完毕");
     }
 
     @Override

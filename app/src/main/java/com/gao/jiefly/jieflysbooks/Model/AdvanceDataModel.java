@@ -87,7 +87,7 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
     public Book addBook(String name) {
         Book book = null;
         try {
-            book = mBookLoader.addBook(name);
+            book = mBookLoader.addBookFromInternet(name);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -101,7 +101,7 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
             public void run() {
                 try {
                     Book book;
-                    book = mBookLoader.addBook(name);
+                    book = mBookLoader.addBookFromInternet(name);
                     if (book != null)
                         onBookAddSuccess(book);
                     else
@@ -131,11 +131,7 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
 
     @Override
     public void updateBook(Book book) {
-        try {
-            mBookLoader.update(book);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
+        mBookLoader.update(book);
     }
 
     @Override
@@ -144,14 +140,10 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    if (mBookLoader.update(book))
-                        onBookUpdateSuccess(book.getBookName(), type);
-                    else {
-                        onBookUpdateFailed();
-                    }
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
+                if (mBookLoader.update(book))
+                    onBookUpdateSuccess(book.getBookName(), type);
+                else {
+                    onBookUpdateFailed();
                 }
             }
         }).start();
@@ -255,7 +247,7 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
     @Override
     public void addChapter(String bookName, int index) {
         try {
-            mBookLoader.addBook(bookName);
+            mBookLoader.addBookFromInternet(bookName);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }

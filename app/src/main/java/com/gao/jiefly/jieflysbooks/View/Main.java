@@ -72,6 +72,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+//        LocalBookSegmentation.getInstance();
         mPresentMain = PresentMain.getInstance(getApplicationContext(), this);
 //        mPresentMain.bindUpdateBookService(Main.this);
         Intent intent = new Intent(getApplicationContext(), UpdateBookService.class);
@@ -208,13 +209,14 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
             mIdRv.setAdapter(adapter);
             mIdMainAddBookFab.attachToRecyclerView(mIdRv);
         }
+
+
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        for (String s : data.getStringArrayExtra("chooseBooks"))
-            Log.e("onActivityResult", s);
+
         showSnackbar("success");
     }
 

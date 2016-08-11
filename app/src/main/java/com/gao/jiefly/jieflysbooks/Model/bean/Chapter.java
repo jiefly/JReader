@@ -19,6 +19,7 @@ public class Chapter {
     private String title;
     private String bookName;
     private int index;
+    private boolean isLocal = false;
 
     public String getContent() {
         return content;
@@ -54,11 +55,18 @@ public class Chapter {
         this.index = index;
     }
 
-    public Chapter(String url, String name, String bookName) {
+    public Chapter(String url, String title, String bookName) {
         this.url = url;
-        this.title = name;
+        this.title = title;
         this.bookName = bookName;
 
+    }
+    public Chapter (String title,String bookName,int index,String url){
+        this.title = title;
+        this.bookName = bookName;
+        this.index = index;
+        isLocal = true;
+        this.url = url;
     }
     public Chapter(String url){
         this.url = url;

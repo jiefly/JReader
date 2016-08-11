@@ -36,7 +36,7 @@ public class ChapterLoader {
     private static final int IO_BUFFER_SIZE = 512;
     private static Configuration mConfiguration;
     //    如果没有配置的话，默认开启磁盘缓存，关闭内存缓存
-    private boolean isNeedCacheInMemory = true;
+    private boolean isNeedCacheInMemory = false;
     private boolean isNeedCacheInDisk = true;
     private boolean mIsDiskCacheCreated = false;
     //    小说章节内存缓存
@@ -59,7 +59,7 @@ public class ChapterLoader {
     }
 
     //    缓存所有章节
-    public void cacheAllChapter(final List<String> urlList, final OnChapterCacheListener onChapterCacheListener){
+    public void cacheAllChapter(final List<String> urlList, final OnChapterCacheListener onChapterCacheListener) {
         mOnChapterCacheListener = onChapterCacheListener;
         for (final String url : urlList) {
             Chapter chapter = null;
@@ -112,6 +112,17 @@ public class ChapterLoader {
                 }
             }
         }).start();*/
+    }
+
+    //    移除缓存章节
+    public boolean removeChapter(String url) {
+        String key = hashKeyForUrl(url);
+        try {
+            return mDiskCache.remove(key);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     //    缓存章节
@@ -236,7 +247,7 @@ public class ChapterLoader {
     }
 
     //    向磁盘缓存中添加内容
-    private void addChapterToDiskCache(String url, Chapter chapter) throws IOException {
+    public void addChapterToDiskCache(String url, Chapter chapter) throws IOException {
         String key = hashKeyForUrl(url);
         DiskLruCache.Editor editor = mDiskCache.edit(key);
         if (editor != null) {

@@ -129,9 +129,9 @@ public class UpdateBookService extends Service implements OnDataModelListener {
             String content = "没有";
             if (updatedBooks.size() == 1) {
                 title = "《" + updatedBooks.get(0).getBookName() + "》有更新";
-                content = "最新章节：" + updatedBooks.get(0).getBookLastUpdate();
+                content = "最新章节：" + updatedBooks.get(0).getBookNewTopicTitle();
             } else if (updatedBooks.size() > 1)
-                content = "《" + updatedBooks.get(0) + "》" + "等" + updatedBooks.size() + "本小说更新...";
+                content = "《" + updatedBooks.get(0).getBookName() + "》" + "等 " + updatedBooks.size() + " 本小说更新...";
 
 //            ------------------------------------------------------------------------------------
             NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext());

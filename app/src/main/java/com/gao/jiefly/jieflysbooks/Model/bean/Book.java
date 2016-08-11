@@ -1,5 +1,7 @@
 package com.gao.jiefly.jieflysbooks.Model.bean;
 
+import android.util.Log;
+
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -25,21 +27,26 @@ public class Book implements Serializable {
     private ChapterList mChapterList = null;
     private int readChapterIndex = 0;
     private boolean isCached = false;
+    private boolean isLocal = false;
 
     public boolean isHasUpdate() {
         return hasUpdate;
     }
+
     private SimpleDateFormat mSimpleDateFormat;
 
     public void setHasUpdate(boolean hasUpdate) {
         this.hasUpdate = hasUpdate;
     }
-    public void setHsaUpdateByShort(int hasUpdate){
+
+    public void setHsaUpdateByShort(int hasUpdate) {
         this.hasUpdate = hasUpdate == 0x10;
     }
-    public int getHasUpdate(){
-        return hasUpdate?0x10:0x01;
+
+    public int getHasUpdate() {
+        return hasUpdate ? 0x10 : 0x01;
     }
+
     private boolean hasUpdate = false;
 
 
@@ -55,7 +62,8 @@ public class Book implements Serializable {
                 .append("最新章节地址：").append(bookNewTopicUrl).append("\n")
                 .append("最后更新时间：").append(bookLastUpdate).append("\n")
                 .append("总字数：").append(bookTotalWords).append("\n")
-                .append("小说状态：").append(bookStatu).append("\n");
+                .append("更新状态：").append(bookStatu).append("\n")
+                .append("小说状态：").append(isLocal ? "本地" : "在线");
         return stringBuilder.toString();
     }
 
@@ -75,6 +83,14 @@ public class Book implements Serializable {
         this.bookTotalWords = bookTotalWords;
     }
 
+    public boolean isLocal() {
+        return isLocal;
+    }
+
+    public void setLocal(boolean local) {
+        isLocal = local;
+    }
+
     public String getBookStatu() {
         return bookStatu;
     }
@@ -88,6 +104,7 @@ public class Book implements Serializable {
     }
 
     public void setBookLastUpdate(String bookLastUpdate) {
+        Log.e("setBookLastUpdate", bookName + ":" + bookLastUpdate);
         this.bookLastUpdate = bookLastUpdate;
     }
 
@@ -161,20 +178,28 @@ public class Book implements Serializable {
         mChapterList = chapterList;
     }
 
+    public void setChapterList(List<Chapter> list) {
+        mChapterList = list2ChapterList(list);
+        for (Chapter chapter:list)
+            Log.e("showChapter","title:"+chapter.getTitle()+"\nurl:"+chapter.getUrl());
+    }
+
     public Date getUpdateDate() {
         if (mSimpleDateFormat == null)
             mSimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         String s = getBookLastUpdate();
-        Date date = null ;
+        Date date = null;
         try {
-            date = mSimpleDateFormat.parse(getBookLastUpdate());
+            Log.e("name", bookName);
+            Log.e("date", s);
+            date = mSimpleDateFormat.parse(s);
         } catch (ParseException e) {
             e.printStackTrace();
         }
         return date;
     }
 
-    public static class ChapterList implements Serializable{
+    public static class ChapterList implements Serializable {
         private String bookName;
         private List<String> chapterTitleList;
         private List<String> chapterUrlList;
@@ -212,10 +237,10 @@ public class Book implements Serializable {
     private Book.ChapterList list2ChapterList(List<Chapter> chapters) {
         List<String> url = new LinkedList<>();
         List<String> title = new LinkedList<>();
-        for (Chapter c : chapters) {
-            url.add(c.getUrl());
-            title.add(c.getTitle());
-        }
-        return new Book.ChapterList(chapters.get(0).getBookName(), url, title);
+            for (Chapter c : chapters) {
+                url.add(c.getUrl());
+                title.add(c.getTitle());
+            }
+        return new Book.ChapterList(bookName, url, title);
     }
 }
