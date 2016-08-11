@@ -6,6 +6,7 @@
 	<color name="textColorPrimary">#c1c7c1</color>
 
 	<!---->
+	<color name="justWhite">#fff</color>
 	<color name="white">#fafafa</color>
 	<color name="white_dark">#f3f3f3</color>
 	<color name="gray_light">#cccccc</color>

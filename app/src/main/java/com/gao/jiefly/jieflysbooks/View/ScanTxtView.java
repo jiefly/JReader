@@ -1,8 +1,10 @@
 package com.gao.jiefly.jieflysbooks.View;
 
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -19,8 +21,8 @@ import com.gao.jiefly.jieflysbooks.R;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -49,6 +51,8 @@ public class ScanTxtView extends AppCompatActivity {
     private DirectoryFragment mDirectoryFragment;
     private FragmentScan mFragmentScan;
 
+    public static final int REQUEST_CODE = 0x1001;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,13 +71,28 @@ public class ScanTxtView extends AppCompatActivity {
         setSupportActionBar(mIdScanToolBar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("");
+        mIdScanToolBar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Runtime runtime = Runtime.getRuntime();
+                try {
+                    runtime.exec("input keyevent " + KeyEvent.KEYCODE_BACK);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
         mIdScanToolBarScanTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_container, mFragmentScan, mFragmentScan.toString());
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
+                if (mIdScanToolBarScanTv.getText().toString().contains("重新")) {
+                    mFragmentScan.startScan(Environment.getExternalStorageDirectory(), ".txt");
+                } else {
+                    fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.replace(R.id.fragment_container, mFragmentScan, mFragmentScan.toString());
+                    fragmentTransaction.addToBackStack(null);
+                    fragmentTransaction.commit();
+                }
             }
         });
         fragmentManager = getSupportFragmentManager();
@@ -115,7 +134,7 @@ public class ScanTxtView extends AppCompatActivity {
                 .subscribe(new Action1<Boolean>() {
                     @Override
                     public void call(Boolean aBoolean) {
-                        mIdScanToolBarScanTv.setVisibility(!aBoolean ? View.VISIBLE : View.GONE);
+                        mIdScanToolBarScanTv.setText(!aBoolean ? "扫描" : "重新扫描");
                     }
                 });
     }
@@ -123,10 +142,11 @@ public class ScanTxtView extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (mDirectoryFragment.isVisible())
 //            到最上层的文件夹时才退出当前activity
-            if (mDirectoryFragment.onBackPressed_())
-                return super.onKeyDown(keyCode, event);
-            return false;
+                return mDirectoryFragment.onBackPressed_() && super.onKeyDown(keyCode, event);
+            else if (mFragmentScan.isVisible())
+                return mFragmentScan.onBackPressed_() && super.onKeyDown(keyCode, event);
         }
         return super.onKeyDown(keyCode, event);
     }
@@ -144,18 +164,46 @@ public class ScanTxtView extends AppCompatActivity {
         win.setAttributes(winParams);
     }
 
+    public void chooseFilesComplete(String[] filesPath){
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra("chooseBooks",filesPath);
+        setResult(REQUEST_CODE, resultIntent);
+        finish();
+    }
     @OnClick(R.id.id_sacn_txt_btn)
     public void onClick() {
         final long time = System.currentTimeMillis();
         new Thread(new Runnable() {
             @Override
             public void run() {
-                walkdir(new File("/storage/emulated/0/91PandaReader/download"), ".txt");
+//                walkdir(new File("/storage/emulated/0/91PandaReader/download"), ".txt");
                 Log.e("scantxt", "扫描时间：" + (System.currentTimeMillis() - time));
             }
         }).start();
     }
 
+    public void showText(String value) {
+        Observable.just(value)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<String>() {
+                    @Override
+                    public void call(String s) {
+                        mIdScanDirPathTv.setText(s);
+                    }
+                });
+    }
+    /*public void startScan(){
+        final long time = System.currentTimeMillis();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+//                new File("/storage/emulated/0/91PandaReader/download")
+                walkdir(Environment.getExternalStorageDirectory(), ".txt");
+                Log.e("scantxt", "扫描时间：" + (System.currentTimeMillis() - time));
+                mFragmentScan.scanCompleted();
+            }
+        }).start();
+    }
     public List<File> walkdir(File dir, String pattern) {
         String pdfPattern = pattern;
         List<File> result = new ArrayList<>();
@@ -175,19 +223,13 @@ public class ScanTxtView extends AppCompatActivity {
                             result.add(listFile[i]);
                             mFragmentScan.addItem(listFile[i]);
                             String value = "扫描结果 " + mFragmentScan.mFiles.size() + " 本";
-                            Observable.just(value)
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribe(new Action1<String>() {
-                                        @Override
-                                        public void call(String s) {
-                                            mIdScanDirPathTv.setText(s);
-                                        }
-                                    });
+
                         }
                     }
                 }
             }
         }
+
         return result;
     }
 
@@ -198,6 +240,6 @@ public class ScanTxtView extends AppCompatActivity {
                 || ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A || ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B
                 || ub == Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION || ub == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS
                 || ub == Character.UnicodeBlock.GENERAL_PUNCTUATION;
-    }
+    }*/
 
 }

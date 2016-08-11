@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -143,7 +142,7 @@ public class DirectoryFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        if (!receiverRegistered) {
+        /*if (!receiverRegistered) {
             receiverRegistered = true;
             IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_MEDIA_BAD_REMOVAL);
@@ -157,7 +156,7 @@ public class DirectoryFragment extends Fragment {
             filter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
             filter.addDataScheme("file");
             getActivity().registerReceiver(receiver, filter);
-        }
+        }*/
         if (fragmentView == null) {
             fragmentView = inflater.inflate(R.layout.document_select_layout,
                     container, false);
@@ -476,7 +475,7 @@ public class DirectoryFragment extends Fragment {
                 .setTitle(getActivity().getString(R.string.app_name))
                 .setMessage(error).setPositiveButton("确定", null).show();
     }
-    public void showSureAddBookBox(ArrayList<File> book){
+    public void showSureAddBookBox(final ArrayList<File> book){
         if (getActivity() == null)
             return;
         new AlertDialog.Builder(getActivity())
@@ -485,7 +484,11 @@ public class DirectoryFragment extends Fragment {
                 .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
+                        String[] result = new String[book.size()];
+                        for (int i = 0 ; i<book.size();i++){
+                            result[i] = book.get(i).getAbsolutePath();
+                        }
+                        ((ScanTxtView)getActivity()).chooseFilesComplete(result);
                     }
                 })
                 .setNegativeButton("取消",null).show();

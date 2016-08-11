@@ -14,6 +14,8 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -21,7 +23,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -65,7 +66,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     PopupWindow itemHeadPop = null;
     EditText etAddBookName;
     PresentMain mPresentMain;
-
+    public static final int SCAN_FLAG = 1;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -86,10 +87,40 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                 if (position == 0) {
                     if (itemHeadPop == null) {
                         android.view.View viewHeadPop = LayoutInflater.from(Main.this)
-                                .inflate(R.layout.item_head_popup, null);
+                                .inflate(R.layout.item_head_new_popup, null);
                         itemHeadPop = new PopupWindow(viewHeadPop, WindowManager.LayoutParams.MATCH_PARENT,
                                 WindowManager.LayoutParams.MATCH_PARENT);
-                        ((RadioGroup) viewHeadPop.findViewById(R.id.id_item_head_rg))
+//                        是否开启更新推送
+                        viewHeadPop.findViewById(R.id.id_main_head_pop_update_ll).setOnClickListener(new android.view.View.OnClickListener() {
+                            @Override
+                            public void onClick(android.view.View v) {
+                                itemHeadPop.dismiss();
+                            }
+                        });
+//                        设置
+                        viewHeadPop.findViewById(R.id.id_main_head_setting_update_ll).setOnClickListener(new android.view.View.OnClickListener() {
+                            @Override
+                            public void onClick(android.view.View v) {
+                                itemHeadPop.dismiss();
+                            }
+                        });
+//                        导入本地书籍
+                        viewHeadPop.findViewById(R.id.id_main_head_pop_local_ll).setOnClickListener(new android.view.View.OnClickListener() {
+                            @Override
+                            public void onClick(android.view.View v) {
+                                Intent addLocalBookIntent = new Intent(Main.this, ScanTxtView.class);
+                                startActivityForResult(addLocalBookIntent, SCAN_FLAG);
+                                itemHeadPop.dismiss();
+                            }
+                        });
+//                        书籍排序
+                        viewHeadPop.findViewById(R.id.id_main_head_sort_ll).setOnClickListener(new android.view.View.OnClickListener() {
+                            @Override
+                            public void onClick(android.view.View v) {
+                                itemHeadPop.dismiss();
+                            }
+                        });
+                        /*((RadioGroup) viewHeadPop.findViewById(R.id.id_item_head_rg))
                                 .setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
                                     @Override
                                     public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -107,7 +138,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                                             adapter.notifyItemRangeChanged(1, data.size());
                                         itemHeadPop.dismiss();
                                     }
-                                });
+                                });*/
                     }
                     itemHeadPop.showAtLocation((
                             (ViewGroup) Main.this.findViewById(android.R.id.content))
@@ -179,6 +210,14 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        for (String s : data.getStringArrayExtra("chooseBooks"))
+            Log.e("onActivityResult", s);
+        showSnackbar("success");
+    }
+
     private void initPopupWindow() {
         android.view.View popupWindow = LayoutInflater
                 .from(Main.this).inflate(R.layout.add_book_popupwindow, null);
@@ -221,6 +260,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
             }
         });
     }
+
     @Override
     protected void onDestroy() {
         Log.e("main", "onDestroy");
@@ -234,6 +274,14 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
         data = mPresentMain.getBookList();
         Log.back_btn_bg("onRestart", data.size() + "");
     }*/
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.activity_scan_txt, menu);
+        return true;
+    }
 
     @Override
     protected void onResume() {
@@ -253,13 +301,13 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     @Override
     protected void onRestart() {
         super.onRestart();
-        Log.e("main","onrestart");
+        Log.e("main", "onrestart");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        Log.e("main","onpause");
+        Log.e("main", "onpause");
 //        if (isFinishing()) {
 ////            onDestroy 有bug activity ｅｘｉｔ 的时候ondestroy不会调用
 ////            于是在onPause中判断当前是否是退出activity，是的话在这里做相关操作
@@ -271,7 +319,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     @Override
     protected void onStop() {
         super.onStop();
-        Log.e("main","onstop");
+        Log.e("main", "onstop");
 //        mPresentMain.setUpdateFlag(true);
     }
 
