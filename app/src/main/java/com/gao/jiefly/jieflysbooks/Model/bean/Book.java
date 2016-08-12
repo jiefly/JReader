@@ -22,8 +22,10 @@ public class Book implements Serializable {
     private String bookNewTopicTitle = null;
     private String bookNewTopicUrl = null;
     private String bookLastUpdate = null;
+    private String bookUpdateTimeUrl = null;
     private String bookStatu = null;
     private String bookCover = null;
+    private String bookResource = null;
     private int bookTotalWords;
     private ChapterList mChapterList = null;
     private int readChapterIndex = 0;
@@ -64,7 +66,9 @@ public class Book implements Serializable {
                 .append("最后更新时间：").append(bookLastUpdate).append("\n")
                 .append("总字数：").append(bookTotalWords).append("\n")
                 .append("更新状态：").append(bookStatu).append("\n")
+                .append("更新时间地址：").append(bookUpdateTimeUrl).append("\n")
                 .append("封面图片：").append(bookCover).append("\n")
+                .append("数据来源：").append(bookResource).append("\n")
                 .append("小说状态：").append(isLocal ? "本地" : "在线");
         return stringBuilder.toString();
     }
@@ -87,6 +91,14 @@ public class Book implements Serializable {
 
     public void setBookCover(String bookCover) {
         this.bookCover = bookCover;
+    }
+
+    public String getBookUpdateTimeUrl() {
+        return bookUpdateTimeUrl;
+    }
+
+    public void setBookUpdateTimeUrl(String bookUpdateTimeUrl) {
+        this.bookUpdateTimeUrl = bookUpdateTimeUrl;
     }
 
     public void setBookTotalWords(int bookTotalWords) {
@@ -128,6 +140,14 @@ public class Book implements Serializable {
 
     public String getBookUrl() {
         return bookUrl;
+    }
+
+    public String getBookResource() {
+        return bookResource;
+    }
+
+    public void setBookResource(String bookResource) {
+        this.bookResource = bookResource;
     }
 
     public void setBookUrl(String bookUrl) {

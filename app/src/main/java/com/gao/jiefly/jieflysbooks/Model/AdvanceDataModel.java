@@ -5,6 +5,8 @@ import android.util.Log;
 
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnBookAddFromSoDuListener;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnBookUpdateFromSoDuListener;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnChapterCacheListener;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnDataModelListener;
 import com.gao.jiefly.jieflysbooks.Model.loader.BookLoader;
@@ -96,7 +98,18 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
 
     @Override
     public void addBookSyn(final String name) {
-        new Thread(new Runnable() {
+        mBookLoader.addBookFromInternet(name, new OnBookAddFromSoDuListener() {
+            @Override
+            public void onSuccess(Book book) {
+                onBookAddSuccess(book);
+            }
+
+            @Override
+            public void onFailed(Exception error) {
+                onBookAddFailed();
+            }
+        });
+       /* new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -110,7 +123,7 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
                     e.printStackTrace();
                 }
             }
-        }).start();
+        }).start();*/
     }
 
     @Override
@@ -137,7 +150,19 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
     @Override
     public void updateBookSyn(final Book book, final int type) {
         isUpdateComplete = false;
-        new Thread(new Runnable() {
+        mBookLoader.update(book, new OnBookUpdateFromSoDuListener() {
+            @Override
+            public void onSuccess(Book book) {
+
+                onBookUpdateSuccess(book.getBookName(), type);
+            }
+
+            @Override
+            public void onFailed(Exception error) {
+                onBookUpdateFailed();
+            }
+        });
+        /*new Thread(new Runnable() {
             @Override
             public void run() {
                 if (mBookLoader.update(book))
@@ -146,7 +171,7 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
                     onBookUpdateFailed();
                 }
             }
-        }).start();
+        }).start();*/
     }
 
     public void cacheChapterFromList(List<String> urlList, OnChapterCacheListener onChapterCacheListener) {

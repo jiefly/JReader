@@ -33,7 +33,6 @@ import android.widget.Toast;
 import com.daimajia.numberprogressbar.NumberProgressBar;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnDataStateListener;
-import com.gao.jiefly.jieflysbooks.Model.loader.GetBookFromSoDu;
 import com.gao.jiefly.jieflysbooks.Present.PresentMain;
 import com.gao.jiefly.jieflysbooks.R;
 import com.gao.jiefly.jieflysbooks.Service.UpdateBookService;
@@ -77,7 +76,34 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        new GetBookFromSoDu().getBook("寒门状元","秋水轩");
+       /* new GetBookFromSoDu().getBook("寒门状元", "秋水轩", new OnBookAddFromSoDuListener() {
+            @Override
+            public void onSuccess(Book book) {
+                Log.e("success",book.toString());
+            }
+
+            @Override
+            public void onFailed(Exception error) {
+
+            }
+        });*/
+        /*Book book = new Book();
+        book.setBookUrl("http://www.qiushuixuan.cc/book/14/14757/");
+        book.setBookUpdateTimeUrl("http://www.sodu.cc/mulu_368538.html");
+        book.setBookResource("秋水轩");
+      new GetBookFromSoDu().getBookUpdateInfo(book, new OnBookUpdateFromSoDuListener() {
+          @Override
+          public void onSuccess(Book book) {
+              Book s = book;
+              Log.e("success",s.toString());
+          }
+
+          @Override
+          public void onFailed(Exception error) {
+
+          }
+      });*/
+
 //        加载本地书籍
 //        LocalBookSegmentation.getInstance();
         mPresentMain = PresentMain.getInstance(getApplicationContext(), this);

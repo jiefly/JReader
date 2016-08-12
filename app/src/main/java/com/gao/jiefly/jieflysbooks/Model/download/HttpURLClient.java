@@ -14,4 +14,5 @@ public interface HttpURLClient {
     void getWebResource(String url, OnDataStateListener onDataStateListener);
     void getWebResource(String url, OnDataStateListener onDataStateListener,String chatset);
     String getWebResourse(String url);
+    String getWebResourse(String url,String chatset);
 }

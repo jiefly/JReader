@@ -10,6 +10,9 @@ import com.gao.jiefly.jieflysbooks.Model.CustomDatabaseHelper;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
 import com.gao.jiefly.jieflysbooks.Model.download.BaseHttpURLClient;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnBookAddFromSoDuListener;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnBookUpdateFromSoDuListener;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnChapterGetListener;
 import com.gao.jiefly.jieflysbooks.Utils.Utils;
 
 import java.net.MalformedURLException;
@@ -30,6 +33,7 @@ public class BookLoader {
     private static final String TAG = "BookLoader";
     private CustomDatabaseHelper mBookDatabaseHelper;
     private CustomDatabaseHelper mChapterListDatabaseHelper;
+    private static final String DEFAULT_WEB_NAME = "秋水轩";
 
     public BookLoader(Context context) {
         mBookDatabaseHelper = new CustomDatabaseHelper(context, "bookStore.db", null, 1, CustomDatabaseHelper.BOOK_TYPE);
@@ -57,10 +61,11 @@ public class BookLoader {
     }
 
     //    更新数据库中的小说章节列表
-    private void updateChapterList(String bookName) throws MalformedURLException {
-        if (!getBook(bookName).getBookUrl().startsWith("http"))
-            return;
-        List<Chapter> chaptersFromHttp = getChapterListFromHttp(getBook(bookName).getBookUrl());
+    private void updateChapterList(List<Chapter> newChapter, String bookName) throws MalformedURLException {
+//        if (!getBook(bookName).getBookUrl().startsWith("http"))
+//            return;
+//        List<Chapter> chaptersFromHttp = getChapterListFromHttp(getBook(bookName).getBookUrl());
+        List<Chapter> chaptersFromHttp = newChapter;
         Book.ChapterList chaptersFromDB = getChapterListFromDB(bookName);
         if (chaptersFromHttp != null) {
             if (chaptersFromDB == null || chaptersFromHttp.size() > chaptersFromDB.getChapterUrlList().size()) {
@@ -101,7 +106,7 @@ public class BookLoader {
         List<Chapter> result = Utils.getChapterListFromHtml(srcHtml);
         for (Chapter c : result) {
             // 拼接好地址
-            c.setUrl(url + "/" + c.getUrl());
+            c.setUrl(url +"/"+ c.getUrl());
         }
         return result;
     }
@@ -163,7 +168,17 @@ public class BookLoader {
             db.insert("chapterList", null, contentValues);
         }
     }
-
+    //直接将小说列表添加到数据库中
+    private void addChapterList(Book book) {
+        SQLiteDatabase db = mChapterListDatabaseHelper.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("bookName", book.getBookName());
+        for (int i = 0; i < book.getChapterList().getChapterUrlList().size(); i++) {
+            contentValues.put("chapterUrl", book.getBookUrl()+"/"+book.getChapterList().getChapterUrlList().get(i));
+            contentValues.put("chapterTitle", book.getChapterList().getChapterTitleList().get(i));
+            db.insert("chapterList", null, contentValues);
+        }
+    }
     //获取数据库中的小说所有小说列表
     public List<Book> getBookList() {
         SQLiteDatabase db = mBookDatabaseHelper.getReadableDatabase();
@@ -180,14 +195,17 @@ public class BookLoader {
                 book.setBookAuthor(cursor.getString(cursor.getColumnIndex("author")));
                 book.setBookStatu(cursor.getString(cursor.getColumnIndex("statue")));
                 book.setBookStyle(cursor.getString(cursor.getColumnIndex("bookType")));
+                book.setBookUpdateTimeUrl(cursor.getString(cursor.getColumnIndex("updateTimeUrl")));
                 book.setBookUrl(cursor.getString(cursor.getColumnIndex("bookUrl")));
                 book.setBookLastUpdate(cursor.getString(cursor.getColumnIndex("recentUpdate")));
                 book.setBookNewTopicTitle(cursor.getString(cursor.getColumnIndex("recentTopic")));
                 book.setBookNewTopicUrl(cursor.getString(cursor.getColumnIndex("recentTopicUrl")));
                 book.setReadChapterIndex(cursor.getInt(cursor.getColumnIndex("chapterIndex")));
+                book.setBookResource(cursor.getString(cursor.getColumnIndex("bookResource")));
                 book.setCached(cursor.getInt(cursor.getColumnIndex("isCached")) == 0x10);
                 book.setLocal(cursor.getInt(cursor.getColumnIndex("isLocal")) == 0x10);
                 book.setHsaUpdateByShort(cursor.getInt(cursor.getColumnIndex("hasUpdate")));
+                book.setBookCover(cursor.getString(cursor.getColumnIndex("bookCover")));
                 book.setChapterList(getChapterListFromDB(book.getBookName()));
                 data.add(book);
             } while (cursor.moveToNext());
@@ -206,6 +224,7 @@ public class BookLoader {
             book.setBookName(cursor.getString(cursor.getColumnIndex("name")));
             book.setBookAuthor(cursor.getString(cursor.getColumnIndex("author")));
             book.setBookStatu(cursor.getString(cursor.getColumnIndex("statue")));
+            book.setBookUpdateTimeUrl(cursor.getString(cursor.getColumnIndex("updateTimeUrl")));
             book.setBookStyle(cursor.getString(cursor.getColumnIndex("bookType")));
             book.setBookUrl(cursor.getString(cursor.getColumnIndex("bookUrl")));
             book.setBookLastUpdate(cursor.getString(cursor.getColumnIndex("recentUpdate")));
@@ -216,6 +235,7 @@ public class BookLoader {
             book.setLocal(cursor.getInt(cursor.getColumnIndex("isLocal")) == 0x10);
             book.setHsaUpdateByShort(cursor.getInt(cursor.getColumnIndex("hasUpdate")));
             book.setBookCover(cursor.getString(cursor.getColumnIndex("bookCover")));
+            book.setBookResource(cursor.getString(cursor.getColumnIndex("bookResource")));
             cursor.close();
             return book;
         }
@@ -231,6 +251,23 @@ public class BookLoader {
             return;
         addBookToDB(book);
         addChapterList(book.getChapterList());
+    }
+
+    public void addBookFromInternet(final String bookName, final OnBookAddFromSoDuListener listener) {
+        final GetBookFromSoDu soDu = new GetBookFromSoDu();
+        soDu.getBook(bookName, DEFAULT_WEB_NAME, new OnBookAddFromSoDuListener() {
+            @Override
+            public void onSuccess(Book book) {
+                addBookToDB(book);
+                addChapterList(book);
+                listener.onSuccess(book);
+            }
+
+            @Override
+            public void onFailed(Exception error) {
+                listener.onFailed(error);
+            }
+        });
     }
 
     //    向数据库中添加小说
@@ -263,8 +300,10 @@ public class BookLoader {
         ContentValues contentValues = new ContentValues();
         contentValues.put("author", book.getBookAuthor());
         contentValues.put("name", book.getBookName());
+        contentValues.put("updateTimeUrl", book.getBookUpdateTimeUrl());
         contentValues.put("recentTopic", book.getBookNewTopicTitle());
         contentValues.put("recentTopicUrl", book.getBookNewTopicUrl());
+        contentValues.put("bookResource", book.getBookResource());
         contentValues.put("bookUrl", book.getBookUrl());
         contentValues.put("recentUpdate", book.getBookLastUpdate());
         contentValues.put("bookType", book.getBookStyle());
@@ -273,7 +312,7 @@ public class BookLoader {
         contentValues.put("isCached", book.isCached() ? 0x10 : 0x01);
         contentValues.put("hasUpdate", book.getHasUpdate());
         contentValues.put("isLocal", book.isLocal() ? 0x10 : 0x01);
-        contentValues.put("bookCover",book.getBookCover());
+        contentValues.put("bookCover", book.getBookCover());
         db.insert("Book", null, contentValues);
         db.close();
         if (!checkAddSuccess(bookName)) {
@@ -283,31 +322,71 @@ public class BookLoader {
         return true;
     }
 
+    public void update(final Book oldbook, final OnBookUpdateFromSoDuListener listener) {
+        final GetBookFromSoDu soDu = new GetBookFromSoDu();
+        soDu.getBookUpdateInfo(oldbook, new OnBookUpdateFromSoDuListener() {
+            @Override
+            public void onSuccess(final Book newbook) {
+//                如果更新日期没有变则直接返回更新成功
+                if (!oldbook.getUpdateDate().before(newbook.getUpdateDate()))
+                    listener.onSuccess(oldbook);
+                else {
+                    update(newbook);
+                    soDu.updateBook(newbook.getBookUrl(), new OnChapterGetListener() {
+                        @Override
+                        public void onSuccess(List<Chapter> result) {
+                            try {
+                                for (Chapter chapter:result)
+                                    chapter.setUrl(oldbook.getBookUrl()+chapter.getUrl());
+                                updateChapterList(result, newbook.getBookName());
+                            } catch (MalformedURLException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        @Override
+                        public void onFailed(Exception e) {
+                            listener.onFailed(e);
+                        }
+                    });
+
+                }
+            }
+
+            @Override
+            public void onFailed(Exception error) {
+                listener.onFailed(error);
+            }
+        });
+    }
+
     //    更新数据库中的书籍信息
     public boolean update(Book book) {
-        Book updateBook = null;
-        try {
-            updateBook = updateBookByUrl(new URL(book.getBookUrl()));
-        } catch (MalformedURLException e) {
-//            e.printStackTrace();
-            return true;
-        }
-        if (updateBook == null)
-            return false;
+//        Book updateBook = null;
+//        try {
+//            updateBook = updateBookByUrl(new URL(book.getBookUrl()));
+//        } catch (MalformedURLException e) {
+////            e.printStackTrace();
+//            return true;
+//        }
+//        if (updateBook == null)
+//            return false;
         SQLiteDatabase db = mBookDatabaseHelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put("recentTopic", updateBook.getBookNewTopicTitle());
-        contentValues.put("recentTopicUrl", updateBook.getBookNewTopicUrl());
-        contentValues.put("recentUpdate", updateBook.getBookLastUpdate());
-        if (!book.getBookLastUpdate().equals(updateBook.getBookLastUpdate())) {
-            contentValues.put("hasUpdate", 0x10);
-            try {
-                updateChapterList(book.getBookName());
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
-        }
-        int result = db.update("Book", contentValues, "name=?", new String[]{updateBook.getBookName()});
+        contentValues.put("recentTopic", book.getBookNewTopicTitle());
+        contentValues.put("recentTopicUrl", book.getBookNewTopicUrl());
+        contentValues.put("recentUpdate", book.getBookLastUpdate());
+        contentValues.put("hasUpdate", 0x10);
+
+//        if (!book.getBookLastUpdate().equals(book.getBookLastUpdate())) {
+//
+//            try {
+//                updateChapterList(book.getBookName());
+//            } catch (MalformedURLException e) {
+//                e.printStackTrace();
+//            }
+//        }
+        int result = db.update("Book", contentValues, "name=?", new String[]{book.getBookName()});
         return result > 0;
     }
 

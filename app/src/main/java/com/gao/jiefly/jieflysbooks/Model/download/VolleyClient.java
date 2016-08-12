@@ -47,7 +47,7 @@ public class VolleyClient implements HttpURLClient {
 
     @Override
     public void getWebResource(String url, final OnDataStateListener onDataStateListener) {
-        Log.e("VolleyClient",url);
+        Log.e("VolleyClient", url);
         mStringRequest = new StringRequestForGBK(url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -77,20 +77,39 @@ public class VolleyClient implements HttpURLClient {
                 }
             });
             mRequestQueue.add(mStringRequest);
-        }else if (chatset.equals("gbk"))
-            getWebResource(url,onDataStateListener);
+        } else if (chatset.equals("gbk"))
+            getWebResource(url, onDataStateListener);
     }
 
     @Override
     public String getWebResourse(String url) {
         RequestFuture future = RequestFuture.newFuture();
-        StringRequestForGBK requestForGBK = new StringRequestForGBK(url,future,future);
+        StringRequestForGBK requestForGBK = new StringRequestForGBK(url, future, future);
         mRequestQueue.add(requestForGBK);
         String result = null;
         try {
             result = (String) future.get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
+        }
+        return result;
+    }
+
+    @Override
+    public String getWebResourse(String url, String chatset) {
+        String result = null;
+        if (chatset.equals("UTF-8")) {
+            RequestFuture future = RequestFuture.newFuture();
+            StringRequest request = new StringRequest(url,future,future);
+            mRequestQueue.add(request);
+            try {
+                result = (String) future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+            return result;
+        } else if (chatset.equals("gbk")) {
+            result = getWebResourse(url);
         }
         return result;
     }
