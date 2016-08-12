@@ -59,6 +59,11 @@ public class BaseHttpURLClient implements HttpURLClient {
     }
 
     @Override
+    public void getWebResource(String url, OnDataStateListener onDataStateListener, String chatset) {
+
+    }
+
+    @Override
     public String getWebResourse(String url) {
         return null;
     }

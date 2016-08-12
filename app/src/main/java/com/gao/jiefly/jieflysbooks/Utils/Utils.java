@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -24,7 +25,7 @@ import java.util.regex.Pattern;
  * Fighting_jiiiiie
  */
 public class Utils {
-//    获取文件大小
+    //    获取文件大小
     public static String formatFileSize(long size) {
         if (size < 1024) {
             return String.format("%d B", size);
@@ -36,26 +37,56 @@ public class Utils {
             return String.format("%.1f GB", size / 1024.0f / 1024.0f / 1024.0f);
         }
     }
-//    将文字转码
-    public static String UrlEncoder(String value,String charsetName){
+
+    //    将文字转码
+    public static String UrlEncoder(String value, String charsetName) {
         String reslut = null;
         try {
-            reslut = URLEncoder.encode(value,charsetName);
+            reslut = URLEncoder.encode(value, charsetName);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
         return reslut;
     }
-//    将文字解码
-    public static String UrlDecoder(String value){
+
+    //    将文字解码
+    public static String UrlDecoder(String value) {
         String result = null;
         try {
-            result = URLDecoder.decode(value,"UTF-8");
+            result = URLDecoder.decode(value, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
         return result;
     }
+
+
+    public static String getRegexResult(String regex, String input) {
+        Pattern p_br = Pattern.compile(regex);
+        Matcher m_br = p_br.matcher(input);
+        if (m_br.find()) {
+            return m_br.group();
+        }
+        return null;
+    }
+
+    public static List<String> getRegexResult(String regex, String input, boolean isMutil) {
+        List<String> result = new ArrayList<>();
+        Pattern p_br = Pattern.compile(regex);
+        Matcher m_br = p_br.matcher(input);
+        if (isMutil) {
+            if (m_br.find()) {
+                for (int i = 0; i < m_br.groupCount(); i++)
+                    result.add(m_br.group(i));
+            }
+        } else {
+            while (m_br.find()) {
+                result.add(m_br.group());
+            }
+        }
+        return result;
+    }
+
     /*
     * 将<br>转换为\n
     * */
@@ -80,6 +111,7 @@ public class Utils {
     * 定义html &nbsp; 空格
     * */
     private static final String REGEX_SPACE_NBSP = "&nbsp;";
+
     public static String delHTMLTag(String htmlStr) {
         //      替换<br>
         Pattern p_br = Pattern.compile(REGEX_BR);
@@ -113,13 +145,13 @@ public class Utils {
         return htmlStr.trim(); // 返回文本字符串
     }
 
-    public static List<Chapter> getChapterListFromHtml(String srcString){
+    public static List<Chapter> getChapterListFromHtml(String srcString) {
         List<Chapter> result = new LinkedList<>();
         String regexGetChapterList = "<dd><a href=\"(.*?)\">(.*?)</a></dd>";
         Pattern pattern = Pattern.compile(regexGetChapterList);
         Matcher matcher = pattern.matcher(srcString);
-        while (matcher.find()){
-            result.add(new Chapter(matcher.group(1),matcher.group(2),"test"));
+        while (matcher.find()) {
+            result.add(new Chapter(matcher.group(1), matcher.group(2), "test"));
         }
         return result;
     }
@@ -161,8 +193,7 @@ public class Utils {
      * 判断某个界面是否在前台
      *
      * @param context
-     * @param className
-     *            某个界面名称
+     * @param className 某个界面名称
      */
     public static boolean isForeground(Context context, String className) {
         if (context == null || TextUtils.isEmpty(className)) {

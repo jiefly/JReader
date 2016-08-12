@@ -188,6 +188,7 @@ public class BookLoader {
                 book.setCached(cursor.getInt(cursor.getColumnIndex("isCached")) == 0x10);
                 book.setLocal(cursor.getInt(cursor.getColumnIndex("isLocal")) == 0x10);
                 book.setHsaUpdateByShort(cursor.getInt(cursor.getColumnIndex("hasUpdate")));
+                book.setChapterList(getChapterListFromDB(book.getBookName()));
                 data.add(book);
             } while (cursor.moveToNext());
             cursor.close();
@@ -214,6 +215,7 @@ public class BookLoader {
             book.setCached(cursor.getInt(cursor.getColumnIndex("isCached")) == 0x10);
             book.setLocal(cursor.getInt(cursor.getColumnIndex("isLocal")) == 0x10);
             book.setHsaUpdateByShort(cursor.getInt(cursor.getColumnIndex("hasUpdate")));
+            book.setBookCover(cursor.getString(cursor.getColumnIndex("bookCover")));
             cursor.close();
             return book;
         }
@@ -271,6 +273,7 @@ public class BookLoader {
         contentValues.put("isCached", book.isCached() ? 0x10 : 0x01);
         contentValues.put("hasUpdate", book.getHasUpdate());
         contentValues.put("isLocal", book.isLocal() ? 0x10 : 0x01);
+        contentValues.put("bookCover",book.getBookCover());
         db.insert("Book", null, contentValues);
         db.close();
         if (!checkAddSuccess(bookName)) {

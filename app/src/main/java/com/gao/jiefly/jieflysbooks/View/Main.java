@@ -1,6 +1,7 @@
 package com.gao.jiefly.jieflysbooks.View;
 
 import android.annotation.TargetApi;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
@@ -8,6 +9,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -23,6 +25,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,6 +33,7 @@ import android.widget.Toast;
 import com.daimajia.numberprogressbar.NumberProgressBar;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnDataStateListener;
+import com.gao.jiefly.jieflysbooks.Model.loader.GetBookFromSoDu;
 import com.gao.jiefly.jieflysbooks.Present.PresentMain;
 import com.gao.jiefly.jieflysbooks.R;
 import com.gao.jiefly.jieflysbooks.Service.UpdateBookService;
@@ -73,6 +77,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        new GetBookFromSoDu().getBook("寒门状元","秋水轩");
 //        加载本地书籍
 //        LocalBookSegmentation.getInstance();
         mPresentMain = PresentMain.getInstance(getApplicationContext(), this);
@@ -176,8 +181,17 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                                     new android.view.View.OnClickListener() {
                                         @Override
                                         public void onClick(android.view.View v) {
-                                            mPresentMain.removeBook(new int[]{position - 1});
                                             deletePopup.dismiss();
+                                            new AlertDialog.Builder(Main.this)
+                                                    .setTitle("确定删除小说")
+                                                    .setNegativeButton("取消",null)
+                                                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                                        @Override
+                                                        public void onClick(DialogInterface dialog, int which) {
+                                                            mPresentMain.removeBook(new int[]{position - 1});
+                                                        }
+                                                    }).show();
+
                                         }
                                     });
 //                    缓存所有
@@ -599,9 +613,8 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                 position -= 1;
                 final ItemViewHolder itemViewHolder = (ItemViewHolder) holder;
                 Log.e("onBindViewHolder", position + "<--->" + data.get(position));
-                itemViewHolder.tvBookAuthor.setText(data.get(position).getBookAuthor());
+
                 itemViewHolder.tvBookName.setText(data.get(position).getBookName());
-                itemViewHolder.tvRecentUpdateTopic.setText(data.get(position).getBookNewTopicTitle());
                 itemViewHolder.tvRecentUpdateTime.setText(data.get(position).getBookLastUpdate());
                 /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     itemViewHolder.ivBook.setImageDrawable(getApplicationContext().getDrawable(R.mipmap.ic_launcher));
@@ -613,9 +626,17 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                     itemViewHolder.tvCoverType.setVisibility(android.view.View.VISIBLE);
                     itemViewHolder.ivBook.setImageDrawable(getApplicationContext().getDrawable(R.drawable.local_cover));
                     itemViewHolder.ivBookUpdateFlag.setVisibility(android.view.View.GONE);
+                    itemViewHolder.llBookAuthor.setVisibility(android.view.View.GONE);
+                    itemViewHolder.tvRecentUpdateTopicTitle.setText("章节数：");
+                    itemViewHolder.tvRecentUpdateTimeTitle.setText("添加时间：");
+                    itemViewHolder.tvRecentUpdateTopic.setText(data.get(position).getList().size()+"章");
                 } else {
+                    itemViewHolder.tvBookAuthor.setText(data.get(position).getBookAuthor());
                     itemViewHolder.ivBookUpdateFlag.setVisibility(data.get(position).isHasUpdate() ? android.view.View.VISIBLE : android.view.View.INVISIBLE);
                     itemViewHolder.ivBook.setImageDrawable(getApplicationContext().getDrawable(R.drawable.nocover));
+                    itemViewHolder.tvRecentUpdateTopic.setText(data.get(position).getBookNewTopicTitle());
+                    itemViewHolder.tvCoverName.setVisibility(android.view.View.GONE);
+                    itemViewHolder.tvCoverType.setVisibility(android.view.View.GONE);
                 }
                 if (mListener != null) {
                     itemViewHolder.itemView.setOnClickListener(new android.view.View.OnClickListener() {
@@ -653,8 +674,11 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
             TextView tvRecentUpdateTime;
             TextView tvCoverType;
             TextView tvCoverName;
+            TextView tvRecentUpdateTopicTitle;
+            TextView tvRecentUpdateTimeTitle;
             ImageView ivBook;
             ImageView ivBookUpdateFlag;
+            LinearLayout llBookAuthor;
 
             public NumberProgressBar getNumberProgressBar() {
                 return mNumberProgressBar;
@@ -675,7 +699,9 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                 ivBook = (ImageView) itemView.findViewById(R.id.id_iv_book);
                 ivBookUpdateFlag = (ImageView) itemView.findViewById(R.id.id_item_book_new_flag_iv);
                 mNumberProgressBar = (NumberProgressBar) itemView.findViewById(R.id.id_main_progress_bar);
-
+                llBookAuthor = (LinearLayout) itemView.findViewById(R.id.id_item_book_author_ll);
+                tvRecentUpdateTimeTitle = (TextView) itemView.findViewById(R.id.id_item_book_recent_update_time_title);
+                tvRecentUpdateTopicTitle = (TextView) itemView.findViewById(R.id.id_item_book_recent_update_title);
 /*                tvUpdateInfo = (TextView) itemView.findViewById(R.id.id_item_update_info_tv);
                 pbCacheAllChapter = (ProgressBar) itemView.findViewById(R.id.id_item_progress_bar);*/
             }

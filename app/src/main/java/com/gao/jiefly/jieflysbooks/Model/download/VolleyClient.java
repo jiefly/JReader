@@ -63,6 +63,25 @@ public class VolleyClient implements HttpURLClient {
     }
 
     @Override
+    public void getWebResource(String url, final OnDataStateListener onDataStateListener, String chatset) {
+        if (chatset.equals("UTF-8")) {
+            mStringRequest = new StringRequest(url, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    onDataStateListener.onSuccess(response);
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    onDataStateListener.onFailed(error);
+                }
+            });
+            mRequestQueue.add(mStringRequest);
+        }else if (chatset.equals("gbk"))
+            getWebResource(url,onDataStateListener);
+    }
+
+    @Override
     public String getWebResourse(String url) {
         RequestFuture future = RequestFuture.newFuture();
         StringRequestForGBK requestForGBK = new StringRequestForGBK(url,future,future);

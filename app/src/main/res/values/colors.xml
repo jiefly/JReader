@@ -17,6 +17,7 @@
 	<color name="green_dark">#1e3e4a</color>
 	<color name="night_mask">#90000000</color>
 	<color name="theme_green">#2aa699</color>
+	<color name="background_line">#cf747070</color>
 	<!---->
 	<color name="colorTextGray">#a9a9b1</color>
 	<color name="colorBackgroundDark">#2e2e27</color>

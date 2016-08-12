@@ -23,6 +23,7 @@ public class Book implements Serializable {
     private String bookNewTopicUrl = null;
     private String bookLastUpdate = null;
     private String bookStatu = null;
+    private String bookCover = null;
     private int bookTotalWords;
     private ChapterList mChapterList = null;
     private int readChapterIndex = 0;
@@ -63,6 +64,7 @@ public class Book implements Serializable {
                 .append("最后更新时间：").append(bookLastUpdate).append("\n")
                 .append("总字数：").append(bookTotalWords).append("\n")
                 .append("更新状态：").append(bookStatu).append("\n")
+                .append("封面图片：").append(bookCover).append("\n")
                 .append("小说状态：").append(isLocal ? "本地" : "在线");
         return stringBuilder.toString();
     }
@@ -77,6 +79,14 @@ public class Book implements Serializable {
 
     public int getBookTotalWords() {
         return bookTotalWords;
+    }
+
+    public String getBookCover() {
+        return bookCover;
+    }
+
+    public void setBookCover(String bookCover) {
+        this.bookCover = bookCover;
     }
 
     public void setBookTotalWords(int bookTotalWords) {
