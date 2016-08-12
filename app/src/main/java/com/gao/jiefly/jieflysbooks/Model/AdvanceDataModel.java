@@ -185,7 +185,6 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
             });
         updateBookThread.start();
     }
-
     @Override
     public void getChapterSyn(final String bookName, final String title, final String url) {
         new Thread(new Runnable() {

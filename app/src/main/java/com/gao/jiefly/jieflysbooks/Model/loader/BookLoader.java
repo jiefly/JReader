@@ -241,7 +241,7 @@ public class BookLoader {
         if (book == null) {
             return null;
         }
-        if (addBookToDB(book)) return null;
+        addBookToDB(book);
         new Thread(new Runnable() {
             @Override
             public void run() {

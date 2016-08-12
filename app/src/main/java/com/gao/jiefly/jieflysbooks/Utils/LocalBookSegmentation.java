@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
  * Fighting_jiiiiie
  */
 public class LocalBookSegmentation {
-    private static volatile LocalBookSegmentation instance = null;
+    private LocalBookSegmentation instance = null;
     public static final String TITLE = "第(.*?)章";
     private final List<String> NUM;
     Pattern mPattern;
@@ -57,6 +57,10 @@ public class LocalBookSegmentation {
         }*/
     }
 
+    public static LocalBookSegmentation build() {
+        return new LocalBookSegmentation();
+    }
+
     private List<String> initTestArray() {
         List<String> tmp = new ArrayList<>();
         tmp.add("一");
@@ -76,16 +80,6 @@ public class LocalBookSegmentation {
         return tmp;
     }
 
-    public static LocalBookSegmentation getInstance() {
-        if (instance == null) {
-            synchronized (LocalBookSegmentation.class) {
-                if (instance == null) {
-                    instance = new LocalBookSegmentation();
-                }
-            }
-        }
-        return instance;
-    }
 
     public boolean LocalBook2CachedBook(File file, String bookName) {
         boolean result = LocalBook2CachedBook(file);
@@ -110,29 +104,40 @@ public class LocalBookSegmentation {
             Chapter chapter = null;
             String title = null;
             while ((line = mReader.readLine()) != null) {
-                wordConut+=line.length();
+                wordConut += line.length();
                 if (isContainChapterTitle(line)) {
                     chapterPosition.add(position);
-                    chapter = new Chapter(title, bookName, chapterPosition.size() - 1, bookName + (chapterPosition.size() - 1));
-                    chapter.setContent(sb.toString());
-                    mChapterList.add(chapter);
-                    mChapterLoader.addChapterToDiskCache(chapter.getUrl(), chapter);
-                    title = line;
+                    if (chapterPosition.size() > 1) {
+                        chapter = new Chapter(title, bookName, chapterPosition.size() - 1, bookName + (chapterPosition.size() - 1));
+                        chapter.setContent(sb.toString());
+                        mChapterList.add(chapter);
+                        mChapterLoader.addChapterToDiskCache(chapter.getUrl(), chapter);
 //                    Log.e("getBookChapterPosition", sb.toString());
-                    sb.delete(0, sb.length());
+                        sb.delete(0, sb.length());
+                    }
+                    title = line;
                 }
                 sb.append(line).append("\n");
                 position++;
             }
+//            如果没有检测到任何标题，就将所有文字作为一个章节
+            /*if (chapterPosition.size() == 0) {
+                mBook.setBookNewTopicTitle(bookName);
+                chapter = new Chapter(bookName, bookName, chapterPosition.size() - 1, bookName + (chapterPosition.size() - 1));
+                chapter.setContent(sb.toString());
+                mChapterList.add(chapter);
+                mChapterLoader.addChapterToDiskCache(chapter.getUrl(), chapter);
+            } else */
             mBook.setBookLastUpdate("1111-01-11 11:11");
-            mBookLoader.addBookFromLocal(mBook);
             mBook.setBookNewTopicTitle(chapter.getTitle());
             mBook.setBookNewTopicUrl(chapter.getUrl());
             mBook.setBookTotalWords(wordConut);
             mBook.setChapterList(mChapterList);
             mBook.setCached(true);
             mBook.setBookStatu("完本");
-            Log.e("getBookChapterPosition", "总字数："+wordConut);
+            mBook.setLocal(true);
+            mBookLoader.addBookFromLocal(mBook);
+            Log.e("getBookChapterPosition", "总字数：" + wordConut);
         } catch (IOException e) {
             e.printStackTrace();
             return false;

@@ -35,8 +35,6 @@ import butterknife.OnClick;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
 
 /**
  * Created by jiefly on 2016/8/9.
@@ -59,7 +57,7 @@ public class ScanTxtView extends AppCompatActivity {
     private FragmentScan mFragmentScan;
     private ProgressDialog progressDialog;
     private List<String> chooseFilesPath = new ArrayList<>();
-
+    private boolean isCancle = false;
     public static final int REQUEST_CODE = 0x1001;
 
     @Override
@@ -138,45 +136,13 @@ public class ScanTxtView extends AppCompatActivity {
         progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "取消", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-//                for (String path : chooseFilesPath) {
-//                    File file = new File(path);
-//                    progressDialog.setMessage("添加" + file.getName().replaceAll(".txt", "中"));
-                    Observable.just(chooseFilesPath)
-                            .flatMap(new Func1<List<String>, Observable<String>>() {
-                                @Override
-                                public Observable<String> call(List<String> strings) {
-                                    return Observable.from(strings);
-                                }
-                            })
-                            .map(new Func1<String, File>() {
-                                @Override
-                                public File call(String s) {
-                                    return new File(s);
-                                }
-                            })
-                            .map(new Func1<File, Boolean>() {
-                                @Override
-                                public Boolean call(File file) {
-                                    progressDialog.setMessage("添加" + file.getName().replaceAll(".txt", "中"));
-                                    return LocalBookSegmentation.getInstance().LocalBook2CachedBook(file);
-                                }
-                            })
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(new Action1<Boolean>() {
-                                @Override
-                                public void call(Boolean aBoolean) {
-
-                                }
-                            });
-
+                isCancle = true;
                 progressDialog.dismiss();
             }
         });
         progressDialog.setButton(DialogInterface.BUTTON_POSITIVE, "后台运行", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                progressDialog.dismiss();
                 finish();
             }
         });
@@ -202,6 +168,13 @@ public class ScanTxtView extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (progressDialog != null)
+            progressDialog.dismiss();
+    }
+
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if (mDirectoryFragment.isVisible())
@@ -212,6 +185,7 @@ public class ScanTxtView extends AppCompatActivity {
         }
         return super.onKeyDown(keyCode, event);
     }
+
 
     @TargetApi(19)
     private void setTranslucentStatus(boolean on) {
@@ -226,12 +200,58 @@ public class ScanTxtView extends AppCompatActivity {
         win.setAttributes(winParams);
     }
 
+    private void setProgressDialogMessage(String message) {
+        Observable.just(message)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<String>() {
+                    @Override
+                    public void call(String s) {
+                        progressDialog.setMessage(s);
+                    }
+                });
+    }
+
+    private void setProgressDialogStatue(boolean isShow) {
+        Observable.just(isShow)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        if (aBoolean && !progressDialog.isShowing()) {
+                            progressDialog.show();
+                        } else {
+                            if (progressDialog.isShowing()) {
+                                progressDialog.dismiss();
+                                finish();
+                            }
+                        }
+                    }
+
+                });
+    }
+
     public void chooseFilesComplete(String[] filesPath) {
         Collections.addAll(chooseFilesPath, filesPath);
         Intent resultIntent = new Intent();
         resultIntent.putExtra("chooseBooks", filesPath);
         setResult(REQUEST_CODE, resultIntent);
-        progressDialog.show();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                setProgressDialogStatue(true);
+                for (String path : chooseFilesPath) {
+                    if (isCancle)
+                        break;
+                    File file = new File(path);
+                    setProgressDialogMessage("添加" + file.getName() + "中");
+                    Log.e("scanTxtView", "转换小说中" + file.getName());
+                    LocalBookSegmentation.build().LocalBook2CachedBook(file);
+                    Log.e("scanTxtView", "转换小说完成" + file.getName());
+                }
+                if (!isCancle)
+                    finish();
+            }
+        }).start();
     }
 
     @OnClick(R.id.id_sacn_txt_btn)

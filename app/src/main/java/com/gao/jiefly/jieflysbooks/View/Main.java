@@ -1,5 +1,6 @@
 package com.gao.jiefly.jieflysbooks.View;
 
+import android.annotation.TargetApi;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
@@ -72,6 +73,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+//        加载本地书籍
 //        LocalBookSegmentation.getInstance();
         mPresentMain = PresentMain.getInstance(getApplicationContext(), this);
 //        mPresentMain.bindUpdateBookService(Main.this);
@@ -291,7 +293,8 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
         mPresentMain.setUpdateFlag(false);
         Log.e("main", "onResume");
         data = mPresentMain.getBookList();
-        adapter.notifyItemRangeChanged(0, data.size());
+        if (data != null)
+            adapter.notifyItemRangeChanged(0, data.size());
     }
 
     @Override
@@ -578,6 +581,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
 
         }
 
+        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
         @Override
         public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
             if (holder instanceof HeadViewHolder) {
@@ -602,7 +606,17 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                 /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     itemViewHolder.ivBook.setImageDrawable(getApplicationContext().getDrawable(R.mipmap.ic_launcher));
                 }*/
-                itemViewHolder.ivBookUpdateFlag.setVisibility(data.get(position).isHasUpdate() ? android.view.View.VISIBLE : android.view.View.INVISIBLE);
+                if (data.get(position).isLocal()) {
+                    itemViewHolder.tvCoverName.setText(data.get(position).getBookName());
+                    itemViewHolder.tvCoverType.setText("本地");
+                    itemViewHolder.tvCoverName.setVisibility(android.view.View.VISIBLE);
+                    itemViewHolder.tvCoverType.setVisibility(android.view.View.VISIBLE);
+                    itemViewHolder.ivBook.setImageDrawable(getApplicationContext().getDrawable(R.drawable.local_cover));
+                    itemViewHolder.ivBookUpdateFlag.setVisibility(android.view.View.GONE);
+                } else {
+                    itemViewHolder.ivBookUpdateFlag.setVisibility(data.get(position).isHasUpdate() ? android.view.View.VISIBLE : android.view.View.INVISIBLE);
+                    itemViewHolder.ivBook.setImageDrawable(getApplicationContext().getDrawable(R.drawable.nocover));
+                }
                 if (mListener != null) {
                     itemViewHolder.itemView.setOnClickListener(new android.view.View.OnClickListener() {
                         @Override
@@ -637,6 +651,8 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
             TextView tvBookAuthor;
             TextView tvRecentUpdateTopic;
             TextView tvRecentUpdateTime;
+            TextView tvCoverType;
+            TextView tvCoverName;
             ImageView ivBook;
             ImageView ivBookUpdateFlag;
 
@@ -654,9 +670,12 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                 tvBookName = (TextView) itemView.findViewById(R.id.id_item_book_name);
                 tvRecentUpdateTime = (TextView) itemView.findViewById(R.id.id_item_book_recent_update_time);
                 tvRecentUpdateTopic = (TextView) itemView.findViewById(R.id.id_item_book_recent_update);
+                tvCoverType = (TextView) itemView.findViewById(R.id.id_item_book_cover_type);
+                tvCoverName = (TextView) itemView.findViewById(R.id.id_item_book_cover_name);
                 ivBook = (ImageView) itemView.findViewById(R.id.id_iv_book);
                 ivBookUpdateFlag = (ImageView) itemView.findViewById(R.id.id_item_book_new_flag_iv);
                 mNumberProgressBar = (NumberProgressBar) itemView.findViewById(R.id.id_main_progress_bar);
+
 /*                tvUpdateInfo = (TextView) itemView.findViewById(R.id.id_item_update_info_tv);
                 pbCacheAllChapter = (ProgressBar) itemView.findViewById(R.id.id_item_progress_bar);*/
             }

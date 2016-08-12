@@ -155,14 +155,14 @@ public class FragmentScan extends Fragment {
                         if (isCancleSession)
                             return;
 //                        只截取中文开头的文件
-//                        if (isChinese(listFile[i].getName().charAt(0))) {
-                        //Do what ever u want
+                        if (isChinese(listFile[i].getName().charAt(0))) {
+//                        Do what ever u want
                         Log.e("scanTxt", "path:" + listFile[i].getAbsolutePath() + "name:" + listFile[i].getName());
                         addItem(listFile[i]);
                         String value = "扫描结果 " + mFiles.size() + " 本";
                         showTextInActvity(value);
                         setProgressDialogMessage(listFile[i].getParent());
-//                        }
+                        }
                     }
                 }
             }
