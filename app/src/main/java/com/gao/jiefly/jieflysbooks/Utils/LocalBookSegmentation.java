@@ -108,7 +108,7 @@ public class LocalBookSegmentation {
                 if (isContainChapterTitle(line)) {
                     chapterPosition.add(position);
                     if (chapterPosition.size() > 1) {
-                        chapter = new Chapter(title, bookName, chapterPosition.size() - 1, bookName + (chapterPosition.size() - 1));
+                        chapter = new Chapter(title, bookName, chapterPosition.size() - 1, "jieLocal:"+bookName + (chapterPosition.size() - 1));
                         chapter.setContent(sb.toString());
                         mChapterList.add(chapter);
                         mChapterLoader.addChapterToDiskCache(chapter.getUrl(), chapter);

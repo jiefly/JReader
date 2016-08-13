@@ -14,4 +14,5 @@
 	<string name="tv_go_bottom">直达底部</string>
 	<string name="input_book_name">输入添加的小说：</string>
 	<string name="system_light_level">系统</string>
+	<string name="orderByTime">排序方式(更新时间)</string>
 </resources>

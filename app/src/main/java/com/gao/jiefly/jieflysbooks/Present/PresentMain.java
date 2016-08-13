@@ -15,6 +15,7 @@ import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnChapterCacheListener;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnDataModelListener;
 import com.gao.jiefly.jieflysbooks.Service.UpdateBookService;
+import com.gao.jiefly.jieflysbooks.Utils.ApplicationLoader;
 import com.gao.jiefly.jieflysbooks.Utils.Utils;
 import com.gao.jiefly.jieflysbooks.View.Main;
 import com.gao.jiefly.jieflysbooks.View.View;
@@ -44,6 +45,7 @@ public class PresentMain implements OnDataModelListener {
     private AdvanceDataModel mAdvanceDataModel;
     private Service mService;
     private boolean isBound = false;
+    public boolean isNeedUpdateBackgrond = true;
     View mView;
     private Context mContext;
     private UpdateBookService.UpdateBookBinder mBookBinder;
@@ -66,7 +68,12 @@ public class PresentMain implements OnDataModelListener {
         mView = view;
         if (mAdvanceDataModel.getBookList() != null)
             mBookList.addAll(mAdvanceDataModel.getBookList());
-        sortListByUpdateTime(mBookList);
+        if (ApplicationLoader.getIntValue(ApplicationLoader.BOOK_ORDER)==ApplicationLoader.SORT_BY_UPDATE_TIME)
+            sortListByUpdateTime(mBookList);
+        else {
+//            DONothing
+        }
+        isNeedUpdateBackgrond = ApplicationLoader.getBooleanValue(ApplicationLoader.IS_NEED_UPDATE_BG);
     }
 
     private void sortListByUpdateTime(List<Book> bookList) {
@@ -105,6 +112,8 @@ public class PresentMain implements OnDataModelListener {
 
     //    绑定后台更新service
     public void bindUpdateBookService(Context context) {
+        if (!isNeedUpdateBackgrond)
+            return;
         Intent intent = new Intent(context, UpdateBookService.class);
         isBound = context.bindService(intent, mServiceConnection, Service.BIND_AUTO_CREATE);
         if (isBound) Log.e("bind", "bind success:" + isBound);
@@ -112,13 +121,14 @@ public class PresentMain implements OnDataModelListener {
 
     //    在前台不可见的时候取消绑定
     public void unBindUpdateBookService(Context context) {
-        if (isBound){
+        if (isBound) {
             context.unbindService(mServiceConnection);
         }
     }
 
     //  设置activity前台可见的时候不后台更新
     public void setUpdateFlag(boolean isNeedUpdate) {
+        isNeedUpdate = isNeedUpdateBackgrond&&isNeedUpdate;
         if (mBookBinder == null)
             return;
         mBookBinder.setIsNeedUpdate(isNeedUpdate);

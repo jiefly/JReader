@@ -28,6 +28,7 @@
 			android:text="连载更新提醒" android:textSize="12sp"/>
 		<CheckBox android:layout_width="wrap_content" android:layout_height="wrap_content"
 		          android:layout_marginLeft="20dp"
+		          android:id="@+id/id_main_head_pop_update_cb"
 		          android:checked="false"
 		/>
 	</LinearLayout>
@@ -46,10 +47,11 @@
 			android:src="@drawable/order"/>
 		<TextView
 			android:layout_width="wrap_content"
+			android:id="@+id/id_main_head_sort_tv"
 			android:layout_height="match_parent"
 			android:layout_marginLeft="10dp"
 			android:gravity="center_vertical"
-			android:text="排序方式(更新时间)" android:textSize="12sp"/>
+			android:text="@string/orderByTime" android:textSize="12sp"/>
 	</LinearLayout>
 	<LinearLayout
 		android:id="@+id/id_main_head_pop_local_ll"

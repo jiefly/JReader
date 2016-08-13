@@ -15,6 +15,7 @@
 		<TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
 		          android:layout_gravity="center"
 		          android:textColor="@color/white"
+		          android:id="@+id/id_scan_tool_bar_title_tv"
 		          android:text="添加书籍" android:textSize="18sp" />
 		<TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
 		          android:text="扫描"

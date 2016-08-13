@@ -16,7 +16,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.gao.jiefly.jieflysbooks.R;
@@ -43,22 +42,27 @@ import rx.functions.Action1;
  */
 public class ScanTxtView extends AppCompatActivity {
 
-    @InjectView(R.id.id_sacn_txt_btn)
-    Button mIdSacnTxtBtn;
     @InjectView(R.id.id_scan_tool_bar)
     Toolbar mIdScanToolBar;
     @InjectView(R.id.id_scan_dir_path_tv)
     TextView mIdScanDirPathTv;
     @InjectView(R.id.id_scan_tool_bar_scan_tv)
     TextView mIdScanToolBarScanTv;
+    @InjectView(R.id.id_scan_tool_bar_title_tv)
+    TextView mIdScanToolBarTitleTv;
     private FragmentManager fragmentManager = null;
     private FragmentTransaction fragmentTransaction = null;
     private DirectoryFragment mDirectoryFragment;
     private FragmentScan mFragmentScan;
+    private FragmentManagerBooks mFragmentManagerBooks;
     private ProgressDialog progressDialog;
     private List<String> chooseFilesPath = new ArrayList<>();
     private boolean isCancle = false;
     public static final int REQUEST_CODE = 0x1001;
+    public static final int TYPE_SCAN = 0x0010;
+    public static final int TYPE_MANAGER_BOOK = 0x0011;
+    private static final int TYPE_UNKNOW = 0x1111;
+    private int type;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +72,6 @@ public class ScanTxtView extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             setTranslucentStatus(true);
         }
-
         SystemBarTintManager tintManager = new SystemBarTintManager(this);
         tintManager.setStatusBarTintEnabled(true);
         //设置沉浸的颜色
@@ -89,12 +92,34 @@ public class ScanTxtView extends AppCompatActivity {
                 }
             }
         });
-        initProgressDialog();
+        type = getIntent().getIntExtra("type", TYPE_UNKNOW);
+        fragmentManager = getSupportFragmentManager();
+        fragmentTransaction = fragmentManager.beginTransaction();
+        switch (type) {
+            case TYPE_MANAGER_BOOK:
+                someThingDoInManager();
+                mIdScanDirPathTv.setVisibility(View.GONE);
+                break;
+            case TYPE_SCAN:
+                someThingDoInScan();
+                break;
+            case TYPE_UNKNOW:
+                break;
+        }
+
         mIdScanToolBarScanTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mIdScanToolBarScanTv.getText().toString().contains("重新")) {
+//                扫描
+                if (mIdScanToolBarScanTv.getText().toString().equals("重新扫描")) {
                     mFragmentScan.startScan(Environment.getExternalStorageDirectory(), ".txt");
+//                    管理书籍
+                } else if (mIdScanToolBarScanTv.getText().toString().equals("全选")) {
+                    mIdScanToolBarScanTv.setText("取消全选");
+                    mFragmentManagerBooks.toogleChooseAll();
+                } else if (mIdScanToolBarScanTv.getText().toString().equals("取消全选")) {
+                    mIdScanToolBarScanTv.setText("全选");
+                    mFragmentManagerBooks.toogleChooseAll();
                 } else {
                     fragmentTransaction = fragmentManager.beginTransaction();
                     fragmentTransaction.replace(R.id.fragment_container, mFragmentScan, mFragmentScan.toString());
@@ -103,8 +128,20 @@ public class ScanTxtView extends AppCompatActivity {
                 }
             }
         });
-        fragmentManager = getSupportFragmentManager();
-        fragmentTransaction = fragmentManager.beginTransaction();
+
+
+    }
+
+    private void someThingDoInManager() {
+        mIdScanToolBarTitleTv.setText("管理书籍");
+        mIdScanToolBarScanTv.setText("全选");
+        mFragmentManagerBooks = new FragmentManagerBooks();
+        fragmentTransaction.add(R.id.fragment_container, mFragmentManagerBooks, mFragmentManagerBooks.toString());
+        fragmentTransaction.commit();
+    }
+
+    private void someThingDoInScan() {
+        initProgressDialog();
         mFragmentScan = new FragmentScan();
         mDirectoryFragment = new DirectoryFragment();
         mDirectoryFragment.setDelegate(new DirectoryFragment.DocumentSelectActivityDelegate() {
@@ -177,11 +214,19 @@ public class ScanTxtView extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (mDirectoryFragment.isVisible())
+            switch (type) {
+                case TYPE_MANAGER_BOOK:
+                    break;
+                case TYPE_SCAN:
+                    if (mDirectoryFragment.isVisible())
 //            到最上层的文件夹时才退出当前activity
-                return mDirectoryFragment.onBackPressed_() && super.onKeyDown(keyCode, event);
-            else if (mFragmentScan.isVisible())
-                return mFragmentScan.onBackPressed_() && super.onKeyDown(keyCode, event);
+                        return mDirectoryFragment.onBackPressed_() && super.onKeyDown(keyCode, event);
+                    else if (mFragmentScan.isVisible())
+                        return mFragmentScan.onBackPressed_() && super.onKeyDown(keyCode, event);
+                    break;
+                case TYPE_UNKNOW:
+                    break;
+            }
         }
         return super.onKeyDown(keyCode, event);
     }
@@ -231,6 +276,10 @@ public class ScanTxtView extends AppCompatActivity {
     }
 
     public void chooseFilesComplete(String[] filesPath) {
+        if (filesPath == null) {
+            finish();
+            return;
+        }
         Collections.addAll(chooseFilesPath, filesPath);
         Intent resultIntent = new Intent();
         resultIntent.putExtra("chooseBooks", filesPath);
@@ -276,54 +325,4 @@ public class ScanTxtView extends AppCompatActivity {
                     }
                 });
     }
-    /*public void startScan(){
-        final long time = System.currentTimeMillis();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-//                new File("/storage/emulated/0/91PandaReader/download")
-                walkdir(Environment.getExternalStorageDirectory(), ".txt");
-                Log.e("scantxt", "扫描时间：" + (System.currentTimeMillis() - time));
-                mFragmentScan.scanCompleted();
-            }
-        }).start();
-    }
-    public List<File> walkdir(File dir, String pattern) {
-        String pdfPattern = pattern;
-        List<File> result = new ArrayList<>();
-        File[] listFile = dir.listFiles();
-
-        if (listFile != null) {
-            for (int i = 0; i < listFile.length; i++) {
-
-                if (listFile[i].isDirectory()) {
-                    walkdir(listFile[i], pattern);
-                } else {
-                    if (listFile[i].getName().endsWith(pdfPattern)) {
-//                        只截取中文开头的文件
-                        if (isChinese(listFile[i].getName().charAt(0))) {
-                            //Do what ever u want
-                            Log.e("scanTxt", "path:" + listFile[i].getAbsolutePath() + "name:" + listFile[i].getName());
-                            result.add(listFile[i]);
-                            mFragmentScan.addItem(listFile[i]);
-                            String value = "扫描结果 " + mFragmentScan.mFiles.size() + " 本";
-
-                        }
-                    }
-                }
-            }
-        }
-
-        return result;
-    }
-
-    // 根据Unicode编码完美的判断中文汉字和符号
-    private static boolean isChinese(char c) {
-        Character.UnicodeBlock ub = Character.UnicodeBlock.of(c);
-        return ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS || ub == Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS
-                || ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A || ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B
-                || ub == Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION || ub == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS
-                || ub == Character.UnicodeBlock.GENERAL_PUNCTUATION;
-    }*/
-
 }

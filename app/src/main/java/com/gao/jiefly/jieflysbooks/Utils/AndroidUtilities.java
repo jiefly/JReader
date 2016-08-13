@@ -1,5 +1,6 @@
 package com.gao.jiefly.jieflysbooks.Utils;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Point;
 import android.util.Log;
@@ -16,7 +17,16 @@ public class AndroidUtilities {
 				.getDisplayMetrics().density;
 		checkDisplaySize();
 	}
-
+	public static boolean isServiceRunning(String serviceName) {
+		ActivityManager manager = (ActivityManager) ApplicationLoader.applicationContext.getSystemService(Context.ACTIVITY_SERVICE);
+		for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+//			Log.e(serviceName,service.service.getClassName());
+			if (serviceName.equals(service.service.getClassName())) {
+				return true;
+			}
+		}
+		return false;
+	}
 	public static int dp(float value) {
 		return (int) Math.ceil(density * value);
 	}

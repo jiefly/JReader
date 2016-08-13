@@ -181,7 +181,7 @@ public class ChapterLoader {
 //            result = new BaseHttpURLClient().getWebResourse(new URL(url));
             result = VolleyClient.build(mContext).getWebResourse(new URL(url));
             String tmp = Utils.delHTMLTag(result);
-            Pattern p = Pattern.compile("错误举报([\\w\\W]*)如果觉得");
+            Pattern p = Pattern.compile("下一章书签([\\w\\W]*)推荐上一章");
             final Matcher m = p.matcher(tmp);
             if (m.find())
                 Log.e("jiefly---", "从网络中获取章节数据");
@@ -196,7 +196,7 @@ public class ChapterLoader {
     private String getChapterFromHtml(String content) {
         StringBuilder sb = new StringBuilder();
         String tmp = Utils.delHTMLTag(content);
-        Pattern p = Pattern.compile("错误举报([\\w\\W]*)如果觉得");
+        Pattern p = Pattern.compile("下一章书签([\\w\\W]*)推荐上一章");
         final Matcher m = p.matcher(tmp);
         if (m.find())
             Log.e("jiefly---", "从网络中获取章节数据");

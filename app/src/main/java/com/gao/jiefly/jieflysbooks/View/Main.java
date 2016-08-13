@@ -1,10 +1,8 @@
 package com.gao.jiefly.jieflysbooks.View;
 
-import android.annotation.TargetApi;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -22,6 +20,8 @@ import android.view.MenuInflater;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -36,6 +36,8 @@ import com.gao.jiefly.jieflysbooks.Model.listener.OnDataStateListener;
 import com.gao.jiefly.jieflysbooks.Present.PresentMain;
 import com.gao.jiefly.jieflysbooks.R;
 import com.gao.jiefly.jieflysbooks.Service.UpdateBookService;
+import com.gao.jiefly.jieflysbooks.Utils.AndroidUtilities;
+import com.gao.jiefly.jieflysbooks.Utils.ApplicationLoader;
 import com.melnykov.fab.FloatingActionButton;
 
 import java.net.MalformedURLException;
@@ -70,7 +72,10 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     PopupWindow itemHeadPop = null;
     EditText etAddBookName;
     PresentMain mPresentMain;
+    android.view.View viewHeadPop;
     public static final int SCAN_FLAG = 1;
+    CheckBox checkBox;
+    TextView mTextView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -108,9 +113,11 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
 //        LocalBookSegmentation.getInstance();
         mPresentMain = PresentMain.getInstance(getApplicationContext(), this);
 //        mPresentMain.bindUpdateBookService(Main.this);
-        Intent intent = new Intent(getApplicationContext(), UpdateBookService.class);
-        intent.putExtra("time", 1000 * 10);
-        startService(intent);
+        if (mPresentMain.isNeedUpdateBackgrond) {
+            Intent intent = new Intent(getApplicationContext(), UpdateBookService.class);
+            intent.putExtra("time", 1000 * 10);
+            startService(intent);
+        }
         ButterKnife.inject(this);
         data = mPresentMain.getBookList();
         mIdMainSwipeRefreshLayout.setOnRefreshListener(this);
@@ -119,15 +126,41 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
             @Override
             public void onItemClick(android.view.View view, final int position) {
                 if (position == 0) {
+                    if (mTextView != null) {
+                        if (ApplicationLoader.getIntValue(ApplicationLoader.BOOK_ORDER) != ApplicationLoader.SORT_BY_ADD_TIME) {
+                            mTextView.setText("排序方式(更新时间)");
+                        } else {
+                            mTextView.setText("排序方式(添加时间)");
+                        }
+                    }
                     if (itemHeadPop == null) {
-                        android.view.View viewHeadPop = LayoutInflater.from(Main.this)
+                        viewHeadPop = LayoutInflater.from(Main.this)
                                 .inflate(R.layout.item_head_new_popup, null);
                         itemHeadPop = new PopupWindow(viewHeadPop, WindowManager.LayoutParams.MATCH_PARENT,
                                 WindowManager.LayoutParams.MATCH_PARENT);
+                        mTextView = (TextView) viewHeadPop.findViewById(R.id.id_main_head_sort_tv);
+                        checkBox = (CheckBox) (viewHeadPop.findViewById(R.id.id_main_head_pop_update_cb));
+                        if (ApplicationLoader.getBooleanValue(ApplicationLoader.IS_NEED_UPDATE_BG))
+                            checkBox.setChecked(true);
+                        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                            @Override
+                            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                if (isChecked) {
+                                    ApplicationLoader.save(ApplicationLoader.IS_NEED_UPDATE_BG, true);
+                                    mPresentMain.setUpdateFlag(false);
+                                } else {
+                                    ApplicationLoader.save(ApplicationLoader.IS_NEED_UPDATE_BG, false);
+                                    mPresentMain.setUpdateFlag(false);
+                                }
+                                mPresentMain.isNeedUpdateBackgrond = isChecked;
+                            }
+                        });
+
 //                        是否开启更新推送
                         viewHeadPop.findViewById(R.id.id_main_head_pop_update_ll).setOnClickListener(new android.view.View.OnClickListener() {
                             @Override
                             public void onClick(android.view.View v) {
+                                checkBox.setChecked(!checkBox.isChecked());
                                 itemHeadPop.dismiss();
                             }
                         });
@@ -143,36 +176,33 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                             @Override
                             public void onClick(android.view.View v) {
                                 Intent addLocalBookIntent = new Intent(Main.this, ScanTxtView.class);
+                                addLocalBookIntent.putExtra("type", ScanTxtView.TYPE_SCAN);
                                 startActivityForResult(addLocalBookIntent, SCAN_FLAG);
                                 itemHeadPop.dismiss();
                             }
                         });
+
 //                        书籍排序
                         viewHeadPop.findViewById(R.id.id_main_head_sort_ll).setOnClickListener(new android.view.View.OnClickListener() {
                             @Override
                             public void onClick(android.view.View v) {
+                                if (ApplicationLoader.getIntValue(ApplicationLoader.BOOK_ORDER) != ApplicationLoader.SORT_BY_ADD_TIME) {
+                                    ApplicationLoader.save(ApplicationLoader.BOOK_ORDER, ApplicationLoader.SORT_BY_ADD_TIME);
+                                    mTextView.setText("排序方式(更新时间)");
+                                    data = mPresentMain.getBookListOrderByUpdateTime();
+                                    if (data != null)
+                                        adapter.notifyItemRangeChanged(1, data.size());
+
+                                } else {
+                                    ApplicationLoader.save(ApplicationLoader.BOOK_ORDER, ApplicationLoader.SORT_BY_UPDATE_TIME);
+                                    mTextView.setText("排序方式(添加时间)");
+                                    data = mPresentMain.getBookListOrderByAddTime();
+                                    if (data != null)
+                                        adapter.notifyItemRangeChanged(1, data.size());
+                                }
                                 itemHeadPop.dismiss();
                             }
                         });
-                        /*((RadioGroup) viewHeadPop.findViewById(R.id.id_item_head_rg))
-                                .setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-                                    @Override
-                                    public void onCheckedChanged(RadioGroup group, int checkedId) {
-                                        switch (checkedId) {
-                                            case 1:
-                                                data = mPresentMain.getBookListOrderByUpdateTime();
-                                                Log.e("change", data + "");
-                                                break;
-                                            case 2:
-                                                data = mPresentMain.getBookListOrderByAddTime();
-                                                Log.e("change", data + "");
-                                                break;
-                                        }
-                                        if (data != null)
-                                            adapter.notifyItemRangeChanged(1, data.size());
-                                        itemHeadPop.dismiss();
-                                    }
-                                });*/
                     }
                     itemHeadPop.showAtLocation((
                             (ViewGroup) Main.this.findViewById(android.R.id.content))
@@ -210,7 +240,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                                             deletePopup.dismiss();
                                             new AlertDialog.Builder(Main.this)
                                                     .setTitle("确定删除小说")
-                                                    .setNegativeButton("取消",null)
+                                                    .setNegativeButton("取消", null)
                                                     .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                                                         @Override
                                                         public void onClick(DialogInterface dialog, int which) {
@@ -255,11 +285,10 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
 
     }
 
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        showSnackbar("success");
     }
 
     private void initPopupWindow() {
@@ -308,7 +337,9 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     @Override
     protected void onDestroy() {
         Log.e("main", "onDestroy");
-        mPresentMain.unBindUpdateBookService(getBaseContext());
+        if (AndroidUtilities.isServiceRunning("com.gao.jiefly.jieflysbooks.Service.UpdateBookService"))
+            mPresentMain.unBindUpdateBookService(getBaseContext());
+        ApplicationLoader.save(ApplicationLoader.FIRST_TIME, false);
         super.onDestroy();
     }
 
@@ -621,14 +652,11 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
 
         }
 
-        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
         @Override
         public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
             if (holder instanceof HeadViewHolder) {
                 HeadViewHolder headViewHolder = (HeadViewHolder) holder;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    headViewHolder.ivHead.setImageDrawable(getApplicationContext().getDrawable(R.drawable.head_canvas));
-                }
+                headViewHolder.ivHead.setImageResource(R.drawable.head_canvas);
                 headViewHolder.mImageButton.setOnClickListener(new android.view.View.OnClickListener() {
                     @Override
                     public void onClick(android.view.View v) {
@@ -650,16 +678,19 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                     itemViewHolder.tvCoverType.setText("本地");
                     itemViewHolder.tvCoverName.setVisibility(android.view.View.VISIBLE);
                     itemViewHolder.tvCoverType.setVisibility(android.view.View.VISIBLE);
-                    itemViewHolder.ivBook.setImageDrawable(getApplicationContext().getDrawable(R.drawable.local_cover));
+                    itemViewHolder.ivBook.setImageResource(R.drawable.local_cover);
                     itemViewHolder.ivBookUpdateFlag.setVisibility(android.view.View.GONE);
                     itemViewHolder.llBookAuthor.setVisibility(android.view.View.GONE);
                     itemViewHolder.tvRecentUpdateTopicTitle.setText("章节数：");
                     itemViewHolder.tvRecentUpdateTimeTitle.setText("添加时间：");
-                    itemViewHolder.tvRecentUpdateTopic.setText(data.get(position).getList().size()+"章");
+                    itemViewHolder.tvRecentUpdateTopic.setText(data.get(position).getList().size() + "章");
                 } else {
                     itemViewHolder.tvBookAuthor.setText(data.get(position).getBookAuthor());
                     itemViewHolder.ivBookUpdateFlag.setVisibility(data.get(position).isHasUpdate() ? android.view.View.VISIBLE : android.view.View.INVISIBLE);
-                    itemViewHolder.ivBook.setImageDrawable(getApplicationContext().getDrawable(R.drawable.nocover));
+                    itemViewHolder.ivBook.setImageResource(R.drawable.nocover);
+                    itemViewHolder.tvRecentUpdateTopicTitle.setText("最近更新：");
+                    itemViewHolder.tvRecentUpdateTimeTitle.setText("最后更新时间：");
+                    itemViewHolder.llBookAuthor.setVisibility(android.view.View.VISIBLE);
                     itemViewHolder.tvRecentUpdateTopic.setText(data.get(position).getBookNewTopicTitle());
                     itemViewHolder.tvCoverName.setVisibility(android.view.View.GONE);
                     itemViewHolder.tvCoverType.setVisibility(android.view.View.GONE);

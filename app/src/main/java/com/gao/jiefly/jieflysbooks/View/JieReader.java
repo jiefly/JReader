@@ -42,6 +42,7 @@ import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnChapterCacheListener;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnDataModelListener;
 import com.gao.jiefly.jieflysbooks.R;
+import com.gao.jiefly.jieflysbooks.Utils.ApplicationLoader;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -56,6 +57,8 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
+
+import static com.gao.jiefly.jieflysbooks.Utils.ApplicationLoader.BACKGROUNT_DEFAULT;
 
 /**
  * Created by jiefly on 2016/7/4.
@@ -131,6 +134,7 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
         initViewPager();
         initRecycleView();
         initAnimation();
+        initReaderBackground();
         if (mBook.isCached()) {
             mIdReaderLeftMenuCacheLl.setVisibility(View.GONE);
             mIdReaderLeftMenuProgressBar.setProgress(View.GONE);
@@ -138,6 +142,35 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
             mIdReaderLeftMenuInfoCached.setVisibility(View.GONE);
         }
         Log.e("chapterListSize", mChapterList.size() + "" + "isCached" + mBook.isCached());
+    }
+
+    private void initReaderBackground() {
+        int viewPagerBackgroundId = 0;
+        int textColorId = 0;
+        int x = ApplicationLoader.getIntValue(ApplicationLoader.READER_BACK_GROUND);
+        if (x == ApplicationLoader.BACKGROUNT_DEFAULT) {
+            viewPagerBackgroundId = R.drawable.read_default_background;
+            textColorId = R.color.colorDefaultBackgroundText;
+        } else if (x == ApplicationLoader.BACKGROUNT_NIGHT) {
+            viewPagerBackgroundId = R.color.colorNovelReadBackgroundgray;
+            textColorId = R.color.colorNovelReadBackgroundgrayText;
+
+        } else if (x == ApplicationLoader.BACKGROUNT_GRAY_GREEN) {
+            viewPagerBackgroundId = R.color.colorNovelReadBackgroundGraygreen;
+            textColorId = R.color.colorNovelReadBackgroundGraygreenText;
+        } else if (x == ApplicationLoader.BACKGROUNT_BLUE) {
+            viewPagerBackgroundId = R.color.colorNovelReadBackgroundBlue;
+            textColorId = R.color.colorNovelReadBackgroundBlueText;
+        } else if (x == ApplicationLoader.BACKGROUNT_GREEN1) {
+            viewPagerBackgroundId = R.color.colorNovelReadBackgroundgreen1;
+            textColorId = R.color.colorNovelReadBackgroundgreen1Text;
+        }
+        if (viewPagerBackgroundId != 0 && textColorId != 0) {
+            mIdJieReaderContentVp
+                    .setBackgroundResource(viewPagerBackgroundId);
+            setTextColor(getResources().getColor(textColorId));
+        }
+
     }
 
     private void initAnimation() {
@@ -404,7 +437,7 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
         mBook = (Book) bundle.getSerializable("book");
         mChapterList = mBook.getChapterList().getChapterTitleList();
         urlList = mBook.getChapterList().getChapterUrlList();
-        mAdvanceDataModel = AdvanceDataModel.build(getApplicationContext(), this,OnDataModelListener.TYPE_ACTIVIT_LISTENER);
+        mAdvanceDataModel = AdvanceDataModel.build(getApplicationContext(), this, OnDataModelListener.TYPE_ACTIVIT_LISTENER);
         chapterIndex = mBook.getReadChapterIndex();
     }
 
@@ -542,6 +575,7 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
     }
 
     private TextView tvShowTextSize;
+
     @OnClick({R.id.id_include_context_btn, R.id.id_include_night_btn, R.id.id_include_setting_btn, R.id.id_reader_left_menu_bottom_btn, R.id.id_reader_left_menu_cache_ll})
     public void onClick(View view) {
         switch (view.getId()) {
@@ -558,11 +592,13 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
                     mIdJieReaderContentVp
                             .setBackgroundResource(R.color.colorNovelReadBackgroundgray);
                     setTextColor(getResources().getColor(R.color.colorNovelReadBackgroundgrayText));
+                    ApplicationLoader.save(ApplicationLoader.READER_BACK_GROUND,ApplicationLoader.BACKGROUNT_NIGHT);
                 } else {
                     mIdIncludeModeTv.setText("夜间");
                     mIdJieReaderContentVp
                             .setBackgroundResource(R.drawable.read_default_background);
                     setTextColor(getResources().getColor(R.color.colorDefaultBackgroundText));
+                    ApplicationLoader.save(ApplicationLoader.READER_BACK_GROUND,ApplicationLoader.BACKGROUNT_DEFAULT);
                 }
                 break;
 //            底栏设置
@@ -671,22 +707,27 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
                                         case 1:
                                             viewPagerBackgroundId = R.drawable.read_default_background;
                                             textColorId = R.color.colorDefaultBackgroundText;
+                                            ApplicationLoader.save(ApplicationLoader.READER_BACK_GROUND, BACKGROUNT_DEFAULT);
                                             break;
                                         case 2:
                                             viewPagerBackgroundId = R.color.colorNovelReadBackgroundBlue;
                                             textColorId = R.color.colorNovelReadBackgroundBlueText;
+                                            ApplicationLoader.save(ApplicationLoader.READER_BACK_GROUND, ApplicationLoader.BACKGROUNT_BLUE);
                                             break;
                                         case 3:
                                             viewPagerBackgroundId = R.color.colorNovelReadBackgroundgray;
                                             textColorId = R.color.colorNovelReadBackgroundgrayText;
+                                            ApplicationLoader.save(ApplicationLoader.READER_BACK_GROUND, ApplicationLoader.BACKGROUNT_NIGHT);
                                             break;
                                         case 4:
                                             viewPagerBackgroundId = R.color.colorNovelReadBackgroundGraygreen;
                                             textColorId = R.color.colorNovelReadBackgroundGraygreenText;
+                                            ApplicationLoader.save(ApplicationLoader.READER_BACK_GROUND, ApplicationLoader.BACKGROUNT_GRAY_GREEN);
                                             break;
                                         case 5:
                                             viewPagerBackgroundId = R.color.colorNovelReadBackgroundgreen1;
                                             textColorId = R.color.colorNovelReadBackgroundgreen1Text;
+                                            ApplicationLoader.save(ApplicationLoader.READER_BACK_GROUND, ApplicationLoader.BACKGROUNT_GREEN1);
                                             break;
                                     }
                                     if (viewPagerBackgroundId != 0 && textColorId != 0) {
@@ -799,7 +840,7 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
     }
 
     @Override
-    public void onBookUpdateSuccess(String bookName,int type) {
+    public void onBookUpdateSuccess(String bookName, int type) {
 
     }
 
