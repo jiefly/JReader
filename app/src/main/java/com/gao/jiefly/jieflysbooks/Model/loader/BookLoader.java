@@ -10,6 +10,7 @@ import com.gao.jiefly.jieflysbooks.Model.CustomDatabaseHelper;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
 import com.gao.jiefly.jieflysbooks.Model.download.BaseHttpURLClient;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnBookImageGetListener;
 import com.gao.jiefly.jieflysbooks.Utils.ApplicationLoader;
 import com.gao.jiefly.jieflysbooks.Utils.Utils;
 
@@ -42,16 +43,14 @@ public class BookLoader {
     }
 
     //  删除数据库中的小说以及小说章节列表
-    public boolean removeBook(String[] bookName) {
-//        移除缓存中的章节内容
-        ChapterLoader chapterLoader = ChapterLoader.build(ApplicationLoader.applicationContext);
-        try {
-            List<String> list = getBook(bookName[0]).getChapterList().getChapterUrlList();
-            for (String s:list)
-                chapterLoader.removeChapter(s);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
+    public boolean removeBook(final String[] bookName) {
+
+                //        移除缓存中的章节内容
+                ChapterLoader chapterLoader = ChapterLoader.build(ApplicationLoader.applicationContext);
+                List<String> list = getChapterListFromDB(bookName[0]).getChapterUrlList();
+                for (String s : list)
+                    chapterLoader.removeChapter(s);
+
         SQLiteDatabase db = mBookDatabaseHelper.getWritableDatabase();
 //        移除数据库中的小说章节列表
         SQLiteDatabase dbChapter = mChapterListDatabaseHelper.getWritableDatabase();
@@ -61,12 +60,13 @@ public class BookLoader {
         int result = db.delete("Book", "name=?", bookName);
         return result > 0;
     }
+
     //  删除数据库中的小说以及小说章节列表
     public boolean removeBook(Book book) {
 //        移除缓存中的章节内容
         ChapterLoader chapterLoader = ChapterLoader.build(ApplicationLoader.applicationContext);
         List<String> list = book.getChapterList().getChapterUrlList();
-        for (String s:list)
+        for (String s : list)
             chapterLoader.removeChapter(s);
         SQLiteDatabase db = mBookDatabaseHelper.getWritableDatabase();
 //        移除数据库中的小说章节列表
@@ -77,25 +77,31 @@ public class BookLoader {
         int result = db.delete("Book", "name=?", new String[]{book.getBookName()});
         return result > 0;
     }
+
     //    关闭数据库
     public void closeDB() {
         mBookDatabaseHelper.close();
         mChapterListDatabaseHelper.close();
     }
-    public List<Book> getLocalBooks(){
-        List<Book> localBooks = getBookList();
-        for (Book book:localBooks)
-            if (!book.isLocal())
-                localBooks.remove(book);
-        return localBooks;
-    }
-    public List<Book> getOnLineBooks(){
-        List<Book> localBooks = getBookList();
-        for (Book book:localBooks)
+
+    public List<Book> getLocalBooks() {
+        List<Book> books = getBookList();
+        List<Book> localBooks = new ArrayList<>();
+        for (Book book : books)
             if (book.isLocal())
-                localBooks.remove(book);
+                localBooks.add(book);
         return localBooks;
     }
+
+    public List<Book> getOnLineBooks() {
+        List<Book> books = getBookList();
+        List<Book> onLineBooks = new ArrayList<>();
+        for (Book book : books)
+            if (!book.isLocal())
+                onLineBooks.add(book);
+        return onLineBooks;
+    }
+
     //    更新数据库中的小说章节列表
     private void updateChapterList(String bookName) throws MalformedURLException {
         if (!getBook(bookName).getBookUrl().startsWith("http"))
@@ -126,13 +132,22 @@ public class BookLoader {
         contentValues.put("isCached", book.isCached() ? 0x10 : 0x01);
         contentValues.put("hasUpdate", book.getHasUpdate());
         db.update("Book", contentValues, "name=?", new String[]{book.getBookName()});
-        try {
+       /* try {
             Log.e(TAG, "after index:" + getBook(book.getBookName()).getReadChapterIndex() + "isCached:" + getBook(book.getBookName()).isCached());
 //            updateBookChapterIndex(getBook(book.getBookName()));
         } catch (MalformedURLException e) {
             e.printStackTrace();
-        }
+        }*/
     }
+    //更新Book的hasUpdate
+    public void updateBookHasUpdate(String bookName, boolean hasUpdate) {
+        SQLiteDatabase db = mBookDatabaseHelper.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("hasUpdate", hasUpdate?0x10 : 0x01);
+        db.update("Book", contentValues, "name=?", new String[]{bookName});
+        db.close();
+    }
+
 
     //从网络拉取小说列表
     private List<Chapter> getChapterListFromHttp(String url) throws MalformedURLException {
@@ -229,6 +244,7 @@ public class BookLoader {
                 book.setLocal(cursor.getInt(cursor.getColumnIndex("isLocal")) == 0x10);
                 book.setHsaUpdateByShort(cursor.getInt(cursor.getColumnIndex("hasUpdate")));
                 book.setChapterList(getChapterListFromDB(book.getBookName()));
+                book.setBookCover(cursor.getString(cursor.getColumnIndex("bookCover")));
                 data.add(book);
             } while (cursor.moveToNext());
             cursor.close();
@@ -289,12 +305,34 @@ public class BookLoader {
             public void run() {
                 try {
                     addChapterList(bookName);
+                    new GetBookFromSoDu().getBookCoverUrl(bookName, ApplicationLoader.IMAGE_WEB_NAME, new OnBookImageGetListener() {
+                        @Override
+                        public void onSuccess(String imageUrl) {
+                            addBookCoverToDB(bookName, imageUrl);
+                        }
+
+                        @Override
+                        public void onFailed(Exception error) {
+//                            nocover
+                            addBookCoverToDB(bookName, "http://www.qiushuixuan.cc/modules/article/images/nocover.jpg");
+                        }
+                    });
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
                 }
             }
         }).start();
         return book;
+    }
+
+    private boolean addBookCoverToDB(String bookName, String coverUrl) {
+
+        SQLiteDatabase db = mBookDatabaseHelper.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("bookCover", coverUrl);
+        int result = db.update("Book", contentValues, "name=?", new String[]{bookName});
+        db.close();
+        return result > 0;
     }
 
     private boolean addBookToDB(Book book) {
@@ -313,7 +351,7 @@ public class BookLoader {
         contentValues.put("isCached", book.isCached() ? 0x10 : 0x01);
         contentValues.put("hasUpdate", book.getHasUpdate());
         contentValues.put("isLocal", book.isLocal() ? 0x10 : 0x01);
-        contentValues.put("bookCover",book.getBookCover());
+        contentValues.put("bookCover", book.getBookCover());
         db.insert("Book", null, contentValues);
         db.close();
         if (!checkAddSuccess(bookName)) {

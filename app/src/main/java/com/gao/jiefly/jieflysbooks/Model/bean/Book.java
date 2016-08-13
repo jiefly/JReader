@@ -126,7 +126,6 @@ public class Book implements Serializable {
     }
 
     public void setBookLastUpdate(String bookLastUpdate) {
-        Log.e("setBookLastUpdate", bookName + ":" + bookLastUpdate);
         this.bookLastUpdate = bookLastUpdate;
     }
 

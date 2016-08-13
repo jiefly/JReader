@@ -13,6 +13,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -108,7 +109,7 @@ public class LocalBookSegmentation {
                 if (isContainChapterTitle(line)) {
                     chapterPosition.add(position);
                     if (chapterPosition.size() > 1) {
-                        chapter = new Chapter(title, bookName, chapterPosition.size() - 1, "jieLocal:"+bookName + (chapterPosition.size() - 1));
+                        chapter = new Chapter(title, bookName, chapterPosition.size() - 1, "jieLocal:" + bookName + (chapterPosition.size() - 1));
                         chapter.setContent(sb.toString());
                         mChapterList.add(chapter);
                         mChapterLoader.addChapterToDiskCache(chapter.getUrl(), chapter);
@@ -128,7 +129,14 @@ public class LocalBookSegmentation {
                 mChapterList.add(chapter);
                 mChapterLoader.addChapterToDiskCache(chapter.getUrl(), chapter);
             } else */
-            mBook.setBookLastUpdate("1111-01-11 11:11");
+            int y, m, d, h, mi, s;
+            Calendar cal = Calendar.getInstance();
+            y = cal.get(Calendar.YEAR);
+            m = cal.get(Calendar.MONTH) + 1 ;
+            d = cal.get(Calendar.DATE);
+            h = cal.get(Calendar.HOUR_OF_DAY);
+            mi = cal.get(Calendar.MINUTE);
+            mBook.setBookLastUpdate(y + "-" + m + "-" + d + " " + (h>9?h:("0"+h)) + ":" + mi);
             mBook.setBookNewTopicTitle(chapter.getTitle());
             mBook.setBookNewTopicUrl(chapter.getUrl());
             mBook.setBookTotalWords(wordConut);

@@ -41,6 +41,7 @@ import rx.schedulers.Schedulers;
  */
 public class PresentMain implements OnDataModelListener {
     private List<Book> mBookList = new ArrayList<>();
+    private List<Book> mOnLineBookList;
     private static PresentMain instance = null;
     private AdvanceDataModel mAdvanceDataModel;
     private Service mService;
@@ -68,7 +69,7 @@ public class PresentMain implements OnDataModelListener {
         mView = view;
         if (mAdvanceDataModel.getBookList() != null)
             mBookList.addAll(mAdvanceDataModel.getBookList());
-        if (ApplicationLoader.getIntValue(ApplicationLoader.BOOK_ORDER)==ApplicationLoader.SORT_BY_UPDATE_TIME)
+        if (ApplicationLoader.getIntValue(ApplicationLoader.BOOK_ORDER) == ApplicationLoader.SORT_BY_UPDATE_TIME)
             sortListByUpdateTime(mBookList);
         else {
 //            DONothing
@@ -128,7 +129,7 @@ public class PresentMain implements OnDataModelListener {
 
     //  设置activity前台可见的时候不后台更新
     public void setUpdateFlag(boolean isNeedUpdate) {
-        isNeedUpdate = isNeedUpdateBackgrond&&isNeedUpdate;
+        isNeedUpdate = isNeedUpdateBackgrond && isNeedUpdate;
         if (mBookBinder == null)
             return;
         mBookBinder.setIsNeedUpdate(isNeedUpdate);
@@ -187,6 +188,9 @@ public class PresentMain implements OnDataModelListener {
 
     //    阅读书籍
     public void readBook(final int index) throws MalformedURLException {
+        if (mBookList == null) {
+            mBookList = getBookList();
+        }
         if (mBookList.get(index).getBookNewTopicTitle() != null) {
             new Thread(new Runnable() {
                 @Override
@@ -198,7 +202,7 @@ public class PresentMain implements OnDataModelListener {
                     } catch (MalformedURLException e) {
                         e.printStackTrace();
                     }
-
+                    mAdvanceDataModel.updateBookHasUpdate(book.getBookName(),false);
                     mView.readBook(book);
                     setUpdateFlag(false);
                 }
@@ -275,7 +279,8 @@ public class PresentMain implements OnDataModelListener {
 
     public List<Book> getBookList() {
         mBookList = mAdvanceDataModel.getBookList();
-        sortListByUpdateTime(mBookList);
+        if (ApplicationLoader.getIntValue(ApplicationLoader.BOOK_ORDER) == ApplicationLoader.SORT_BY_UPDATE_TIME)
+            sortListByUpdateTime(mBookList);
         return mBookList;
     }
 
@@ -295,7 +300,9 @@ public class PresentMain implements OnDataModelListener {
     @Override
     public void onBookUpdateSuccess(String bookName, int type) {
         mView.updateBook(bookName);
-        if (countUpdate++ >= mBookList.size() - 1) {
+        if (mOnLineBookList == null)
+            mOnLineBookList = mAdvanceDataModel.getOnLineBookList();
+        if (countUpdate++ >= mOnLineBookList.size() - 1) {
             mView.stopRefreshAnim();
             countUpdate = 0;
         }

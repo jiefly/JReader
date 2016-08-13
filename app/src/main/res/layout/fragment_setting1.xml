@@ -91,9 +91,9 @@
 			             android:id="@+id/id_fragment_rb_1"
 			             android:text="关闭" android:checked="false"/>
 			<RadioButton android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
-			             android:text="十分钟" android:checked="false" android:id="@+id/id_fragment_rb_2"/>
+			             android:text="五分钟" android:checked="false" android:id="@+id/id_fragment_rb_2"/>
 			<RadioButton android:layout_width="0dp" android:layout_weight="1" android:id="@+id/id_fragment_rb_3" android:layout_height="wrap_content"
-			             android:text="二十分钟" android:checked="false"/>
+			             android:text="十分钟" android:checked="false"/>
 		</RadioGroup>
 		<RadioGroup android:layout_width="match_parent"
 		            android:paddingTop="20dp"
@@ -101,7 +101,7 @@
 		            android:paddingBottom="20dp"
 		            android:layout_height="wrap_content" android:orientation="horizontal">
 			<RadioButton android:layout_width="0dp" android:layout_weight="1" android:id="@+id/id_fragment_rb_4" android:layout_height="wrap_content"
-			             android:text="三十分钟" android:checked="false"/>
+			             android:text="三十分钟" android:checked="false" android:shadowColor="@color/theme_green"/>
 			<RadioButton android:layout_width="0dp" android:layout_weight="1" android:id="@+id/id_fragment_rb_5" android:layout_height="wrap_content"
 			             android:text="一个小时" android:checked="false"/>
 			<RadioButton android:layout_width="0dp" android:layout_weight="1" android:id="@+id/id_fragment_rb_6" android:layout_height="wrap_content"

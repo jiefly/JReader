@@ -12,7 +12,7 @@
 	<string name="tv_cached_all_chapter">已缓存所有章节</string>
 	<string name="tv_click_to_cache_all_chapter">点击缓存所有章节</string>
 	<string name="tv_go_bottom">直达底部</string>
-	<string name="input_book_name">输入添加的小说：</string>
+	<string name="input_book_name">添加小说</string>
 	<string name="system_light_level">系统</string>
 	<string name="orderByTime">排序方式(更新时间)</string>
 </resources>

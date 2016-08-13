@@ -12,6 +12,7 @@ public class ApplicationLoader extends Application {
     public static int DEFAULT_INT = 0;
     public static Boolean DEFAULT_BOOLEAN = true;
     public static String DEFAULT_STRING = "jiefly";
+    public static String IMAGE_WEB_NAME = "秋水轩";
     //    是否第一次打开app
     public static String FIRST_TIME = "firstTime";
     //    app打开次数

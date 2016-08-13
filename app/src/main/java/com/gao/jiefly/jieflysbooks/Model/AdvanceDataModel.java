@@ -159,7 +159,7 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
 
     @Override
     public void updateAllBooks(final int type) {
-        final List<Book> books = getBookList();
+        final List<Book> books = mBookLoader.getOnLineBooks();
         if (books != null)
             updateBookThread = new Thread(new Runnable() {
                 @Override
@@ -222,7 +222,12 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
         }
         return getChapter(url);
     }
-
+    private boolean checkDataModelIsInit() {
+        return instance != null;
+    }
+    public List<Book> getOnLineBookList(){
+        return mBookLoader.getOnLineBooks();
+    }
     public Chapter getChapter(String bookName, int index, String title) {
         Chapter chapter = getChapter(bookName, index);
         if (chapter == null)
@@ -232,6 +237,9 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
         return chapter;
     }
 
+    public void updateBookHasUpdate(String bookName,boolean hasUpdate){
+        mBookLoader.updateBookHasUpdate(bookName,hasUpdate);
+    }
 
     @Override
     public Chapter getChapter(String url) {
@@ -270,9 +278,6 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
         mBookLoader.refreshReadChapterIndex(book, index);
     }
 
-    private boolean checkDataModelIsInit() {
-        return instance != null;
-    }
 
     @Override
     public void onBookAddSuccess(Book book) {
