@@ -168,6 +168,8 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                         viewHeadPop.findViewById(R.id.id_main_head_setting_update_ll).setOnClickListener(new android.view.View.OnClickListener() {
                             @Override
                             public void onClick(android.view.View v) {
+                                Intent intent = new Intent(Main.this,SettingActivity.class);
+                                startActivity(intent);
                                 itemHeadPop.dismiss();
                             }
                         });

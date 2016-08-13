@@ -30,7 +30,6 @@ import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import butterknife.OnClick;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -303,7 +302,7 @@ public class ScanTxtView extends AppCompatActivity {
         }).start();
     }
 
-    @OnClick(R.id.id_sacn_txt_btn)
+/*    @OnClick(R.id.id_sacn_txt_btn)
     public void onClick() {
         final long time = System.currentTimeMillis();
         new Thread(new Runnable() {
@@ -313,7 +312,7 @@ public class ScanTxtView extends AppCompatActivity {
                 Log.e("scantxt", "扫描时间：" + (System.currentTimeMillis() - time));
             }
         }).start();
-    }
+    }*/
 
     public void showText(String value) {
         Observable.just(value)

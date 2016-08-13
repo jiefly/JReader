@@ -1,0 +1,112 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:fitsSystemWindows="true"
+              tools:context="com.gao.jiefly.jieflysbooks.View.SettingActivity">
+	<android.support.v7.widget.Toolbar
+		android:id="@+id/id_scan_tool_bar"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		app:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+		android:background="@color/theme_green">
+		<TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+		          android:layout_gravity="center" android:textColor="@color/white"
+		          android:id="@+id/id_scan_tool_bar_title_tv"
+		          android:text="设置" android:textSize="18sp" />
+	</android.support.v7.widget.Toolbar>
+	<LinearLayout android:layout_width="match_parent"
+	              android:background="#fff"
+	              android:layout_marginTop="30dp"
+	              android:layout_height="wrap_content" android:orientation="vertical">
+		<!--<TextView android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/gray"
+		          android:paddingLeft="20dp"
+		          android:paddingRight="20dp"
+		          android:layout_marginBottom="-1dp"/>-->
+
+		<Button android:layout_width="match_parent" android:layout_height="wrap_content"
+		        android:text="管理书籍"  android:textSize="16sp"
+		        android:background="@drawable/alpha_change_selector" android:textColor="@color/colorAccent"
+		        android:id="@+id/id_fragment_setting_manage_book_btn" android:paddingLeft="20dp"
+		        android:textAlignment="textStart"
+		        android:layout_gravity="center_horizontal"/>
+		<TextView android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/gray"
+		          android:layout_marginBottom="-1dp"/>
+		<Button
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text="清除阅读缓存"
+			android:textColor="#df1d23"
+			android:textSize="16sp"
+			android:background="@drawable/alpha_change_selector"
+			android:id="@+id/id_fragment_setting_clear_cache_btn" android:layout_gravity="center_horizontal"
+			android:paddingLeft="20dp"
+			android:textAlignment="textStart"/>
+
+		<TextView android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/gray"
+		          android:layout_marginBottom="-1dp"/>
+
+		<Button android:layout_width="match_parent" android:layout_height="wrap_content"
+		        android:text="反馈"  android:textSize="16sp" android:textColor="@color/colorAccent"
+		        android:background="@drawable/alpha_change_selector"
+		        android:id="@+id/id_fragment_setting_feed_back_btn" android:paddingLeft="20dp"
+		        android:textAlignment="textStart"
+		        android:layout_gravity="center_horizontal"/>
+		<TextView android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/gray"
+		          android:layout_marginBottom="-1dp"/>
+		<Button android:layout_width="match_parent" android:layout_height="wrap_content"
+		        android:text="关于" android:textSize="16sp"
+		        android:background="@drawable/alpha_change_selector" android:paddingLeft="20dp"
+		        android:textAlignment="textStart"
+		        android:id="@+id/id_fragment_setting_about_btn"
+
+		        android:textColor="@color/colorAccent"
+		/>
+	</LinearLayout>
+	<TextView
+		android:id="@+id/textView"
+		android:background="#fff"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_alignParentTop="true"
+		android:layout_centerHorizontal="true"
+		android:layout_marginTop="32dp" android:text="设置更新推送频率"
+		android:textAppearance="?android:attr/textAppearanceSmall"
+		android:paddingTop="20dp"
+		android:paddingLeft="20dp"/>
+	<LinearLayout android:layout_width="match_parent"
+	              android:background="#fff"
+	              android:layout_height="wrap_content"
+	              android:layout_gravity="center_horizontal"
+	              android:orientation="vertical" android:paddingRight="20dp"
+	              android:paddingLeft="20dp">
+		<RadioGroup android:layout_width="match_parent"
+		            android:paddingTop="20dp"
+		            android:id="@+id/id_fragment_setting_rg_one"
+		            android:paddingBottom="20dp"
+		            android:layout_height="wrap_content" android:orientation="horizontal">
+			<RadioButton android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+			             android:id="@+id/id_fragment_rb_1"
+			             android:text="关闭" android:checked="false"/>
+			<RadioButton android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+			             android:text="十分钟" android:checked="false" android:id="@+id/id_fragment_rb_2"/>
+			<RadioButton android:layout_width="0dp" android:layout_weight="1" android:id="@+id/id_fragment_rb_3" android:layout_height="wrap_content"
+			             android:text="二十分钟" android:checked="false"/>
+		</RadioGroup>
+		<RadioGroup android:layout_width="match_parent"
+		            android:paddingTop="20dp"
+		            android:id="@+id/id_fragment_setting_rg_two"
+		            android:paddingBottom="20dp"
+		            android:layout_height="wrap_content" android:orientation="horizontal">
+			<RadioButton android:layout_width="0dp" android:layout_weight="1" android:id="@+id/id_fragment_rb_4" android:layout_height="wrap_content"
+			             android:text="三十分钟" android:checked="false"/>
+			<RadioButton android:layout_width="0dp" android:layout_weight="1" android:id="@+id/id_fragment_rb_5" android:layout_height="wrap_content"
+			             android:text="一个小时" android:checked="false"/>
+			<RadioButton android:layout_width="0dp" android:layout_weight="1" android:id="@+id/id_fragment_rb_6" android:layout_height="wrap_content"
+			             android:text="两个小时" android:checked="false"/>
+		</RadioGroup>
+	</LinearLayout>
+
+</LinearLayout>

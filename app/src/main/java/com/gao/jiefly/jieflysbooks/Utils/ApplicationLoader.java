@@ -40,6 +40,12 @@ public class ApplicationLoader extends Application {
     public static int BACKGROUNT_GRAY_GREEN = 0x010;
     public static int BACKGROUNT_GREEN1 = 0x001;
 
+    public static int UPDATE_FREQUENCE_1 = 1;
+    public static int UPDATE_FREQUENCE_2 = 2;
+    public static int UPDATE_FREQUENCE_3 = 3;
+    public static int UPDATE_FREQUENCE_4 = 4;
+    public static int UPDATE_FREQUENCE_5 = 5;
+    public static int UPDATE_FREQUENCE_6 = 6;
     @Override
     public void onCreate() {
         super.onCreate();

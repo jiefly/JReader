@@ -17,7 +17,7 @@
 	              android:layout_alignParentBottom="true" android:orientation="horizontal">
 		<Button android:layout_width="0dp" android:layout_height="match_parent"
 		        android:id="@+id/id_scan_bottom_bar_left_btn"
-		        android:layout_weight="1" android:background="#fff" android:text="删除"
+		        android:layout_weight="1" android:background="@drawable/alpha_change_selector" android:text="删除"
 		        android:textSize="16sp"
 		        android:textColor="#000"/>
 		<!--<Button android:layout_width="0dp" android:layout_height="match_parent"

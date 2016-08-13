@@ -37,7 +37,7 @@ import rx.functions.Action1;
 public class FragmentManagerBooks extends Fragment {
     @InjectView(R.id.id_scan_bottom_bar_left_btn)
     Button mIdScanBottomBarLeftBtn;
-//    @InjectView(R.id.id_scan_bottom_bar_right_btn)
+    //    @InjectView(R.id.id_scan_bottom_bar_right_btn)
 //    Button mIdScanBottomBarRightBtn;
     @InjectView(R.id.id_scan_bottom_bar)
     LinearLayout mIdScanBottomBar;
@@ -48,6 +48,7 @@ public class FragmentManagerBooks extends Fragment {
     private boolean isChooseAll = false;
     private List<Book> mRemoveBooks = new ArrayList<>();
     private AdvanceDataModel mAdvanceDataModel;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -58,10 +59,12 @@ public class FragmentManagerBooks extends Fragment {
         ButterKnife.inject(this, mView);
         mAdvanceDataModel = AdvanceDataModel.build(ApplicationLoader.applicationContext);
         mFiles = mAdvanceDataModel.getBookList();
-        mCustomRecycleAdapter.notifyItemRangeInserted(0,mFiles.size());
+        if (mFiles !=null) {
+            mCustomRecycleAdapter.notifyItemRangeInserted(0, mFiles.size());
+        }else
+            mFiles = new ArrayList<>();
         return mView;
     }
-
 
 
     @Override
@@ -69,7 +72,6 @@ public class FragmentManagerBooks extends Fragment {
         super.onStart();
 
     }
-
 
 
     @Override
@@ -94,7 +96,6 @@ public class FragmentManagerBooks extends Fragment {
                     }
                 });
     }
-
 
 
     private void initRecycleView() {
@@ -130,25 +131,25 @@ public class FragmentManagerBooks extends Fragment {
                     return;
                 new android.app.AlertDialog.Builder(getActivity())
                         .setTitle("删除书籍")
-                        .setMessage(mFiles.get(mCustomRecycleAdapter.getCheckPositionList().get(0)).getBookName()+(mCustomRecycleAdapter.getCheckPositionList().size()>1?("等 "+mCustomRecycleAdapter.getCheckPositionList().size()+" 本书籍"):""))
+                        .setMessage(mFiles.get(mCustomRecycleAdapter.getCheckPositionList().get(0)).getBookName() + (mCustomRecycleAdapter.getCheckPositionList().size() > 1 ? ("等 " + mCustomRecycleAdapter.getCheckPositionList().size() + " 本书籍") : ""))
                         .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                for (int i:mCustomRecycleAdapter.getCheckPositionList()){
-                                   mRemoveBooks.add(mFiles.get(i));
+                                for (int i : mCustomRecycleAdapter.getCheckPositionList()) {
+                                    mRemoveBooks.add(mFiles.get(i));
                                 }
                                 mCustomRecycleAdapter.cancleItems();
-                                for (Book book:mRemoveBooks){
+                                for (Book book : mRemoveBooks) {
                                     mCustomRecycleAdapter.notifyItemRemoved(getBooksCurrentPosition(book));
                                     mFiles.remove(book);
                                 }
-                                int remainCount =  mFiles.size()-mRemoveBooks.size() ;
+                                int remainCount = mFiles.size() - mRemoveBooks.size();
 //                                mCustomRecycleAdapter.notifyItemRangeRemoved(0,mRemoveBooks.size() - 1);
 //                                mFiles.removeAll(mRemoveBooks);
-                                if (remainCount>0)
-                                    mCustomRecycleAdapter.notifyItemRangeChanged(0,remainCount - 1);
+                                if (remainCount > 0)
+                                    mCustomRecycleAdapter.notifyItemRangeChanged(0, remainCount - 1);
 //                                mCustomRecycleAdapter.cancleItems();
-                                ((ScanTxtView)getActivity()).chooseFilesComplete(null);
+                                ((ScanTxtView) getActivity()).chooseFilesComplete(null);
                             }
                         })
                         .setNegativeButton("取消", null)
@@ -158,7 +159,7 @@ public class FragmentManagerBooks extends Fragment {
     }
 
     private int getBooksCurrentPosition(Book book) {
-        for (int i=0;i<mFiles.size();i++){
+        for (int i = 0; i < mFiles.size(); i++) {
             if (mFiles.get(i).equals(book))
                 return i;
         }
@@ -168,7 +169,8 @@ public class FragmentManagerBooks extends Fragment {
     interface OnDataChangeListener {
         void OnDataChange();
     }
-    public void toogleChooseAll(){
+
+    public void toogleChooseAll() {
         if (!isChooseAll) {
             isChooseAll = true;
 //            mIdScanBottomBarRightBtn.setText("取消");
@@ -187,6 +189,7 @@ public class FragmentManagerBooks extends Fragment {
 
         List<Integer> checkPositionList = new ArrayList<>();
         private OnDataChangeListener mListener = null;
+
         public void chooseAllItems() {
             for (int i = 0; i < mFiles.size(); i++) {
                 if (!checkPositionList.contains(i)) {
@@ -202,6 +205,7 @@ public class FragmentManagerBooks extends Fragment {
             notifyItemRangeChanged(0, mFiles.size());
             mListener.OnDataChange();
         }
+
         public void setOnDataChangeListener(OnDataChangeListener listener) {
             mListener = listener;
         }
@@ -212,6 +216,7 @@ public class FragmentManagerBooks extends Fragment {
 
             return holder;
         }
+
         @Override
         public void onBindViewHolder(final ViewHolder holder, final int position) {
             holder.mImageView.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.txt_icon));

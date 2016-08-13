@@ -10,6 +10,7 @@ import com.gao.jiefly.jieflysbooks.Model.CustomDatabaseHelper;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
 import com.gao.jiefly.jieflysbooks.Model.download.BaseHttpURLClient;
+import com.gao.jiefly.jieflysbooks.Utils.ApplicationLoader;
 import com.gao.jiefly.jieflysbooks.Utils.Utils;
 
 import java.net.MalformedURLException;
@@ -42,20 +43,59 @@ public class BookLoader {
 
     //  删除数据库中的小说以及小说章节列表
     public boolean removeBook(String[] bookName) {
+//        移除缓存中的章节内容
+        ChapterLoader chapterLoader = ChapterLoader.build(ApplicationLoader.applicationContext);
+        try {
+            List<String> list = getBook(bookName[0]).getChapterList().getChapterUrlList();
+            for (String s:list)
+                chapterLoader.removeChapter(s);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
         SQLiteDatabase db = mBookDatabaseHelper.getWritableDatabase();
 //        移除数据库中的小说章节列表
         SQLiteDatabase dbChapter = mChapterListDatabaseHelper.getWritableDatabase();
+
         dbChapter.delete("chapterList", "bookName=?", bookName);
+//        移除小说
         int result = db.delete("Book", "name=?", bookName);
         return result > 0;
     }
+    //  删除数据库中的小说以及小说章节列表
+    public boolean removeBook(Book book) {
+//        移除缓存中的章节内容
+        ChapterLoader chapterLoader = ChapterLoader.build(ApplicationLoader.applicationContext);
+        List<String> list = book.getChapterList().getChapterUrlList();
+        for (String s:list)
+            chapterLoader.removeChapter(s);
+        SQLiteDatabase db = mBookDatabaseHelper.getWritableDatabase();
+//        移除数据库中的小说章节列表
+        SQLiteDatabase dbChapter = mChapterListDatabaseHelper.getWritableDatabase();
 
+        dbChapter.delete("chapterList", "bookName=?", new String[]{book.getBookName()});
+//        移除小说
+        int result = db.delete("Book", "name=?", new String[]{book.getBookName()});
+        return result > 0;
+    }
     //    关闭数据库
     public void closeDB() {
         mBookDatabaseHelper.close();
         mChapterListDatabaseHelper.close();
     }
-
+    public List<Book> getLocalBooks(){
+        List<Book> localBooks = getBookList();
+        for (Book book:localBooks)
+            if (!book.isLocal())
+                localBooks.remove(book);
+        return localBooks;
+    }
+    public List<Book> getOnLineBooks(){
+        List<Book> localBooks = getBookList();
+        for (Book book:localBooks)
+            if (book.isLocal())
+                localBooks.remove(book);
+        return localBooks;
+    }
     //    更新数据库中的小说章节列表
     private void updateChapterList(String bookName) throws MalformedURLException {
         if (!getBook(bookName).getBookUrl().startsWith("http"))

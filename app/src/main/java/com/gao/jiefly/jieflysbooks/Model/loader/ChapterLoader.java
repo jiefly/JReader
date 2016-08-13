@@ -58,6 +58,18 @@ public class ChapterLoader {
         return new ChapterLoader(context);
     }
 
+    public  long getDiskCacheSize(){
+        return mDiskCache.size();
+    }
+    public boolean clearAllCache(){
+        try {
+            mDiskCache.delete();
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
     //    缓存所有章节
     public void cacheAllChapter(final List<String> urlList, final OnChapterCacheListener onChapterCacheListener) {
         mOnChapterCacheListener = onChapterCacheListener;
