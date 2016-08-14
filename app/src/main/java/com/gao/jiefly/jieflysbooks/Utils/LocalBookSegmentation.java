@@ -122,13 +122,13 @@ public class LocalBookSegmentation {
                 position++;
             }
 //            如果没有检测到任何标题，就将所有文字作为一个章节
-            /*if (chapterPosition.size() == 0) {
+            if (chapterPosition.size() == 0) {
                 mBook.setBookNewTopicTitle(bookName);
                 chapter = new Chapter(bookName, bookName, chapterPosition.size() - 1, bookName + (chapterPosition.size() - 1));
                 chapter.setContent(sb.toString());
                 mChapterList.add(chapter);
                 mChapterLoader.addChapterToDiskCache(chapter.getUrl(), chapter);
-            } else */
+            }
             int y, m, d, h, mi, s;
             Calendar cal = Calendar.getInstance();
             y = cal.get(Calendar.YEAR);

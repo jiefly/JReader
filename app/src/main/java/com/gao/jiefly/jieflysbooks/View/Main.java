@@ -47,6 +47,9 @@ import java.util.List;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import co.mobiwise.materialintro.shape.Focus;
+import co.mobiwise.materialintro.shape.FocusGravity;
+import co.mobiwise.materialintro.view.MaterialIntroView;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -299,7 +302,6 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
 
 
     }
-
     private void startBackGroundUpdateService() {
         //            默认十分钟更新一次
         int time = 60 * 1000;
@@ -412,6 +414,18 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     @Override
     protected void onResume() {
         super.onResume();
+        new MaterialIntroView.Builder(this)
+                .enableDotAnimation(true)
+                .setFocusGravity(FocusGravity.CENTER)
+                .setFocusType(Focus.MINIMUM)
+                .setDelayMillis(500)
+                .enableFadeAnimation(false)
+                .performClick(true)
+                .setInfoText("点击这里可以添加你喜欢的书籍哦...快来试试吧")
+                .setTarget(mIdMainAddBookFab)
+                .setUsageId("MainAddBookFab") //THIS SHOULD BE UNIQUE ID
+                .show();
+
         mPresentMain.setUpdateFlag(false);
         Log.e("main", "onResume");
         data = mPresentMain.getBookList();
@@ -760,7 +774,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                     itemViewHolder.ivBookUpdateFlag.setVisibility(data.get(position).isHasUpdate() ? android.view.View.VISIBLE : android.view.View.INVISIBLE);
 //                    itemViewHolder.ivBook.setImageResource(R.drawable.nocover);
                     Picasso.with(getApplicationContext())
-                            .load(data.get(position).getBookCover()).into(itemViewHolder.ivBook);
+                            .load(data.get(position).getBookCover()).error(R.drawable.nocover).into(itemViewHolder.ivBook);
                     itemViewHolder.tvRecentUpdateTopicTitle.setText("最近更新：");
                     itemViewHolder.tvRecentUpdateTimeTitle.setText("最后更新时间：");
                     itemViewHolder.llBookAuthor.setVisibility(android.view.View.VISIBLE);
@@ -849,6 +863,18 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                 mScrollNumber.setTextSize(50);
                 mScrollNumber.setTextColors(new int[]{R.color.white});
                 mImageButton = (ImageButton) itemView.findViewById(R.id.id_item_main_options_ibtn);
+
+                new MaterialIntroView.Builder(Main.this)
+                        .enableDotAnimation(true)
+                        .setFocusGravity(FocusGravity.CENTER)
+                        .setFocusType(Focus.MINIMUM)
+                        .setDelayMillis(500)
+                        .enableFadeAnimation(false)
+                        .performClick(true)
+                        .setInfoText("点击这里可以看到更多功能哦...快来试试吧")
+                        .setTarget(mImageButton)
+                        .setUsageId("MainMore") //THIS SHOULD BE UNIQUE ID
+                        .show();
             }
         }
     }

@@ -23,7 +23,7 @@
 	<!---->
 	<color name="colorTextGray">#a9a9b1</color>
 	<color name="colorBackgroundDark">#2e2e27</color>
-	<color name="colorDefaultBackgroundText">#101020</color>
+	<color name="colorDefaultBackgroundText">#5A513C</color>
 	<color name="colorNovelReadBackgroundWhite">#ffffff</color>
 	<color name="colorNovelReadBackgroundWhiteText">#5b5555</color>
 	<!--文字：亮白 背景：暗蓝-->

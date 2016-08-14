@@ -29,6 +29,9 @@ import java.io.IOException;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import co.mobiwise.materialintro.shape.Focus;
+import co.mobiwise.materialintro.shape.FocusGravity;
+import co.mobiwise.materialintro.view.MaterialIntroView;
 
 /**
  * Created by jiefly on 2016/8/9.
@@ -124,6 +127,17 @@ public class SettingActivity extends AppCompatActivity implements RadioGroup.OnC
         }
         mIdFragmentSettingRgOne.setOnCheckedChangeListener(this);
         mIdFragmentSettingRgTwo.setOnCheckedChangeListener(this);
+        new MaterialIntroView.Builder(this)
+                .enableDotAnimation(true)
+                .setFocusGravity(FocusGravity.CENTER)
+                .setFocusType(Focus.MINIMUM)
+                .setDelayMillis(500)
+                .enableFadeAnimation(false)
+                .performClick(true)
+                .setInfoText("点击这里可以可以弹出更新频率设置哦...快来试试吧")
+                .setTarget(mIdFragmentSettingUpdateFrequenceBtn)
+                .setUsageId("SetFrequence") //THIS SHOULD BE UNIQUE ID
+                .show();
     }
 
     @Override
