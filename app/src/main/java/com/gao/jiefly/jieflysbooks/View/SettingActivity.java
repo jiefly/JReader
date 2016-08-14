@@ -13,6 +13,8 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
@@ -53,6 +55,22 @@ public class SettingActivity extends AppCompatActivity implements RadioGroup.OnC
     RadioGroup mIdFragmentSettingRgOne;
     @InjectView(R.id.id_fragment_setting_rg_two)
     RadioGroup mIdFragmentSettingRgTwo;
+    @InjectView(R.id.id_fragment_setting_update_frequence_btn)
+    Button mIdFragmentSettingUpdateFrequenceBtn;
+    @InjectView(R.id.id_fragment_rb_1)
+    RadioButton mIdFragmentRb1;
+    @InjectView(R.id.id_fragment_rb_2)
+    RadioButton mIdFragmentRb2;
+    @InjectView(R.id.id_fragment_rb_3)
+    RadioButton mIdFragmentRb3;
+    @InjectView(R.id.id_fragment_rb_4)
+    RadioButton mIdFragmentRb4;
+    @InjectView(R.id.id_fragment_rb_5)
+    RadioButton mIdFragmentRb5;
+    @InjectView(R.id.id_fragment_rb_6)
+    RadioButton mIdFragmentRb6;
+    @InjectView(R.id.id_fragment_setting_frequence_ll)
+    LinearLayout mIdFragmentSettingFrequenceLl;
     private int currentChecked;
 
     @Override
@@ -148,7 +166,7 @@ public class SettingActivity extends AppCompatActivity implements RadioGroup.OnC
         win.setAttributes(winParams);
     }
 
-    @OnClick({R.id.id_fragment_setting_manage_book_btn, R.id.id_fragment_setting_clear_cache_btn, R.id.id_fragment_setting_feed_back_btn, R.id.id_fragment_setting_about_btn})
+    @OnClick({R.id.id_fragment_setting_manage_book_btn, R.id.id_fragment_setting_update_frequence_btn, R.id.id_fragment_setting_clear_cache_btn, R.id.id_fragment_setting_feed_back_btn, R.id.id_fragment_setting_about_btn})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.id_fragment_setting_manage_book_btn:
@@ -160,8 +178,8 @@ public class SettingActivity extends AppCompatActivity implements RadioGroup.OnC
                 long size = ChapterLoader.build(getApplicationContext()).getDiskCacheSize();
                 new AlertDialog.Builder(this)
                         .setTitle("确定清除所有阅读缓存")
-                        .setMessage("共:"+Utils.formatFileSize(size)+"\n删除后您的本地图书请重新添加")
-                        .setPositiveButton("取消",null)
+                        .setMessage("共:" + Utils.formatFileSize(size) + "\n删除后您的本地图书请重新添加")
+                        .setPositiveButton("取消", null)
                         .setNegativeButton("确定", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -180,12 +198,15 @@ public class SettingActivity extends AppCompatActivity implements RadioGroup.OnC
                 new AlertDialog.Builder(this)
                         .setMessage("有任何意见或者建议请联系作者，jiefly1993@gmail.com。")
                         .setNegativeButton("确定", null)
-                    .show();
+                        .show();
                 break;
             case R.id.id_fragment_setting_about_btn:
                 new AlertDialog.Builder(this)
                         .setMessage("本app网络小说仅提供转码服务\nps:本app仅用于学习交流。")
-                        .setNegativeButton("确定",null).show();
+                        .setNegativeButton("确定", null).show();
+                break;
+            case R.id.id_fragment_setting_update_frequence_btn:
+                mIdFragmentSettingFrequenceLl.setVisibility(View.VISIBLE);
                 break;
         }
     }

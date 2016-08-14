@@ -103,7 +103,7 @@ public class LocalBookSegmentation {
             String line;
             int position = 0;
             Chapter chapter = null;
-            String title = null;
+            String title = "unkonw";
             while ((line = mReader.readLine()) != null) {
                 wordConut += line.length();
                 if (isContainChapterTitle(line)) {
@@ -137,8 +137,8 @@ public class LocalBookSegmentation {
             h = cal.get(Calendar.HOUR_OF_DAY);
             mi = cal.get(Calendar.MINUTE);
             mBook.setBookLastUpdate(y + "-" + m + "-" + d + " " + (h>9?h:("0"+h)) + ":" + mi);
-            mBook.setBookNewTopicTitle(chapter.getTitle());
-            mBook.setBookNewTopicUrl(chapter.getUrl());
+//            mBook.setBookNewTopicTitle(chapter.getTitle());
+//            mBook.setBookNewTopicUrl(chapter.getUrl());
             mBook.setBookTotalWords(wordConut);
             mBook.setChapterList(mChapterList);
             mBook.setCached(true);

@@ -45,12 +45,14 @@ public class BookLoader {
     //  删除数据库中的小说以及小说章节列表
     public boolean removeBook(final String[] bookName) {
 
-                //        移除缓存中的章节内容
-                ChapterLoader chapterLoader = ChapterLoader.build(ApplicationLoader.applicationContext);
-                List<String> list = getChapterListFromDB(bookName[0]).getChapterUrlList();
-                for (String s : list)
-                    chapterLoader.removeChapter(s);
-
+        //        移除缓存中的章节内容
+        ChapterLoader chapterLoader = ChapterLoader.build(ApplicationLoader.applicationContext);
+        Book.ChapterList chapterList = getChapterListFromDB(bookName[0]);
+        if (chapterList != null) {
+            List<String> list = chapterList.getChapterUrlList();
+            for (String s : list)
+                chapterLoader.removeChapter(s);
+        }
         SQLiteDatabase db = mBookDatabaseHelper.getWritableDatabase();
 //        移除数据库中的小说章节列表
         SQLiteDatabase dbChapter = mChapterListDatabaseHelper.getWritableDatabase();
@@ -95,6 +97,8 @@ public class BookLoader {
 
     public List<Book> getOnLineBooks() {
         List<Book> books = getBookList();
+        if (books == null)
+            return null;
         List<Book> onLineBooks = new ArrayList<>();
         for (Book book : books)
             if (!book.isLocal())
@@ -139,11 +143,12 @@ public class BookLoader {
             e.printStackTrace();
         }*/
     }
+
     //更新Book的hasUpdate
     public void updateBookHasUpdate(String bookName, boolean hasUpdate) {
         SQLiteDatabase db = mBookDatabaseHelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put("hasUpdate", hasUpdate?0x10 : 0x01);
+        contentValues.put("hasUpdate", hasUpdate ? 0x10 : 0x01);
         db.update("Book", contentValues, "name=?", new String[]{bookName});
         db.close();
     }
@@ -195,7 +200,10 @@ public class BookLoader {
 
     // 从网络中获取小说列表最后向数据库中添加小说章节列表
     private boolean addChapterList(String bookName) throws MalformedURLException {
-        List<Chapter> chapters = getChapterListFromHttp(getBook(bookName).getBookUrl());
+        Book book = getBook(bookName);
+        if (book == null)
+            return false;
+        List<Chapter> chapters = getChapterListFromHttp(book.getBookUrl());
         List<String> chapterUrl = new LinkedList<>();
         List<String> chapterTitle = new LinkedList<>();
         for (Chapter c : chapters) {

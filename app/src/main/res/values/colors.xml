@@ -8,6 +8,7 @@
 	<!---->
 	<color name="justWhite">#fff</color>
 	<color name="white">#fafafa</color>
+	<color name="red">#FFD52019</color>
 	<color name="white_dark">#f3f3f3</color>
 	<color name="gray_light">#cccccc</color>
 	<color name="gray">#777</color>
@@ -17,6 +18,7 @@
 	<color name="green_dark">#1e3e4a</color>
 	<color name="night_mask">#90000000</color>
 	<color name="theme_green">#2aa699</color>
+	<color name="theme_green1">#652aa699</color>
 	<color name="background_line">#cf747070</color>
 	<!---->
 	<color name="colorTextGray">#a9a9b1</color>
@@ -38,5 +40,29 @@
 	<!--文字：墨绿 背景：若竹-->
 	<color name="colorNovelReadBackgroundgreen1">#b5eecd</color>
 	<color name="colorNovelReadBackgroundgreen1Text">#414c41 </color>
+
+	<declare-styleable name="SeekCircle">
+		<attr name="SeekCirclemax" format="integer" value="100" />
+		<attr name="SeekCircleprogress" format="integer" value="0" />
+		<attr name="startColor" format="color" />
+		<attr name="endColor" format="color" />
+		<attr name="inactiveColor" format="color" />
+		<attr name="ringBias" format="float" />
+		<attr name="sectionRatio" format="float" />
+	</declare-styleable>
+	<declare-styleable name="CircularRing">
+		<attr name="roundColor" format="color" />
+		<attr name="roundProgressColor" format="color" />
+		<attr name="circleRoundWidth" format="dimension" />
+		<attr name="circleWidth" format="dimension" />
+		<attr name="circleTextColor" format="color" />
+		<attr name="circleNumber" format="integer" />
+		<attr name="circleTextSize" format="dimension" />
+		<attr name="circleColor1" format="color" />
+		<attr name="circleColor2" format="color" />
+		<attr name="circleColor3" format="color" />
+		<attr name="circleColor4" format="color" />
+		<attr name="circleColor5" format="color" />
+	</declare-styleable>
 
 </resources>

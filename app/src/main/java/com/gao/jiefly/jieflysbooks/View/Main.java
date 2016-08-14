@@ -41,6 +41,7 @@ import com.squareup.picasso.Picasso;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import butterknife.ButterKnife;
@@ -52,6 +53,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
+import top.wuhaojie.library.MultiScrollNumber;
 
 /**
  * Created by jiefly on 2016/6/23.
@@ -115,6 +117,10 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
         if (mPresentMain.isNeedUpdateBackgrond) {
             startBackGroundUpdateService();
         }
+        Calendar cal = Calendar.getInstance();
+        if (ApplicationLoader.getIntValue(ApplicationLoader.CURRENT_DAY) != cal.get(Calendar.DATE))
+            ApplicationLoader.save(ApplicationLoader.DAILY_READ_TIME, 0);
+        ApplicationLoader.save(ApplicationLoader.CURRENT_DAY,cal.get(Calendar.DATE));
         ButterKnife.inject(this);
         data = mPresentMain.getBookList();
         mIdMainSwipeRefreshLayout.setOnRefreshListener(this);
@@ -287,7 +293,8 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
             mIdRv.setAdapter(adapter);
             mIdMainAddBookFab.attachToRecyclerView(mIdRv);
             mIdMainAddBookFab.setColorNormalResId(R.color.theme_green);
-            mIdMainAddBookFab.setColorPressedResId(R.color.justWhite);
+            mIdMainAddBookFab.setColorPressedResId(R.color.theme_green1);
+            mIdMainAddBookFab.setImageResource(R.drawable.plus_icon);
         }
 
 
@@ -296,14 +303,14 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     private void startBackGroundUpdateService() {
         //            默认十分钟更新一次
         int time = 60 * 1000;
-        switch (ApplicationLoader.getIntValue(ApplicationLoader.UPDATE_FREQUENCE)){
+        switch (ApplicationLoader.getIntValue(ApplicationLoader.UPDATE_FREQUENCE)) {
 //                关闭更新
             case 1:
                 time = Integer.MAX_VALUE;
                 break;
 //                五分钟
             case 2:
-                time = 5*60*1000;
+                time = 5 * 60 * 1000;
                 break;
 //                十分钟
             case 3:
@@ -311,18 +318,18 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                 break;
 //                三十分钟
             case 4:
-                time = 30*60*1000;
+                time = 30 * 60 * 1000;
                 break;
 //                一个小时
             case 5:
-                time = 60*60*1000;
+                time = 60 * 60 * 1000;
                 break;
 //                两个小时
             case 6:
-                time = 120*60*1000;
+                time = 120 * 60 * 1000;
                 break;
         }
-        Log.e("openBackgroundService","time:"+time);
+        Log.e("openBackgroundService", "time:" + time);
         Intent intent = new Intent(getApplicationContext(), UpdateBookService.class);
         intent.putExtra("time", time);
         startService(intent);
@@ -717,7 +724,10 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
         public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
             if (holder instanceof HeadViewHolder) {
                 HeadViewHolder headViewHolder = (HeadViewHolder) holder;
-                headViewHolder.ivHead.setImageResource(R.drawable.head_canvas);
+//                headViewHolder.ivHead.setImageResource(R.drawable.head_canvas);
+//                每天阅读时长
+                int readTime = ApplicationLoader.getIntValue(ApplicationLoader.DAILY_READ_TIME);
+                headViewHolder.mScrollNumber.setNumber(readTime);
                 headViewHolder.mImageButton.setOnClickListener(new android.view.View.OnClickListener() {
                     @Override
                     public void onClick(android.view.View v) {
@@ -830,10 +840,14 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
         public class HeadViewHolder extends RecyclerView.ViewHolder {
             ImageView ivHead;
             ImageButton mImageButton;
+            MultiScrollNumber mScrollNumber;
 
             public HeadViewHolder(android.view.View itemView) {
                 super(itemView);
-                ivHead = (ImageView) itemView.findViewById(R.id.id_iv_head);
+//                ivHead = (ImageView) itemView.findViewById(R.id.id_iv_head);
+                mScrollNumber = (MultiScrollNumber) itemView.findViewById(R.id.scroll_number);
+                mScrollNumber.setTextSize(50);
+                mScrollNumber.setTextColors(new int[]{R.color.white});
                 mImageButton = (ImageButton) itemView.findViewById(R.id.id_item_main_options_ibtn);
             }
         }

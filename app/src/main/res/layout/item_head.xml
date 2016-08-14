@@ -4,15 +4,27 @@
                 android:layout_height="200dp"
                 android:background="@drawable/main_head_bg"
                 android:orientation="vertical">
-	<com.gao.jiefly.jieflysbooks.View.CircleImageView android:id="@+id/id_iv_head"
-	           android:layout_width="140dp"
-	           android:layout_height="140dp"
-	                                                  android:src="@drawable/head_canvas"
-	           android:layout_centerVertical="true" android:layout_centerHorizontal="true"/>
-	<ImageButton android:layout_width="30dp"
+<!--	<com.gao.jiefly.jieflysbooks.View.CircleImageView android:id="@+id/id_iv_head"
+	                                                  android:layout_width="140dp"
+	                                                  android:layout_height="140dp"
+	                                                  android:layout_centerHorizontal="true"
+	                                                  android:layout_centerVertical="true"
+	                                                  android:src="@drawable/head_canvas"/>-->
+	<top.wuhaojie.library.MultiScrollNumber
+		android:id="@+id/scroll_number"
+		android:layout_width="wrap_content"
+		android:layout_centerHorizontal="true"
+		android:layout_centerVertical="true"
+		android:layout_height="wrap_content"/>
+	<TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+	          android:layout_below="@id/scroll_number" android:layout_centerHorizontal="true"
+	          android:textColor="@color/white_dark"
+	          android:textSize="10sp"
+	          android:text="今日阅读时长/分钟" android:id="@+id/textView2"/>
+	<ImageButton android:id="@+id/id_item_main_options_ibtn"
+	             android:layout_width="30dp"
 	             android:layout_height="30dp"
-	             android:background="@drawable/mian_set_selector"
-	             android:layout_alignParentTop="true"
-	             android:layout_alignParentRight="true" android:layout_marginTop="10dp"
-	             android:layout_marginRight="10dp" android:id="@+id/id_item_main_options_ibtn"/>
+	             android:layout_alignParentRight="true"
+	             android:layout_alignParentTop="true" android:layout_marginRight="10dp"
+	             android:layout_marginTop="10dp" android:background="@drawable/mian_set_selector"/>
 </RelativeLayout>

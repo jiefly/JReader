@@ -5,6 +5,7 @@ import android.util.Log;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -253,6 +254,8 @@ public class Book implements Serializable {
     }
 
     private List<Chapter> chapterList2List(Book.ChapterList chapterList) {
+        if (chapterList == null)
+            return new ArrayList<>();
         List<Chapter> chapters = new LinkedList<>();
         List<String> urlList = chapterList.getChapterUrlList();
         List<String> titleList = chapterList.getChapterTitleList();

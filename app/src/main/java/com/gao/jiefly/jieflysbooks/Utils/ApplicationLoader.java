@@ -13,6 +13,13 @@ public class ApplicationLoader extends Application {
     public static Boolean DEFAULT_BOOLEAN = true;
     public static String DEFAULT_STRING = "jiefly";
     public static String IMAGE_WEB_NAME = "秋水轩";
+    public static String DEFAULT_BOOK_COVER = "http://www.qiushuixuan.cc/modules/article/images/nocover.jpg";
+    //    总共阅读时长
+    public static String TOTAL_READ_TIME = "totleReadTime";
+    //    今日阅读时长
+    public static String DAILY_READ_TIME = "dailyReadTime";
+    //    当前日期
+    public static String CURRENT_DAY = "currentDay";
     //    是否第一次打开app
     public static String FIRST_TIME = "firstTime";
     //    app打开次数
@@ -47,6 +54,7 @@ public class ApplicationLoader extends Application {
     public static int UPDATE_FREQUENCE_4 = 4;
     public static int UPDATE_FREQUENCE_5 = 5;
     public static int UPDATE_FREQUENCE_6 = 6;
+
     @Override
     public void onCreate() {
         super.onCreate();

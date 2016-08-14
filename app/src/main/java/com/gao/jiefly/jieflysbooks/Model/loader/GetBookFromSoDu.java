@@ -36,7 +36,8 @@ public class GetBookFromSoDu {
         mBook = new Book();
         sb = new StringBuffer();
     }
-    public void getBookCoverUrl(final String bookName, final String webName, final OnBookImageGetListener listener){
+
+    public void getBookCoverUrl(final String bookName, final String webName, final OnBookImageGetListener listener) {
         regexUpdateResult = "<a href=\"(.*?)\">" + bookName + "</a>";
 //        将小说名字转换为IEM码
         String transformedName = Utils.UrlDecoder(bookName);
@@ -54,8 +55,11 @@ public class GetBookFromSoDu {
                     url = url.replace(end, "");
 //                    要更新小说的时候先从这个页面获取更新时间，通过更新时间来确定是否需要更新
 //                    mBook.setBookUpdateTimeUrl(url);
-                } else
+                } else {
+                    listener.onFailed(null);
                     Log.e("GetBookFromSoDu.getBook", "sodu中搜索书籍出错");
+                    return;
+                }
 //                获取最近更新页面的html
                 VolleyClient.build(null).getWebResource(url, new OnDataStateListener() {
                     @Override
@@ -63,49 +67,49 @@ public class GetBookFromSoDu {
 //
                         String rex = "<div class=\"main-html\">([\\s\\S]*?)</div>[\\s\\S][\\s\\S]</div>";
                         List<String> units = Utils.getRegexResult(rex, result, false);
-                        for (String unit : units) {
-                            if (unit.contains(webName)) {
-                                rex = "hapterurl=(.*?)\" alt";
-                                url = Utils.getRegexResult(rex, unit);
-                                rex = "alt=\"(.*?)\" onclick";
-                                String chapterTitle = Utils.getRegexResult(rex, unit)
-                                        .replace("alt=\"", "")
-                                        .replace("\" onclick", "");
-                                rex = "class=\"xt1\">(.*?)</div>[\\s\\S][\\s\\S]</div>";
-                                String lastUpdateTime = Utils.getRegexResult(rex, unit).replaceAll("class=\"xt1\">", "").replace("</div>\r\n</div>", "");
+                        if (units != null)
+                            for (String unit : units) {
+                                if (unit.contains(webName)) {
+                                    rex = "hapterurl=(.*?)\" alt";
+                                    url = Utils.getRegexResult(rex, unit);
+                                    rex = "alt=\"(.*?)\" onclick";
+                                    String chapterTitle = Utils.getRegexResult(rex, unit)
+                                            .replace("alt=\"", "")
+                                            .replace("\" onclick", "");
+                                    rex = "class=\"xt1\">(.*?)</div>[\\s\\S][\\s\\S]</div>";
+                                    String lastUpdateTime = Utils.getRegexResult(rex, unit).replaceAll("class=\"xt1\">", "").replace("</div>\r\n</div>", "");
 //                更新时间
-                                mBook.setBookLastUpdate(lastUpdateTime);
+                                    mBook.setBookLastUpdate(lastUpdateTime);
 //                更新章节标题
-                                mBook.setBookNewTopicTitle(chapterTitle);
+                                    mBook.setBookNewTopicTitle(chapterTitle);
 //                                hapterurl=http://www.qiushuixuan.cc/book/14/14757/12881130.html" alt
-                                //        更新章节的地址
-                                mBook.setBookNewTopicUrl(formateUrl(url, '=', '"'));
+                                    //        更新章节的地址
+                                    mBook.setBookNewTopicUrl(formateUrl(url, '=', '"'));
 //                网站地址
-                                webUrl = formateUrl(url, '=', 'b');
-                                url = formateUrl(url, '=', '/');
+                                    webUrl = formateUrl(url, '=', 'b');
+                                    url = formateUrl(url, '=', '/');
 //                小说地址
 
+                                }
                             }
-                        }
-                        VolleyClient.build(null).getWebResource(url, new OnDataStateListener() {
-                            @Override
-                            public void onSuccess(String result) {
+                        if (url != null)
+                            VolleyClient.build(null).getWebResource(url, new OnDataStateListener() {
+                                @Override
+                                public void onSuccess(String result) {
 //                                        获取小说cover path
-                                result = getImage(result);
-                                listener.onSuccess(result);
-                            }
+                                    result = getImage(result);
+                                    listener.onSuccess(result);
+                                }
 
-                            @Override
-                            public void onFailed(Exception e) {
-                                listener.onFailed(e);
-                                Log.e("GetBookFromSoDu", e.getMessage());
-                            }
-                        }, "gbk");
+                                @Override
+                                public void onFailed(Exception e) {
+                                    listener.onFailed(e);
+                                }
+                            }, "gbk");
                     }
 
                     @Override
                     public void onFailed(Exception e) {
-                        Log.e("GetBookFromSoDu", e.getMessage());
                         listener.onFailed(e);
                     }
                 }, "UTF-8");
@@ -113,11 +117,11 @@ public class GetBookFromSoDu {
 
             @Override
             public void onFailed(Exception e) {
-                Log.e("GetBookFromSoDu", e.getMessage());
                 listener.onFailed(e);
             }
         }, "UTF-8");
     }
+
     public void getBook(final String bookName, final String webName, OnBookAddFromSoDuListener onBookAddFromSoDuListener) {
         this.webName = webName;
         mBook.setBookName(bookName);
@@ -175,7 +179,7 @@ public class GetBookFromSoDu {
 
                             }
                         }*/
-                        getBookUpdateInfo(mBook,result);
+                        getBookUpdateInfo(mBook, result);
                         VolleyClient.build(null).getWebResource(mBook.getBookUrl(), new OnDataStateListener() {
                             @Override
                             public void onSuccess(String result) {
@@ -220,7 +224,7 @@ public class GetBookFromSoDu {
         VolleyClient.build(ApplicationLoader.applicationContext).getWebResource(book.getBookUpdateTimeUrl(), new OnDataStateListener() {
             @Override
             public void onSuccess(String result) {
-                listener.onSuccess(getBookUpdateInfo(book,result));
+                listener.onSuccess(getBookUpdateInfo(book, result));
             }
 
             @Override
@@ -230,7 +234,7 @@ public class GetBookFromSoDu {
         }, "UTF-8");
     }
 
-    public Book getBookUpdateInfo(Book book,String htmlStr) {
+    public Book getBookUpdateInfo(Book book, String htmlStr) {
 //        用来匹配这一段
 //        <div class="main-html">
 //        <div style="width:560px;float:left;"><a href="http://www.sodu.cc/gourl.html?id=62745029&t=081e3c94902e1ae1100c790642da804f&chapterurl=http://www.qiushuixuan.cc/book/14/14757/12590487.html" alt="第一九二八章 逼降" onclick="getpage(this)" target="_blank">飞天 第一九二八章 逼降</a></div>
@@ -269,7 +273,7 @@ public class GetBookFromSoDu {
         return null;
     }
 
-    public void updateBook(String url,  final OnChapterGetListener listener) {
+    public void updateBook(String url, final OnChapterGetListener listener) {
         VolleyClient.build(ApplicationLoader.applicationContext).getWebResource(url, new OnDataStateListener() {
             @Override
             public void onSuccess(String result) {
@@ -327,16 +331,20 @@ public class GetBookFromSoDu {
         imageUrl = webUrl.substring(0, webUrl.length() - 1) + imageUrl;
         book.setBookCover(imageUrl);
     }
+
     private String getImage(String result) {
         String regex = "<div class=\"booklistt clearfix\">([\\s\\S]*?)href=\"#bot\"";
         result = Utils.getRegexResult(regex, result);
 //        获取image url
         regex = "<img src=\"(.*?)\"";
+        if (result == null)
+            return ApplicationLoader.DEFAULT_BOOK_COVER;
         String imageUrl = Utils.getRegexResult(regex, result);
         imageUrl = imageUrl.replace("<img src=\"", "").replace("\"", "");
         imageUrl = webUrl.substring(0, webUrl.length() - 1) + imageUrl;
-       return imageUrl;
+        return imageUrl;
     }
+
     private void getAndSetBookAuthorType(String result, Book book) {
         String regex = "<span class=\"author\">作者：(.*?)  分类：(.*?)</span>";
         List<String> tmp = Utils.getRegexResult(regex, result, true);

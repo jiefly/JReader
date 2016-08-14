@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -121,11 +122,21 @@ public class FragmentScan extends Fragment {
 
     public void scanCompleted() {
         isCancleSession = false;
+        Observable.just(mFiles.size())
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Integer>() {
+                    @Override
+                    public void call(Integer s) {
+                        if (getView() != null)
+                            Snackbar.make(getView(), "共扫描到：" + s + "本小说", Snackbar.LENGTH_SHORT)
+                                    .setAction("Action", null).show();
+                    }
+                });
         progressDialog.dismiss();
     }
 
     public void startScan(final File dir, final String pattern) {
-        mCustomRecycleAdapter.notifyItemRangeRemoved(0,mFiles.size());
+        mCustomRecycleAdapter.notifyItemRangeRemoved(0, mFiles.size());
         mFiles.clear();
         progressDialog.show();
         new Thread(new Runnable() {
@@ -157,11 +168,11 @@ public class FragmentScan extends Fragment {
 //                        只截取中文开头的文件
                         if (isChinese(listFile[i].getName().charAt(0))) {
 //                        Do what ever u want
-                        Log.e("scanTxt", "path:" + listFile[i].getAbsolutePath() + "name:" + listFile[i].getName());
-                        addItem(listFile[i]);
-                        String value = "扫描结果 " + mFiles.size() + " 本";
-                        showTextInActvity(value);
-                        setProgressDialogMessage(listFile[i].getParent());
+                            Log.e("scanTxt", "path:" + listFile[i].getAbsolutePath() + "name:" + listFile[i].getName());
+                            addItem(listFile[i]);
+                            String value = "扫描结果 " + mFiles.size() + " 本";
+                            showTextInActvity(value);
+                            setProgressDialogMessage(listFile[i].getParent());
                         }
                     }
                 }
@@ -223,10 +234,10 @@ public class FragmentScan extends Fragment {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 String[] result = new String[mFiles.size()];
-                                for (int i = 0 ; i<mFiles.size();i++){
+                                for (int i = 0; i < mFiles.size(); i++) {
                                     result[i] = mFiles.get(i).getAbsolutePath();
                                 }
-                                ((ScanTxtView)getActivity()).chooseFilesComplete(result);
+                                ((ScanTxtView) getActivity()).chooseFilesComplete(result);
                             }
                         })
                         .setNegativeButton("取消", null)

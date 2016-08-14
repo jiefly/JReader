@@ -113,7 +113,7 @@ public class UpdateBookService extends Service implements OnDataModelListener {
     public void onBookUpdateCompleted() {
         updatedBooks.clear();
         updateNum = 0;
-        List<Book> newBooks = mAdvanceDataModel.getBookList();
+        List<Book> newBooks = mAdvanceDataModel.getOnLineBookList();
         for (Book book : newBooks)
             Log.e("TimerTask", "newBooks:" + book.getBookLastUpdate());
         for (Book book : oldBooks)
@@ -195,7 +195,7 @@ public class UpdateBookService extends Service implements OnDataModelListener {
             //                十分钟检查一次更新
             isUpdateBackground = true;
             updateNum = 0;
-            oldBooks = mAdvanceDataModel.getBookList();
+            oldBooks = mAdvanceDataModel.getOnLineBookList();
             mAdvanceDataModel.updateAllBooks(OnDataModelListener.TYPE_SERVICE_LISTENER);
         }
     }

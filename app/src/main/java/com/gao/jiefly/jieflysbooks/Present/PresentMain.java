@@ -191,7 +191,7 @@ public class PresentMain implements OnDataModelListener {
         if (mBookList == null) {
             mBookList = getBookList();
         }
-        if (mBookList.get(index).getBookNewTopicTitle() != null) {
+        if (mBookList.get(index).isLocal()||mBookList.get(index).getBookNewTopicTitle() != null) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {

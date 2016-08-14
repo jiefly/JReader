@@ -110,6 +110,7 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
     private SeekBar lightSeekBar;
     private CheckBox followSystemCheckBox;
     private CustomFragmentPagerAdapter mCustomFragmentPagerAdapter;
+    private long startTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -142,6 +143,21 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
             mIdReaderLeftMenuInfoCached.setVisibility(View.GONE);
         }
         Log.e("chapterListSize", mChapterList.size() + "" + "isCached" + mBook.isCached());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        startTime = System.currentTimeMillis();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        int currentTotle = ApplicationLoader.getIntValue(ApplicationLoader.TOTAL_READ_TIME);
+        int min = (int) ((System.currentTimeMillis() - startTime)/60/1000);
+        ApplicationLoader.save(ApplicationLoader.DAILY_READ_TIME,min+currentTotle);
+        ApplicationLoader.save(ApplicationLoader.TOTAL_READ_TIME,min+currentTotle);
     }
 
     private void initReaderBackground() {
