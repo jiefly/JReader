@@ -439,9 +439,19 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
 
         mPresentMain.setUpdateFlag(false);
         Log.e("main", "onResume");
-        data = mPresentMain.getBookList();
-        if (data != null)
-            adapter.notifyItemRangeChanged(0, data.size());
+        if (data != null) {
+            int count = data.size();
+            List<Book> newBooks = mPresentMain.getBookList();
+            if (newBooks == null)
+                newBooks = new ArrayList<>();
+//            删除过了数据
+            if (count != newBooks.size()) {
+                adapter.notifyItemRangeRemoved(1, data.size());
+                data = newBooks;
+                adapter.notifyItemRangeInserted(1, data.size());
+            } else
+                adapter.notifyItemRangeChanged(0, data.size());
+        }
     }
 
     @Override
@@ -612,7 +622,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                 .subscribe(new Action1<String>() {
                     @Override
                     public void call(String s) {
-                        Toast.makeText(Main.this,s,Toast.LENGTH_SHORT).show();
+                        Toast.makeText(Main.this, s, Toast.LENGTH_SHORT).show();
                         /*Snackbar.make(mIdMainAddBookFab, s, Snackbar.LENGTH_SHORT)
                                 .setAction("Action", null).show();*/
                     }

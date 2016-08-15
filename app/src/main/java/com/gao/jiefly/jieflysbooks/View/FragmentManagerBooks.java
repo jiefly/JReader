@@ -139,9 +139,11 @@ public class FragmentManagerBooks extends Fragment {
                                     mRemoveBooks.add(mFiles.get(i));
                                 }
                                 mCustomRecycleAdapter.cancleItems();
+                                AdvanceDataModel advanceDataModel = AdvanceDataModel.build(ApplicationLoader.applicationContext);
                                 for (Book book : mRemoveBooks) {
                                     mCustomRecycleAdapter.notifyItemRemoved(getBooksCurrentPosition(book));
                                     mFiles.remove(book);
+                                    advanceDataModel.removeBook(new String[]{book.getBookName()});
                                 }
                                 int remainCount = mFiles.size() - mRemoveBooks.size();
 //                                mCustomRecycleAdapter.notifyItemRangeRemoved(0,mRemoveBooks.size() - 1);
