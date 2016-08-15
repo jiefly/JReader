@@ -50,6 +50,7 @@ public class FragmentReaderImpl extends Fragment implements FragmentReader {
         tvShowTime = (TextView) view.findViewById(R.id.id_fragment_time_tv);
         svWrapper = (ScrollView) view.findViewById(R.id.id_fragment_sv);
         tvShowPersent = (TextView) view.findViewById(R.id.id_fragment_persent_tv);
+        setTextColor(getResources().getColor(((JieReader)getActivity()).getTextColorId()));
         handler.post(runnable);
         return view;
     }
@@ -61,8 +62,7 @@ public class FragmentReaderImpl extends Fragment implements FragmentReader {
                     .subscribe(new Subscriber<Chapter>() {
                         @Override
                         public void onCompleted() {
-
-                        }
+                            }
 
                         @Override
                         public void onError(Throwable e) {
@@ -75,7 +75,7 @@ public class FragmentReaderImpl extends Fragment implements FragmentReader {
                             svWrapper.scrollTo(0, 0);
                             tvShowContent.setText(chapter.getContent());
                             tvShowTitle.setText(chapter.getTitle());
-                            Log.e("fragment", "content:" + mChapter.getContent());
+//                            Log.e("fragment", "content:" + mChapter.getContent());
                             tvShowPersent.setText(df.format((float) (chapter.getIndex() + 1) * 100 / (float) chapterSize) + "%");
                         }
                     });

@@ -144,6 +144,13 @@ public class BookLoader {
         }*/
     }
 
+    public void setBookIsCached(Book book){
+        SQLiteDatabase db = mBookDatabaseHelper.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("isCached", book.isCached() ? 0x10 : 0x01);
+        db.update("Book", contentValues, "name=?", new String[]{book.getBookName()});
+    }
+
     //更新Book的hasUpdate
     public void updateBookHasUpdate(String bookName, boolean hasUpdate) {
         SQLiteDatabase db = mBookDatabaseHelper.getWritableDatabase();

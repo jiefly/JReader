@@ -152,7 +152,9 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
     public void cacheChapterFromList(List<String> urlList, OnChapterCacheListener onChapterCacheListener) {
         mChapterLoader.cacheAllChapter(urlList, onChapterCacheListener);
     }
-
+    public void setBookIsCached(Book book){
+        mBookLoader.setBookIsCached(book);
+    }
     private volatile boolean isUpdateComplete = true;
     Thread updateBookThread;
     private boolean isUpdateFailed = false;

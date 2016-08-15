@@ -1,7 +1,6 @@
 package com.gao.jiefly.jieflysbooks.Model.download;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -47,7 +46,7 @@ public class VolleyClient implements HttpURLClient {
 
     @Override
     public void getWebResource(String url, final OnDataStateListener onDataStateListener) {
-        Log.e("VolleyClient", url);
+//        Log.e("VolleyClient", url);
         mStringRequest = new StringRequestForGBK(url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {

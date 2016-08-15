@@ -1,7 +1,5 @@
 package com.gao.jiefly.jieflysbooks.Model.bean;
 
-import android.util.Log;
-
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -210,8 +208,8 @@ public class Book implements Serializable {
 
     public void setChapterList(List<Chapter> list) {
         mChapterList = list2ChapterList(list);
-        for (Chapter chapter:list)
-            Log.e("showChapter","title:"+chapter.getTitle()+"\nurl:"+chapter.getUrl());
+        /*for (Chapter chapter:list)
+            Log.e("showChapter","title:"+chapter.getTitle()+"\nurl:"+chapter.getUrl());*/
     }
 
     public Date getUpdateDate() {
@@ -220,8 +218,8 @@ public class Book implements Serializable {
         String s = getBookLastUpdate();
         Date date = null;
         try {
-            Log.e("name", bookName);
-            Log.e("date", s);
+//            Log.e("name", bookName);
+//            Log.e("date", s);
             date = mSimpleDateFormat.parse(s);
         } catch (ParseException e) {
             e.printStackTrace();

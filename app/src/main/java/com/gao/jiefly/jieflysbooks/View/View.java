@@ -17,5 +17,6 @@ public interface View {
     void removeBook(Book book);
     void showSnackbar(String value);
     void stopRefreshAnim();
+    boolean isNetworkConnected();
     Main.BookListRecycleViewAdapter.ItemViewHolder getViewHolder(int position);
 }

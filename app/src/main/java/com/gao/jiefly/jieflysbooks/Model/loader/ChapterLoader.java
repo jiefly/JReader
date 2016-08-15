@@ -260,6 +260,8 @@ public class ChapterLoader {
 
     //    向磁盘缓存中添加内容
     public void addChapterToDiskCache(String url, Chapter chapter) throws IOException {
+        if (chapter.getContent() == null)
+            return;
         String key = hashKeyForUrl(url);
         DiskLruCache.Editor editor = mDiskCache.edit(key);
         if (editor != null) {
@@ -271,6 +273,7 @@ public class ChapterLoader {
             }
             mDiskCache.flush();
         }
+
     }
 
     private boolean chapterToStream(Chapter chapter, OutputStream outputStream) {

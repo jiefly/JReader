@@ -3,6 +3,8 @@ package com.gao.jiefly.jieflysbooks.Utils;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 
 public class ApplicationLoader extends Application {
 

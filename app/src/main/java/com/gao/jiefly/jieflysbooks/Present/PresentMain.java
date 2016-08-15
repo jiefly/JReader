@@ -146,6 +146,10 @@ public class PresentMain implements OnDataModelListener {
 
     //    增加书籍
     public void addBook(String bookName) throws MalformedURLException {
+        if (!mView.isNetworkConnected()) {
+            mView.showSnackbar("当前网络不可用，请检查网络连接");
+            return;
+        }
         if (mBookList != null) {
             for (Book book : mBookList) {
                 if (book.getBookName().equals(bookName)) {
@@ -154,6 +158,7 @@ public class PresentMain implements OnDataModelListener {
                 }
             }
         }
+
         mAdvanceDataModel.addBookSyn(bookName);
         Log.e("addBookFromInternet", "正在加载书籍");
         mView.showSnackbar("正在从网络上获取书籍，请稍后");
@@ -191,7 +196,7 @@ public class PresentMain implements OnDataModelListener {
         if (mBookList == null) {
             mBookList = getBookList();
         }
-        if (mBookList.get(index).isLocal()||mBookList.get(index).getBookNewTopicTitle() != null) {
+        if (mBookList.get(index).isLocal() || mBookList.get(index).getBookNewTopicTitle() != null) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -202,7 +207,7 @@ public class PresentMain implements OnDataModelListener {
                     } catch (MalformedURLException e) {
                         e.printStackTrace();
                     }
-                    mAdvanceDataModel.updateBookHasUpdate(book.getBookName(),false);
+                    mAdvanceDataModel.updateBookHasUpdate(book.getBookName(), false);
                     mView.readBook(book);
                     setUpdateFlag(false);
                 }
@@ -219,7 +224,42 @@ public class PresentMain implements OnDataModelListener {
             mView.showSnackbar("该小说已经缓存，请勿重复缓存");
             return;
         }
+        if (!mView.isNetworkConnected()) {
+            mView.showSnackbar("当前网络不可用，请联网后再缓存");
+            return;
+        }
+        mView.showSnackbar("后台缓存中...");
         cacheCountMap.put(position, 0);
+        /*new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Book book = mBookList.get(position);
+                try {
+                    List<String> urls = Utils.list2ChapterList(mAdvanceDataModel.getChapterList(book.getBookName())).getChapterUrlList();
+                    if (urls != null) {
+                        final int finalTotle = urls.size();
+                        mAdvanceDataModel.cacheChapterFromList(urls, new OnChapterCacheListener() {
+                            @Override
+                            public void onSuccess() {
+                                int i = cacheCountMap.get(position);
+                                cacheCountMap.put(position, i++);
+                                if (i > finalTotle - 2) {
+                                    mBookList.get(position).setCached(true);
+
+                                }
+                            }
+
+                            @Override
+                            public void onFailed(String url) {
+                                mView.showSnackbar("缓存失败");
+                            }
+                        });
+                    }
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();*/
         Observable.just(position)
                 .observeOn(Schedulers.io())
                 .map(new Func1<Integer, List<String>>() {
@@ -259,7 +299,9 @@ public class PresentMain implements OnDataModelListener {
                                             });
                                     if (cacheCountMap.get(position) >= finalChaptersUrlList.size() - 1) {
                                         mBookList.get(position).setCached(true);
-                                        numberProgressBar.setVisibility(android.view.View.VISIBLE);
+                                        numberProgressBar.setVisibility(android.view.View.INVISIBLE);
+                                        mAdvanceDataModel.setBookIsCached(mBookList.get(position));
+                                        mView.showSnackbar("缓存完毕");
                                     }
                                 }
 
@@ -271,7 +313,6 @@ public class PresentMain implements OnDataModelListener {
                         }
                     }
                 });
-
     }
 
     public void readRecentChapter(Book book) {

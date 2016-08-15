@@ -1,5 +1,6 @@
 package com.gao.jiefly.jieflysbooks.View;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
@@ -51,6 +52,9 @@ import java.util.concurrent.TimeUnit;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import co.mobiwise.materialintro.shape.Focus;
+import co.mobiwise.materialintro.shape.FocusGravity;
+import co.mobiwise.materialintro.view.MaterialIntroView;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -112,6 +116,12 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
     private CustomFragmentPagerAdapter mCustomFragmentPagerAdapter;
     private long startTime;
 
+    public int getTextColorId() {
+        return textColorId;
+    }
+
+    private int textColorId = R.color.colorDefaultBackgroundText;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -143,11 +153,23 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
             mIdReaderLeftMenuInfoCached.setVisibility(View.GONE);
         }
         Log.e("chapterListSize", mChapterList.size() + "" + "isCached" + mBook.isCached());
+        new MaterialIntroView.Builder(this)
+                .enableDotAnimation(true)
+                .setFocusGravity(FocusGravity.CENTER)
+                .setFocusType(Focus.MINIMUM)
+                .setDelayMillis(500)
+                .enableFadeAnimation(false)
+                .performClick(true)
+                .setInfoText("点击屏幕中心可以隐藏/唤出菜单栏...快来试试吧")
+                .setTarget(mIdJieReaderContentVp)
+                .setUsageId("JReaderVp3") //THIS SHOULD BE UNIQUE ID
+                .show();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
         startTime = System.currentTimeMillis();
     }
 
@@ -162,7 +184,6 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
 
     private void initReaderBackground() {
         int viewPagerBackgroundId = 0;
-        int textColorId = 0;
         int x = ApplicationLoader.getIntValue(ApplicationLoader.READER_BACK_GROUND);
         if (x == ApplicationLoader.BACKGROUNT_DEFAULT) {
             viewPagerBackgroundId = R.drawable.read_default_background;
@@ -184,9 +205,8 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
         if (viewPagerBackgroundId != 0 && textColorId != 0) {
             mIdJieReaderContentVp
                     .setBackgroundResource(viewPagerBackgroundId);
-            setTextColor(getResources().getColor(textColorId));
+//            setTextColor(getResources().getColor(textColorId));
         }
-
     }
 
     private void initAnimation() {
@@ -299,12 +319,10 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
                             .subscribe(new Subscriber<Chapter>() {
                                 @Override
                                 public void onCompleted() {
-
                                 }
 
                                 @Override
                                 public void onError(Throwable e) {
-                                    Log.e("翻页", e.getMessage());
                                 }
 
                                 @Override
@@ -885,8 +903,12 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
     public void onBookUpdateCompleted() {
 
     }
-
-
+    private ProgressDialog progressDialog;
+    private void initProgressDialog() {
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle("加载中...请稍后");
+        progressDialog.setCanceledOnTouchOutside(false);;
+    }
     class CustomFragmentPagerAdapter extends FragmentPagerAdapter {
 
         public CustomFragmentPagerAdapter(FragmentManager fm) {

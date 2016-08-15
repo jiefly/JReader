@@ -1,8 +1,11 @@
 package com.gao.jiefly.jieflysbooks.View;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -123,7 +126,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
         Calendar cal = Calendar.getInstance();
         if (ApplicationLoader.getIntValue(ApplicationLoader.CURRENT_DAY) != cal.get(Calendar.DATE))
             ApplicationLoader.save(ApplicationLoader.DAILY_READ_TIME, 0);
-        ApplicationLoader.save(ApplicationLoader.CURRENT_DAY,cal.get(Calendar.DATE));
+        ApplicationLoader.save(ApplicationLoader.CURRENT_DAY, cal.get(Calendar.DATE));
         ButterKnife.inject(this);
         data = mPresentMain.getBookList();
         mIdMainSwipeRefreshLayout.setOnRefreshListener(this);
@@ -271,7 +274,15 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                                     new android.view.View.OnClickListener() {
                                         @Override
                                         public void onClick(android.view.View v) {
-                                            mPresentMain.cacheAllChapter(position - 1);
+                                            new AlertDialog.Builder(Main.this)
+                                                    .setTitle("确定缓存")
+                                                    .setMessage("建议在wifi环境下缓存\n缓存过程中界面会稍微卡顿，请耐心等候")
+                                                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                                        @Override
+                                                        public void onClick(DialogInterface dialog, int which) {
+                                                            mPresentMain.cacheAllChapter(position - 1);
+                                                        }
+                                                    }).setNegativeButton("取消", null).show();
                                             deletePopup.dismiss();
                                         }
                                     });
@@ -281,7 +292,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                                     new android.view.View.OnClickListener() {
                                         @Override
                                         public void onClick(android.view.View v) {
-
+                                            showSnackbar("功能完善中...");
                                             deletePopup.dismiss();
                                         }
                                     });
@@ -302,6 +313,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
 
 
     }
+
     private void startBackGroundUpdateService() {
         //            默认十分钟更新一次
         int time = 60 * 1000;
@@ -616,6 +628,11 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     // 下拉刷新
     @Override
     public void onRefresh() {
+        if (!isNetworkConnected()) {
+            showSnackbar("当前网络不可用，请检查网络连接");
+            stopRefreshAnim();
+            return;
+        }
         if (data == null) {
             stopRefreshAnim();
             return;
@@ -683,6 +700,13 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
         } else {
             finish();
         }
+    }
+
+    @Override
+    public boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo ni = cm.getActiveNetworkInfo();
+        return ni != null && ni.isConnectedOrConnecting();
     }
 
     private long exitTime = 0;
