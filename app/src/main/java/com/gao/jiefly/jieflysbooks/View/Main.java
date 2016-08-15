@@ -8,7 +8,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -275,8 +274,8 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                                         @Override
                                         public void onClick(android.view.View v) {
                                             new AlertDialog.Builder(Main.this)
-                                                    .setTitle("确定缓存")
-                                                    .setMessage("建议在wifi环境下缓存\n缓存过程中界面会稍微卡顿，请耐心等候")
+                                                    .setTitle("确定缓存?")
+                                                    .setMessage("建议在wifi环境下缓存\n缓存过程进度条可能会错位，请勿重复缓存")
                                                     .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                                                         @Override
                                                         public void onClick(DialogInterface dialog, int which) {
@@ -613,16 +612,19 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                 .subscribe(new Action1<String>() {
                     @Override
                     public void call(String s) {
-                        Snackbar.make(mIdMainAddBookFab, s, Snackbar.LENGTH_SHORT)
-                                .setAction("Action", null).show();
+                        Toast.makeText(Main.this,s,Toast.LENGTH_SHORT).show();
+                        /*Snackbar.make(mIdMainAddBookFab, s, Snackbar.LENGTH_SHORT)
+                                .setAction("Action", null).show();*/
                     }
                 });
     }
 
     @Override
     public BookListRecycleViewAdapter.ItemViewHolder getViewHolder(int position) {
-        return (BookListRecycleViewAdapter.ItemViewHolder) mIdRv
-                .getChildViewHolder(mIdRv.getChildAt(position + 1));
+        if (mIdRv.getChildAt(position + 1) != null)
+            return (BookListRecycleViewAdapter.ItemViewHolder) mIdRv
+                    .getChildViewHolder(mIdRv.getChildAt(position + 1));
+        return null;
     }
 
     // 下拉刷新

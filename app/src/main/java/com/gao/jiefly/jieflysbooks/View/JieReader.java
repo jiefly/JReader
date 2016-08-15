@@ -6,7 +6,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -35,6 +34,7 @@ import android.widget.PopupWindow;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.daimajia.numberprogressbar.NumberProgressBar;
 import com.gao.jiefly.jieflysbooks.Model.AdvanceDataModel;
@@ -544,8 +544,9 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
                 .subscribe(new Action1<String>() {
                     @Override
                     public void call(String s) {
-                        Snackbar.make(mIdJieReaderLeftMenuRv, s, Snackbar.LENGTH_LONG)
-                                .setAction("Action", null).show();
+                        Toast.makeText(JieReader.this,s,Toast.LENGTH_SHORT).show();
+                       /* Snackbar.make(mIdJieReaderLeftMenuRv, s, Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();*/
                     }
                 });
     }
@@ -797,6 +798,7 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
                 break;
 //            侧边栏缓存所有章节
             case R.id.id_reader_left_menu_cache_ll:
+                showSnackbar("正在缓存，请勿重复点击");
                 mIdReaderLeftMenuProgressBar.setMax(urlList.size() - 1);
                 mIdReaderLeftMenuProgressBar.setProgress(0);
                 mIdReaderLeftMenuProgressBar.setVisibility(View.VISIBLE);

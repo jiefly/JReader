@@ -8,7 +8,6 @@ import android.util.LruCache;
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
 import com.gao.jiefly.jieflysbooks.Model.download.VolleyClient;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnChapterCacheListener;
-import com.gao.jiefly.jieflysbooks.Model.listener.OnDataStateListener;
 import com.gao.jiefly.jieflysbooks.Utils.Utils;
 
 import java.io.BufferedOutputStream;
@@ -73,7 +72,7 @@ public class ChapterLoader {
     //    缓存所有章节
     public void cacheAllChapter(final List<String> urlList, final OnChapterCacheListener onChapterCacheListener) {
         mOnChapterCacheListener = onChapterCacheListener;
-        for (final String url : urlList) {
+        /*for (final String url : urlList) {
             Chapter chapter = null;
             try {
                 chapter = loadChapterFromDiskCache(url);
@@ -102,8 +101,8 @@ public class ChapterLoader {
                     }
                 });
             }
-        }
-        /*new Thread(new Runnable() {
+        }*/
+        new Thread(new Runnable() {
             @Override
             public void run() {
                 int count;
@@ -123,7 +122,7 @@ public class ChapterLoader {
                     }
                 }
             }
-        }).start();*/
+        }).start();
     }
 
     //    移除缓存章节

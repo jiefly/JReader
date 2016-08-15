@@ -278,6 +278,10 @@ public class PresentMain implements OnDataModelListener {
                 .subscribe(new Action1<List<String>>() {
                     @Override
                     public void call(List<String> chaptersUrlList) {
+                        if (mView.getViewHolder(position) == null){
+                            mView.showSnackbar("缓存异常");
+                            return;
+                        }
                         final NumberProgressBar numberProgressBar = mView.getViewHolder(position).getNumberProgressBar();
                         numberProgressBar.setMax(chaptersUrlList.size() - 1);
                         numberProgressBar.setProgress(0);

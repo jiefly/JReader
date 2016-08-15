@@ -15,14 +15,9 @@
 
 		android:theme="@style/AppTheme">
 
-		<!--
-        <activity android:name=".MainActivity" >
-		</activity>
-        -->
 		<activity
 			android:name=".View.Main"
 			android:screenOrientation="portrait"
-			android:launchMode="singleInstance"
 			android:theme="@style/ImageTranslucentTheme">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN"/>
@@ -35,7 +30,7 @@
 			android:theme="@style/AppTheme.night">
 		</activity>
 
-		<activity android:name=".View.JieReader" android:screenOrientation="portrait">
+		<activity android:name=".View.JieReader" android:screenOrientation="portrait" >
 
 		</activity>
 

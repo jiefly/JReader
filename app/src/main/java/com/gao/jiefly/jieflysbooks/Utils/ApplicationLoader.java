@@ -3,8 +3,6 @@ package com.gao.jiefly.jieflysbooks.Utils;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 
 public class ApplicationLoader extends Application {
 
@@ -12,7 +10,7 @@ public class ApplicationLoader extends Application {
     static SharedPreferences mSharedPreferences;
     static SharedPreferences.Editor mEditor;
     public static int DEFAULT_INT = 0;
-    public static Boolean DEFAULT_BOOLEAN = true;
+    public static Boolean DEFAULT_BOOLEAN = false;
     public static String DEFAULT_STRING = "jiefly";
     public static String IMAGE_WEB_NAME = "秋水轩";
     public static String DEFAULT_BOOK_COVER = "http://www.qiushuixuan.cc/modules/article/images/nocover.jpg";

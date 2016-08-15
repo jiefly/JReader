@@ -193,8 +193,8 @@ public class SettingActivity extends AppCompatActivity implements RadioGroup.OnC
                 new AlertDialog.Builder(this)
                         .setTitle("确定清除所有阅读缓存")
                         .setMessage("共:" + Utils.formatFileSize(size) + "\n删除后您的本地图书请重新添加")
-                        .setPositiveButton("取消", null)
-                        .setNegativeButton("确定", new DialogInterface.OnClickListener() {
+                        .setNegativeButton("取消", null)
+                        .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 ChapterLoader.build(getApplicationContext()).clearAllCache();
