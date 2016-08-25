@@ -131,7 +131,8 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
         ButterKnife.inject(this);
         mIdToolBar.setTitle("");
         setSupportActionBar(mIdToolBar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         getSupportActionBar().setShowHideAnimationEnabled(true);
         mIdToolBar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -913,7 +914,7 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("加载中...请稍后");
         progressDialog.setCanceledOnTouchOutside(false);
-        ;
+
     }
 
     class CustomFragmentPagerAdapter extends FragmentPagerAdapter {
