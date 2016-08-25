@@ -6,6 +6,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -34,7 +35,6 @@ import android.widget.PopupWindow;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.daimajia.numberprogressbar.NumberProgressBar;
 import com.gao.jiefly.jieflysbooks.Model.AdvanceDataModel;
@@ -177,9 +177,10 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
     protected void onPause() {
         super.onPause();
         int currentTotle = ApplicationLoader.getIntValue(ApplicationLoader.TOTAL_READ_TIME);
-        int min = (int) ((System.currentTimeMillis() - startTime)/60/1000);
-        ApplicationLoader.save(ApplicationLoader.DAILY_READ_TIME,min+currentTotle);
-        ApplicationLoader.save(ApplicationLoader.TOTAL_READ_TIME,min+currentTotle);
+        int todayTotle = ApplicationLoader.getIntValue(ApplicationLoader.DAILY_READ_TIME);
+        int min = (int) ((System.currentTimeMillis() - startTime) / 60 / 1000);
+        ApplicationLoader.save(ApplicationLoader.DAILY_READ_TIME, min + todayTotle);
+        ApplicationLoader.save(ApplicationLoader.TOTAL_READ_TIME, min + currentTotle);
     }
 
     private void initReaderBackground() {
@@ -544,9 +545,9 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
                 .subscribe(new Action1<String>() {
                     @Override
                     public void call(String s) {
-                        Toast.makeText(JieReader.this,s,Toast.LENGTH_SHORT).show();
-                       /* Snackbar.make(mIdJieReaderLeftMenuRv, s, Snackbar.LENGTH_LONG)
-                                .setAction("Action", null).show();*/
+//                        Toast.makeText(JieReader.this,s,Toast.LENGTH_SHORT).show();
+                        Snackbar.make(mIdJieReaderLeftMenuRv, s, Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
                     }
                 });
     }
@@ -627,13 +628,13 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
                     mIdJieReaderContentVp
                             .setBackgroundResource(R.color.colorNovelReadBackgroundgray);
                     setTextColor(getResources().getColor(R.color.colorNovelReadBackgroundgrayText));
-                    ApplicationLoader.save(ApplicationLoader.READER_BACK_GROUND,ApplicationLoader.BACKGROUNT_NIGHT);
+                    ApplicationLoader.save(ApplicationLoader.READER_BACK_GROUND, ApplicationLoader.BACKGROUNT_NIGHT);
                 } else {
                     mIdIncludeModeTv.setText("夜间");
                     mIdJieReaderContentVp
                             .setBackgroundResource(R.drawable.read_default_background);
                     setTextColor(getResources().getColor(R.color.colorDefaultBackgroundText));
-                    ApplicationLoader.save(ApplicationLoader.READER_BACK_GROUND,ApplicationLoader.BACKGROUNT_DEFAULT);
+                    ApplicationLoader.save(ApplicationLoader.READER_BACK_GROUND, ApplicationLoader.BACKGROUNT_DEFAULT);
                 }
                 break;
 //            底栏设置
@@ -905,12 +906,16 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
     public void onBookUpdateCompleted() {
 
     }
+
     private ProgressDialog progressDialog;
+
     private void initProgressDialog() {
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("加载中...请稍后");
-        progressDialog.setCanceledOnTouchOutside(false);;
+        progressDialog.setCanceledOnTouchOutside(false);
+        ;
     }
+
     class CustomFragmentPagerAdapter extends FragmentPagerAdapter {
 
         public CustomFragmentPagerAdapter(FragmentManager fm) {

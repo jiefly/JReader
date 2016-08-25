@@ -12,9 +12,10 @@
 			android:id="@+id/id_jie_reader_content_vp"
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
-			android:background="@drawable/read_default_background">
+			android:background="@drawable/read_default_background"
+			android:layout_alignParentTop="true" android:layout_alignParentLeft="true"
+			android:layout_alignParentStart="true">
 		</com.gao.jiefly.jieflysbooks.View.CustomViewPager>
-
 		<include
 			layout="@layout/reader_bottom_bar"
 			android:layout_width="match_parent"

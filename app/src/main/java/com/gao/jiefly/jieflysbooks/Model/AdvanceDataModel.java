@@ -152,9 +152,11 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
     public void cacheChapterFromList(List<String> urlList, OnChapterCacheListener onChapterCacheListener) {
         mChapterLoader.cacheAllChapter(urlList, onChapterCacheListener);
     }
-    public void setBookIsCached(Book book){
+
+    public void setBookIsCached(Book book) {
         mBookLoader.setBookIsCached(book);
     }
+
     private volatile boolean isUpdateComplete = true;
     Thread updateBookThread;
     private boolean isUpdateFailed = false;
@@ -179,14 +181,16 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
                                 }
                             }
                             if (!isUpdateFailed)
-                                updateBookSyn(b,type);
+                                updateBookSyn(b, type);
                         }
                     }
                     Log.e("updateTime", System.currentTimeMillis() - time + "ms");
                 }
             });
-        updateBookThread.start();
+        if (!updateBookThread.isAlive())
+            updateBookThread.start();
     }
+
     @Override
     public void getChapterSyn(final String bookName, final String title, final String url) {
         new Thread(new Runnable() {
@@ -224,12 +228,15 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
         }
         return getChapter(url);
     }
+
     private boolean checkDataModelIsInit() {
         return instance != null;
     }
-    public List<Book> getOnLineBookList(){
+
+    public List<Book> getOnLineBookList() {
         return mBookLoader.getOnLineBooks();
     }
+
     public Chapter getChapter(String bookName, int index, String title) {
         Chapter chapter = getChapter(bookName, index);
         if (chapter == null)
@@ -239,8 +246,8 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
         return chapter;
     }
 
-    public void updateBookHasUpdate(String bookName,boolean hasUpdate){
-        mBookLoader.updateBookHasUpdate(bookName,hasUpdate);
+    public void updateBookHasUpdate(String bookName, boolean hasUpdate) {
+        mBookLoader.updateBookHasUpdate(bookName, hasUpdate);
     }
 
     @Override

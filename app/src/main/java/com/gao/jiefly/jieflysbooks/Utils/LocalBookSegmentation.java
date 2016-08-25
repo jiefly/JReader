@@ -132,11 +132,11 @@ public class LocalBookSegmentation {
             int y, m, d, h, mi, s;
             Calendar cal = Calendar.getInstance();
             y = cal.get(Calendar.YEAR);
-            m = cal.get(Calendar.MONTH) + 1 ;
+            m = cal.get(Calendar.MONTH) + 1;
             d = cal.get(Calendar.DATE);
             h = cal.get(Calendar.HOUR_OF_DAY);
             mi = cal.get(Calendar.MINUTE);
-            mBook.setBookLastUpdate(y + "-" + m + "-" + d + " " + (h>9?h:("0"+h)) + ":" + mi);
+            mBook.setBookLastUpdate(y + "-" + m + "-" + d + " " + (h > 9 ? h : ("0" + h)) + ":" + mi);
 //            mBook.setBookNewTopicTitle(chapter.getTitle());
 //            mBook.setBookNewTopicUrl(chapter.getUrl());
             mBook.setBookTotalWords(wordConut);
@@ -151,7 +151,8 @@ public class LocalBookSegmentation {
             return false;
         } finally {
             try {
-                mReader.close();
+                if (mReader != null)
+                    mReader.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
