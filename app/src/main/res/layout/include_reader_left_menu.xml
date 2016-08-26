@@ -42,7 +42,7 @@
 		<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content"
 		           android:layout_gravity="center_vertical"
 		           android:layout_marginRight="10dp"
-		           android:src="@android:drawable/stat_sys_download" />
+		           android:src="@android:drawable/stat_sys_download"/>
 		<TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
 		          android:layout_gravity="center_vertical"
 		          android:layout_marginLeft="10dp"
@@ -66,9 +66,9 @@
 		custom:progress_unreached_bar_height="1.5dp"
 		custom:progress_unreached_color="#CCCCCC"
 	/>
-	<TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-	          android:layout_gravity="center" android:layout_marginBottom="5dp"
+	<TextView android:id="@+id/id_reader_left_menu_info_cached" android:layout_width="wrap_content"
+	          android:layout_height="wrap_content" android:layout_gravity="center"
+	          android:layout_marginBottom="5dp"
 	          android:text="@string/tv_cached_all_chapter"
-	          android:id="@+id/id_reader_left_menu_info_cached"
 	          android:textColor="#ff0000"/>
 </LinearLayout>

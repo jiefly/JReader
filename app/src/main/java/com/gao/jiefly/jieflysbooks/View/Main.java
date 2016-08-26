@@ -570,7 +570,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     @Override
     public void readBook(Book book) {
         Intent intent = new Intent();
-        intent.setClass(Main.this, JieReader.class);
+        intent.setClass(Main.this, JReader.class);
         Bundle bundle = new Bundle();
         bundle.putSerializable("book", book);
         intent.putExtra("bookbundle", bundle);
@@ -811,7 +811,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                 } else {
                     itemViewHolder.tvBookAuthor.setText(data.get(position).getBookAuthor());
                     itemViewHolder.ivBookUpdateFlag.setVisibility(data.get(position).isHasUpdate() ? android.view.View.VISIBLE : android.view.View.INVISIBLE);
-//                    itemViewHolder.ivBook.setImageResource(R.drawable.nocover);
+//                  itemViewHolder.ivBook.setImageResource(R.drawable.nocover);
                     Picasso.with(getApplicationContext())
                             .load(data.get(position).getBookCover()).error(R.drawable.nocover).into(itemViewHolder.ivBook);
                     itemViewHolder.tvRecentUpdateTopicTitle.setText("最近更新：");

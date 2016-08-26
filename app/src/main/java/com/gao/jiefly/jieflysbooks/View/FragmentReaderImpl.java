@@ -26,6 +26,7 @@ import rx.android.schedulers.AndroidSchedulers;
  * Fighting_jiiiiie
  */
 public class FragmentReaderImpl extends Fragment implements FragmentReader {
+
     private TextView tvShowContent;
     private TextView tvShowTitle;
     private TextView tvShowTime;
@@ -110,6 +111,16 @@ public class FragmentReaderImpl extends Fragment implements FragmentReader {
             tvShowPersent.setTextColor(color);
             tvShowTime.setTextColor(color);
         }
+    }
+
+    @Override
+    public void setTime(String time) {
+
+    }
+
+    @Override
+    public void setTextSize(int textSize) {
+
     }
 
     Date mDate = new Date();
