@@ -187,8 +187,9 @@ public class AdvanceDataModel implements DataModel, OnDataModelListener {
                     Log.e("updateTime", System.currentTimeMillis() - time + "ms");
                 }
             });
-        if (!updateBookThread.isAlive())
-            updateBookThread.start();
+        if (updateBookThread != null)
+            if (!updateBookThread.isAlive())
+                updateBookThread.start();
     }
 
     @Override

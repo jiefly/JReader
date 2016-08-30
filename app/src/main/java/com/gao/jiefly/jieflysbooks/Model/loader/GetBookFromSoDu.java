@@ -72,22 +72,35 @@ public class GetBookFromSoDu {
                                 if (unit.contains(webName)) {
                                     rex = "hapterurl=(.*?)\" alt";
                                     url = Utils.getRegexResult(rex, unit);
-                                    rex = "alt=\"(.*?)\" onclick";
-                                    String chapterTitle = Utils.getRegexResult(rex, unit)
-                                            .replace("alt=\"", "")
-                                            .replace("\" onclick", "");
-                                    rex = "class=\"xt1\">(.*?)</div>[\\s\\S][\\s\\S]</div>";
-                                    String lastUpdateTime = Utils.getRegexResult(rex, unit).replaceAll("class=\"xt1\">", "").replace("</div>\r\n</div>", "");
+                                    rex = "(\\D++)";
+                                    int bookNumber;
+                                    if (url != null) {
+                                        String[] bookNum = url.split(rex);
+                                        for (String num : bookNum) {
+                                            if (num.length() > 1) {
+                                                bookNumber = Integer.parseInt(num);
+                                                url = "http://www.dashubao.cc/book/" + bookNumber / 1000 + "/" + bookNumber + "/";
+                                                break;
+                                            }
+                                        }
+                                        break;
+                                    }
+//                                    rex = "alt=\"(.*?)\" onclick";
+//                                    String chapterTitle = Utils.getRegexResult(rex, unit)
+//                                            .replace("alt=\"", "")
+//                                            .replace("\" onclick", "");
+//                                    rex = "class=\"xt1\">(.*?)</div>[\\s\\S][\\s\\S]</div>";
+//                                    String lastUpdateTime = Utils.getRegexResult(rex, unit).replaceAll("class=\"xt1\">", "").replace("</div>\r\n</div>", "");
 //                更新时间
-                                    mBook.setBookLastUpdate(lastUpdateTime);
+//                                    mBook.setBookLastUpdate(lastUpdateTime);
 //                更新章节标题
-                                    mBook.setBookNewTopicTitle(chapterTitle);
+//                                    mBook.setBookNewTopicTitle(chapterTitle);
 //                                hapterurl=http://www.qiushuixuan.cc/book/14/14757/12881130.html" alt
                                     //        更新章节的地址
-                                    mBook.setBookNewTopicUrl(formateUrl(url, '=', '"'));
+//                                    mBook.setBookNewTopicUrl(formateUrl(url, '=', '"'));
 //                网站地址
-                                    webUrl = formateUrl(url, '=', 'b');
-                                    url = formateUrl(url, '=', '/');
+//                                    webUrl = formateUrl(url, '=', 'b');
+//                                    url = formateUrl(url, '=', '_');
 //                小说地址
 
                                 }
@@ -333,15 +346,13 @@ public class GetBookFromSoDu {
     }
 
     private String getImage(String result) {
-        String regex = "<div class=\"booklistt clearfix\">([\\s\\S]*?)href=\"#bot\"";
+        String regex = "<img src=\"([\\s\\S]*?)\" width=([\\s\\S]*?)></div>";
         result = Utils.getRegexResult(regex, result);
 //        获取image url
-        regex = "<img src=\"(.*?)\"";
         if (result == null)
             return ApplicationLoader.DEFAULT_BOOK_COVER;
-        String imageUrl = Utils.getRegexResult(regex, result);
-        imageUrl = imageUrl.replace("<img src=\"", "").replace("\"", "");
-        imageUrl = webUrl.substring(0, webUrl.length() - 1) + imageUrl;
+        String imageUrl = formateUrl(result,'=','w');
+        imageUrl = imageUrl.replaceAll("\"","").replaceAll(" ","");
         return imageUrl;
     }
 

@@ -1,5 +1,6 @@
 package com.gao.jiefly.jieflysbooks.View;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -22,6 +23,7 @@ import rx.functions.Action1;
  * Email:jiefly1993@gmail.com
  * Fighting_jiiiiie
  */
+@SuppressLint("ValidFragment")
 public class JReaderFragment extends Fragment implements FragmentReader {
     private static final String TAG = "JReaderFragment";
     Chapter mChapter;
@@ -35,8 +37,7 @@ public class JReaderFragment extends Fragment implements FragmentReader {
     private int textSize;
     java.text.DecimalFormat df = new java.text.DecimalFormat("#.00");
 
-    public JReaderFragment() {
-
+    public JReaderFragment(){
     }
 
     public JReaderFragment(Chapter chapter, PresentReader reader, int textColor, float present) {
