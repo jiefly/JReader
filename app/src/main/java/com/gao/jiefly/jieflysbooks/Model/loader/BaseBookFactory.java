@@ -1,7 +1,11 @@
 package com.gao.jiefly.jieflysbooks.Model.loader;
 
-import com.gao.jiefly.jieflysbooks.Model.bean.Book;
+import android.support.annotation.Nullable;
 
+import com.gao.jiefly.jieflysbooks.Model.bean.Book;
+import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
+
+import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -16,11 +20,20 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by jiefly on 2016/8/30.
@@ -32,13 +45,54 @@ public class BaseBookFactory extends BookFactory {
     private static final String SODU_PREFIX = "http://www.soduso.com";
     private Document mDocument;
     private String bookName;
+    int cpuNum = Runtime.getRuntime().availableProcessors();
+    ThreadPoolExecutor executor = new ThreadPoolExecutor(
+            cpuNum
+            , 10
+            , 10000
+            , TimeUnit.MILLISECONDS
+            , new ArrayBlockingQueue<Runnable>(10));
 
     @Override
     public Book getBookByName(String bookName) {
         this.bookName = bookName;
+        long start = System.currentTimeMillis();
         String text = getBookLastUpdateUrlFromSearch(bookName);
-        getBookInfoListFromLastUpdateList(text);
-//        System.out.printf(text);
+        System.out.printf("\ngetBookLastUpdateUrlFromSearch cost time:" + (System.currentTimeMillis() - start) + "ms");
+        start = System.currentTimeMillis();
+        Set<BookInfo> infos = getBookInfoListFromLastUpdateList(text);
+        System.out.printf("\ngetBookInfoListFromLastUpdateList cost time:" + (System.currentTimeMillis() - start) + "ms");
+        final Map<String, String[]> contentFeature = new HashMap<>();
+        contentFeature.put("id", new String[]{"booktext", "BookText", "content", "contents"});
+        contentFeature.put("class", new String[]{"centent"});
+        final Map<String, String[]> titleFeature = new HashMap<>();
+        titleFeature.put("tag", new String[]{"h1"});
+        List<Chapter> chapters = new ArrayList<>();
+        start = System.currentTimeMillis();
+        if (infos != null) {
+            for (final BookInfo info : infos) {
+//                直接串行执行花费时间为excutor的两倍左右
+                /*Chapter chapter = null;
+                chapter = getChapter(info.getBookLastUpdateUrl(),contentFeature,titleFeature);
+                if (chapter != null)
+                    chapters.add(chapter);*/
+                Future future = executor.submit(new Callable<Chapter>() {
+                    @Override
+                    public Chapter call() throws Exception {
+                        return getChapter(info.getBookLastUpdateUrl(), contentFeature, titleFeature);
+                    }
+                });
+                try {
+                    if (future.get() != null)
+                        chapters.add((Chapter) future.get());
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        System.out.printf("\ncost time:" + (System.currentTimeMillis() - start) / 1000 + "s");
+        System.out.printf("" + chapters.size());
         return null;
     }
 
@@ -66,7 +120,95 @@ public class BaseBookFactory extends BookFactory {
             e.printStackTrace();
             return null;
         }
+//        统一转换bookinfo中的跳转地址
+
+
+        for (final BookInfo i : bookInfos) {
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    getBookUrlBySodu(i);
+                }
+            });
+        }
         return bookInfos;
+    }
+
+
+    private Chapter getChapter(String url
+            , Map<String, String[]> contentFeature
+            , Map<String, String[]> titleFeature) {
+        if (url == null || !url.startsWith("http://"))
+            return null;
+        try {
+            Document document = Jsoup.connect(url).get();
+            return parserChapterFromDocument(contentFeature, titleFeature, document);
+        } catch (HttpStatusException e) {
+//            爬虫被网站禁止，需要模拟真实环境
+            if (e.getStatusCode() == 403) {
+                System.out.printf("\n403 error:" + url);
+                System.out.printf("\nusing user-agent to cheat webservice");
+                try {
+                    HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+                    connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36");
+                    Document document = Jsoup.parse(connection.getInputStream(), connection.getContentEncoding(), url);
+                    connection.disconnect();
+                    return parserChapterFromDocument(contentFeature, titleFeature, document);
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Nullable
+    private Chapter parserChapterFromDocument(Map<String, String[]> contentFeature, Map<String, String[]> titleFeature, Document document) {
+        String url = document.baseUri();
+        Element content = null;
+        String[] contentId;
+//            这里目前只是用id来获取content内容
+        if (contentFeature.containsKey("id") && (contentId = contentFeature.get("id")) != null) {
+            for (String id : contentId) {
+                content = document.body().getElementById(id);
+                if (content != null)
+                    break;
+            }
+        }
+        if (content == null) {
+            //没有获取到章节内容
+//            从class中判断
+            if (contentFeature.containsKey("class") && contentFeature.get("class") != null) {
+                for (String classname : contentFeature.get("class")) {
+                    Elements e = document.body().getElementsByClass(classname);
+                    if (e != null && e.size() == 1) {
+                        content = e.first();
+                        break;
+                    }
+                }
+            } else
+                return null;
+        }
+        if (content == null)
+            return null;
+        Chapter chapter = new Chapter(url);
+        chapter.setContent(content.text());
+        String[] titleTag;
+        Elements title = null;
+//            这里目前只是用title的tag来获取title的内容
+        if (titleFeature.containsKey("tag") && (titleTag = titleFeature.get("tag")) != null) {
+            for (String tag : titleTag) {
+                title = document.body().getElementsByTag(tag);
+                if (title != null)
+                    break;
+            }
+        }
+        if (title != null && title.size() != 0) {
+            chapter.setTitle(title.text());
+        }
+        return chapter;
     }
 
     private BookInfo element2BookInfo(Element e) {
@@ -102,27 +244,31 @@ public class BaseBookFactory extends BookFactory {
             result.setBookLastUpdateTime(updateTime);
         } else
             return null;
-        getBookUrlBySodu(result);
         return result;
+    }
+
+    private String getRedirctsUrl(String url) throws IOException {
+        String redirctUrl = null;
+        HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+        connection.setInstanceFollowRedirects(false);
+        if (connection.getResponseCode() == 302) {
+            redirctUrl = connection.getHeaderField("Location");
+        }
+        connection.disconnect();
+        return redirctUrl;
     }
 
     private BookInfo getBookUrlBySodu(BookInfo bookInfo) {
         try {
-            HttpURLConnection connection = (HttpURLConnection) new URL(bookInfo.getBookLastUpdateUrl()).openConnection();
-//            设置不进行重定向，而是拦截重定向的response，从而获得最新章节的地址
-            connection.setInstanceFollowRedirects(false);
-            if (connection.getResponseCode() == 302) {
-                List<String> desUrls = connection.getHeaderFields().get("Location");
-                if (desUrls != null && desUrls.size() == 1) {
-                    String lastUpdateChapterUrl = desUrls.get(0);
-                    if (!" ".equals(lastUpdateChapterUrl)) {
-                        bookInfo.setBookLastUpdateUrl(lastUpdateChapterUrl);
-                        String[] s = lastUpdateChapterUrl.split("/");
-//                    第三个String为网站的网址
-                        bookInfo.setBookSourceWebUrl(s[2]);
-                        String bookUrl = lastUpdateChapterUrl.replace(s[s.length - 1], "");
-                        bookInfo.setBookUrl(bookUrl);
-                    }
+            String redirctUrl = getRedirctsUrl(bookInfo.getBookLastUpdateUrl());
+            if (redirctUrl != null && !" ".equals(redirctUrl)) {
+                if (!" ".equals(redirctUrl)) {
+                    bookInfo.setBookLastUpdateUrl(redirctUrl);
+                    String[] s = redirctUrl.split("/");
+//                      第三个String为网站的网址
+                    bookInfo.setBookSourceWebUrl(s[2]);
+                    String bookUrl = redirctUrl.replace(s[s.length - 1], "");
+                    bookInfo.setBookUrl(bookUrl);
                 }
             }
         } catch (IOException e) {
@@ -305,4 +451,5 @@ public class BaseBookFactory extends BookFactory {
             return this.bookSourceWebName.hashCode();
         }
     }
+
 }
