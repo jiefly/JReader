@@ -1,6 +1,7 @@
 package com.gao.jiefly.jieflysbooks.Model.loader;
 
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnBookAddListener;
 
 import java.util.List;
 
@@ -12,6 +13,7 @@ import java.util.List;
 public abstract class BookFactory {
     protected String webUrl;
     protected String searchUrl;
+    public OnBookAddListener mListener;
 
     public abstract Book getBookByName(String bookName);
 
@@ -21,6 +23,11 @@ public abstract class BookFactory {
 
     public BookFactory setBookResourceWeb(String webUrl) {
         this.webUrl = webUrl;
+        return this;
+    }
+
+    public BookFactory setBookAddListener(OnBookAddListener mListener){
+        this.mListener = mListener;
         return this;
     }
 
