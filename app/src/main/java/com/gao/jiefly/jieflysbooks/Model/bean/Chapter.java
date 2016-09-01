@@ -88,6 +88,23 @@ public class Chapter implements Parcelable{
         this.url = url;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) return false;
+        if (this == obj) return true;
+        if (obj instanceof Chapter) {
+            Chapter chapter = (Chapter) obj;
+            if (chapter.url.equals(this.url) && chapter.title.equals(this.title))
+                return true;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return url.hashCode()*title.hashCode();
+    }
+
     public Chapter(String url) {
         this.url = url;
     }

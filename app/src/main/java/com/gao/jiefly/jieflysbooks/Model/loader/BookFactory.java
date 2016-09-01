@@ -1,6 +1,7 @@
 package com.gao.jiefly.jieflysbooks.Model.loader;
 
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
+import com.gao.jiefly.jieflysbooks.Model.bean.BookManager;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnBookAddListener;
 
 import java.util.List;
@@ -15,7 +16,8 @@ public abstract class BookFactory {
     protected String searchUrl;
     public OnBookAddListener mListener;
 
-    public abstract Book getBookByName(String bookName);
+    public abstract BookManager getBookByName(String bookName);
+    public abstract void getBookByName(String bookName,OnBookAddListener listener);
 
     public abstract List<Book> getBooksByAuthor(String author);
 

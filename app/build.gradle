@@ -40,4 +40,5 @@ dependencies {
     compile 'com.github.iammert:MaterialIntroView:1.2'
     compile project(path: ':Jlibrary')
     compile 'org.jsoup:jsoup:1.9.2'
+
 }

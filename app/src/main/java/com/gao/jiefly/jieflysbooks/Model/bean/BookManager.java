@@ -34,7 +34,7 @@ public class BookManager implements Parcelable {
     private String lastUpdateStr;
     private Date lastUpdateDate;
     private String type;
-    private String[] covers;
+    private List<String > covers = new ArrayList<>();
     private String statu;
     private boolean isLocal;
     private boolean isCached;
@@ -50,7 +50,7 @@ public class BookManager implements Parcelable {
         author = in.readString();
         lastUpdateStr = in.readString();
         type = in.readString();
-        in.readStringArray(covers);
+        in.readList(covers,String.class.getClassLoader());
         statu = in.readString();
         isCached = in.readInt() == 1;
         isLocal = in.readInt() == 1;
@@ -76,7 +76,7 @@ public class BookManager implements Parcelable {
         dest.writeString(author);
         dest.writeString(lastUpdateStr);
         dest.writeString(type);
-        dest.writeStringArray(covers);
+        dest.writeList(covers);
         dest.writeString(statu);
         dest.writeInt(isCached ? 1 : 0);
         dest.writeInt(isLocal ? 1 : 0);
@@ -139,17 +139,17 @@ public class BookManager implements Parcelable {
         this.type = type;
     }
 
-    public String[] getCovers() {
+    public List<String> getCovers() {
         return covers;
     }
 
-    public void setCovers(String[] covers) {
+    public void setCovers(List<String> covers) {
         this.covers = covers;
     }
 
     public void addCover(String cover) {
         if (covers != null) {
-            covers[covers.length] = cover;
+            covers.add(cover);
         }
     }
 

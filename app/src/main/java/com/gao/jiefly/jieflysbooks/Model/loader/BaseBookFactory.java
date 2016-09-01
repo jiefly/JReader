@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.bean.BookManager;
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnBookAddListener;
 import com.google.gson.Gson;
 
 import org.jsoup.HttpStatusException;
@@ -30,11 +31,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -47,21 +45,28 @@ public class BaseBookFactory extends BookFactory {
     private static final String SODU_PREFIX = "http://www.soduso.com";
     public Set<String> resourceIgnore = new HashSet<>();
     public Set<String> webNoCoverList = new HashSet<>();
-
+    private final int cpuNum = Runtime.getRuntime().availableProcessors();
     final Map<String, String[]> contentFeature = new HashMap<>();
     final Map<String, String[]> titleFeature = new HashMap<>();
+    final Map<String, String[]> chapterFeature = new HashMap<>();
     private Document mDocument;
     private String bookName;
-    int cpuNum = Runtime.getRuntime().availableProcessors();
-    ThreadPoolExecutor executor = new ThreadPoolExecutor(
-            cpuNum
-            , 10
-            , 10000
-            , TimeUnit.MILLISECONDS
-            , new ArrayBlockingQueue<Runnable>(10));
     private BookManager mBookManager;
+    BookFactoryConfiguration aszw;
 
     public BaseBookFactory() {
+        aszw = new BookFactoryConfiguration()
+                .setWebName("爱上中文")
+                .setAuthor("tag", "i")
+                .setAuthor("text", "作者")
+                .setStatu("tag", "i")
+                .setStatu("text", "作品进度")
+                .setType("tag", "i")
+                .setType("text", "类别")
+                .setNewChapter("class", "fl")
+                .setNewChapter("text", "最新章节")
+                .setChapterList("id", "at")
+                .setChapter("id", "contents");
         webNoCoverList.add("http://www.shuqi6.com/");
         webNoCoverList.add("http://www.baoliny.com/");
         webNoCoverList.add("http://www.shuqu8.com/");
@@ -71,63 +76,48 @@ public class BaseBookFactory extends BookFactory {
         contentFeature.put("class", new String[]{"centent"});
 //        获取标题的定位点
         titleFeature.put("tag", new String[]{"h1"});
+//        获取chapterlist的定位点
+        chapterFeature.put("id", new String[]{"list", "xiaoshuolist", "xslist"});
+        chapterFeature.put("class", new String[]{"chapterlist"});
     }
 
     @Override
-    public Book getBookByName(String bookName) {
+    public void getBookByName(final String bookName, OnBookAddListener listener) {
+        if (listener == null && mListener == null)
+            return;
+        if (listener != null)
+            mListener = listener;
+        if (mBookManager == null)
+            mBookManager = new BookManager();
+        this.bookName = bookName;
+        mBookManager.setName(bookName);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String updateUrl = getBookLastUpdateUrlFromSearch(bookName);
+                getBookInfoListFromLastUpdateList(updateUrl, mListener);
+            }
+        }).start();
+    }
+
+    @Override
+    public BookManager getBookByName(String bookName) {
         this.bookName = bookName;
         if (mBookManager == null)
             mBookManager = new BookManager();
         mBookManager.setName(bookName);
-        long start = System.currentTimeMillis();
         String text = getBookLastUpdateUrlFromSearch(bookName);
-        System.out.printf("\ngetBookLastUpdateUrlFromSearch cost time:" + (System.currentTimeMillis() - start) + "ms");
-        start = System.currentTimeMillis();
         Set<BookInfo> infos = getBookInfoListFromLastUpdateList(text);
-        System.out.printf("\ngetBookInfoListFromLastUpdateList cost time:" + (System.currentTimeMillis() - start) + "ms");
-        List<Chapter> chapters = new ArrayList<>();
-        start = System.currentTimeMillis();
-        if (infos != null) {
-            for (final BookInfo info : infos) {
-//                直接串行执行花费时间为excutor的两倍左右
-                /*Chapter chapter = null;
-                chapter = getChapter(info.getBookLastUpdateUrl(),contentFeature,titleFeature);
-                if (chapter != null)
-                    chapters.add(chapter);*/
-                Future future = executor.submit(new Callable<Chapter>() {
-                    @Override
-                    public Chapter call() throws Exception {
-                        return getChapter(info.getBookLastUpdateUrl(), contentFeature, titleFeature);
-                    }
-                });
-                try {
-                    if (future.get() != null) {
-                        chapters.add((Chapter) future.get());
-                    }
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                }
-            }
+        if (infos == null)
+            return null;
+        for (BookInfo info : infos) {
+            mBookManager.setLastUpdateDate(info.bookLastUpdateTime);
+            mBookManager.addCover(info.bookCover);
+            mBookManager.addResourse(info.bookSourceWebName, info.bookUrl);
         }
-
-        System.out.printf("\ncost time:" + (System.currentTimeMillis() - start) / 1000 + "s");
-        BookManager manager = new BookManager();
-        manager.setName(bookName);
-        for (BookInfo bookInfo : infos) {
-//            if (manager.getCovers() == null) {
-//                String cover = findBookCover(getDocumentByUrl(chapter.getBookUrl()));
-//                if (cover != null && !cover.contains("nocover")) {
-////                    测试图片是否能访问
-//                    if (urlCanArrieve(cover))
-//                        manager.setCovers(cover);
-//                }
-//            }
-            manager.addResourse(bookInfo.bookSourceWebName, bookInfo.bookUrl);
-            String json = bookInfo.toJson();
-            System.out.printf("" + json);
-        }
-        return null;
+        return mBookManager;
     }
+
 
     /*
     * 测试url地址能否到达
@@ -138,7 +128,7 @@ public class BaseBookFactory extends BookFactory {
             URL urlObj = new URL(url);
             HttpURLConnection oc = (HttpURLConnection) urlObj.openConnection();
             oc.setUseCaches(false);
-            oc.setConnectTimeout(3000); // 设置超时时间
+            oc.setConnectTimeout(500); // 设置超时时间
             status = oc.getResponseCode();// 请求状态
             if (200 == status) {
                 // 200是请求地址顺利连通。。
@@ -174,6 +164,9 @@ public class BaseBookFactory extends BookFactory {
     }
 
     private Document getDocumentByUrl(String url) {
+        if (url == null || !url.startsWith("http://www")) {
+            return null;
+        }
         Document document = null;
         try {
             document = Jsoup.connect(url).get();
@@ -195,42 +188,88 @@ public class BaseBookFactory extends BookFactory {
         return document;
     }
 
+    private void getBookInfoListFromLastUpdateList(String url, final OnBookAddListener listener) {
+        if (url == null || " ".equals(url)) {
+            listener.onBookAddFailed(new Exception("url error"));
+            return;
+        }
+        ExecutorService executor = Executors.newFixedThreadPool(cpuNum);
+        final Set<BookInfo> infos = new HashSet<>();
+        url = SODU_PREFIX + url;
+        mDocument = getDocumentByUrl(url);
+        if (mDocument != null) {
+            Elements results = mDocument.body().children();
+            for (Element e : results) {
+                final BookInfo bookInfo = element2BookInfo(e, bookName);
+                if (bookInfo != null && !resourceIgnore.contains(bookInfo.getBookSourceWebName()))
+                    infos.add(bookInfo);
+            }
+        }
+        if (infos.isEmpty()) {
+            listener.onBookAddFailed(new Exception("sodu小说最近更新页面为获取到相关数据"));
+            return;
+        }
+        for (BookInfo info : infos) {
+            final BookInfo finalInfo = info;
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    BookInfo info = getBookUrlBySodu(finalInfo);
+                    Document bookDocument = getDocumentByUrl(info.getBookUrl());
+                    List<Chapter> c = getChapterList(bookDocument, aszw.getConfig().get(BookFactoryConfiguration.CHAPTER_LIST));
+                    String cover = findBookCover(bookDocument, info.getBookSourceWebUrl());
+                    synchronized (BookManager.class) {
+                        mBookManager.addResourse(info.bookSourceWebName, info.bookUrl);
+                        mBookManager.addCover(cover);
+                        mBookManager.setLastUpdateDate(info.bookLastUpdateTime);
+                        if (mBookManager.getResourse().size() == 1) {
+                            listener.onBookBaseInfoGetSuccess(mBookManager);
+                        }
+
+                        if (mBookManager.getResourse().size() == infos.size())
+                            listener.onBookCompleteInfoGetSuccess(mBookManager);
+                    }
+
+
+                }
+            });
+        }
+        executor.shutdown();
+    }
+
     private Set<BookInfo> getBookInfoListFromLastUpdateList(String url) {
         if (url == null || " ".equals(url))
             return null;
         url = SODU_PREFIX + url;
         final Set<BookInfo> bookInfos = new HashSet<>();
+        ExecutorService executorService = Executors.newFixedThreadPool(4);
         try {
             mDocument = Jsoup.connect(url).get();
             Elements results = mDocument.body().children();
             for (Element e : results) {
                 final BookInfo bookInfo = element2BookInfo(e, bookName);
-                if (bookInfo != null)
-                    if (!resourceIgnore.contains(bookInfo.bookSourceWebName)) {
-                        Future<BookInfo> future = executor.submit(new Callable<BookInfo>() {
-                            @Override
-                            public BookInfo call() throws Exception {
-                                BookInfo info = getBookUrlBySodu(bookInfo);
-                                String cover = findBookCover(getDocumentByUrl(info.getBookUrl()), info.getBookSourceWebUrl());
+                if (bookInfo == null)
+                    continue;
+                if (resourceIgnore.contains(bookInfo.bookSourceWebName))
+                    continue;
+
+                executorService.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        BookInfo info = getBookUrlBySodu(bookInfo);
+                        synchronized (BookInfo.class) {
+                            if (!bookInfos.contains(info)) {
+                                Document bookDocument = getDocumentByUrl(info.getBookUrl());
+                                List<Chapter> c = getChapterList(bookDocument, chapterFeature);
+                                String cover = findBookCover(bookDocument, info.getBookSourceWebUrl());
                                 if (urlCanArrieve(cover)) {
                                     info.setBookCover(cover);
-                                    mBookManager.addResourse(info.bookSourceWebName,info.getBookSourceWebUrl());
-                                    mBookManager.addCover(cover);
-                                    mBookManager.setLastUpdateDate(info.getBookLastUpdateTime());
-                                    mListener.onBookBaseInfoGetSuccess(mBookManager);
                                 }
-                                return info;
+                                bookInfos.add(info);
                             }
-
-                        });
-
-                        try {
-                            bookInfos.add(future.get());
-                        } catch (InterruptedException | ExecutionException e1) {
-                            e1.printStackTrace();
                         }
-
                     }
+                });
 
             }
 
@@ -238,16 +277,12 @@ public class BaseBookFactory extends BookFactory {
             e.printStackTrace();
             return null;
         }
-//        统一转换bookinfo中的跳转地址
-//        for (final BookInfo i : bookInfos) {
-//            executor.execute(new Runnable() {
-//                @Override
-//                public void run() {
-//                    getBookUrlBySodu(i);
-//                }
-//            });
-//        }
-        mListener.onBookCompleteInfoGetSuccess(mBookManager);
+        executorService.shutdown();
+        try {
+            executorService.awaitTermination(5, TimeUnit.MINUTES);
+        } catch (InterruptedException e1) {
+            e1.printStackTrace();
+        }
         return bookInfos;
     }
 
@@ -257,7 +292,7 @@ public class BaseBookFactory extends BookFactory {
 //        <div style="width:108px;float:left;"><a href="http://www.sodu.cc/newmulu_204551_9.html" class="tl">7度书屋</a></div>
 //        <div style="width:88px;float:left;" class="xt1">2016-8-30 22:35:00</div>
 //        </div>
-        if (e == null || !"div".equals(e.tagName()))
+        if (e == null || !"div".equals(e.tagName()) || bookName == null)
             return null;
         if (e.getElementsContainingText(bookName).size() == 0)
             return null;
@@ -294,6 +329,61 @@ public class BaseBookFactory extends BookFactory {
         return result;
     }
 
+    private Elements getConnectionATag(Element e) {
+        return e.select("a[href]");
+    }
+    private List<Chapter> getChapterList(Document d, Map<String, String[]> chapterFeature) {
+        if (d == null || chapterFeature == null)
+            return null;
+//        判断id
+        List<Chapter> chapterList = new ArrayList<>();
+        if (chapterFeature.containsKey("id") && chapterFeature.get("id") != null) {
+            for (String id : chapterFeature.get("id")) {
+                Element e = d.body().getElementById(id);
+                if (e == null)
+                    continue;
+                Elements chapters = e.select("a[href]");
+                if (chapters == null)
+                    continue;
+                for (Element chapter : chapters) {
+                    Chapter c = new Chapter(chapter.attr("href"));
+                    c.setTitle(chapter.text());
+                    chapterList.add(c);
+                }
+                return chapterList;
+            }
+        }
+//        判断class
+        if (chapterFeature.containsKey("class") && chapterFeature.get("class") != null) {
+            for (String className : chapterFeature.get("class")) {
+                Elements e = d.body().getElementsByClass(className);
+                if (e == null)
+                    continue;
+                for (Element mabyChapter : e) {
+                    Elements chapters = mabyChapter.select("a[href]");
+                    if (chapters == null)
+                        continue;
+                    for (Element chapter : chapters) {
+                        Chapter c = new Chapter(chapter.attr("href"));
+                        c.setTitle(chapter.text());
+                        chapterList.add(c);
+                    }
+                    return chapterList;
+                }
+            }
+        }
+//        直接判断<a>
+        Elements results = d.body().select("a[href]");
+        if (results == null)
+            return null;
+        for (Element chapter : results) {
+            Chapter c = new Chapter(chapter.attr("href"));
+            c.setTitle(chapter.text());
+            chapterList.add(c);
+        }
+        return chapterList;
+
+    }
 
     private Chapter getChapter(String url
             , Map<String, String[]> contentFeature
@@ -395,7 +485,7 @@ public class BaseBookFactory extends BookFactory {
                     bookInfo.setBookLastUpdateUrl(redirctUrl);
                     String[] s = redirctUrl.split("/");
 //                      第三个String为网站的网址
-                    bookInfo.setBookSourceWebUrl("http://"+s[2]);
+                    bookInfo.setBookSourceWebUrl("http://" + s[2]);
                     String bookUrl = redirctUrl.replace(s[s.length - 1], "");
                     bookInfo.setBookUrl(bookUrl);
                 }
@@ -430,6 +520,8 @@ public class BaseBookFactory extends BookFactory {
     }
 
     private String getBookLastUpdateUrlFromSearch(String bookName) {
+        if (searchUrl == null)
+            return null;
         try {
             mDocument = Jsoup.connect(searchUrl + UrlEncoder(bookName, "gb2312")).timeout(3000).get();
             Elements links = mDocument.select("a[target=_blank]");
@@ -495,6 +587,20 @@ public class BaseBookFactory extends BookFactory {
         String chapterLastUpdateListUrlList;
         String bookUrl;
         String bookCover;
+        List<Chapter> chapterList = new ArrayList<>();
+
+        public List<Chapter> getChapterList() {
+            return chapterList;
+        }
+
+        public void setChapterList(List<Chapter> chapterList) {
+            this.chapterList = chapterList;
+        }
+
+        public void addChapter(Chapter c) {
+            if (c != null)
+                chapterList.add(c);
+        }
 
         public String getBookCover() {
             return bookCover;
