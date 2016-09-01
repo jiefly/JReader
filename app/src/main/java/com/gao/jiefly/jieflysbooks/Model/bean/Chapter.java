@@ -1,25 +1,35 @@
 package com.gao.jiefly.jieflysbooks.Model.bean;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by jiefly on 2016/6/28.
  * Email:jiefly1993@gmail.com
  * Fighting_jiiiiie
  */
-public class Chapter {
-    public void setUrl(String url) {
-        this.url = url;
-    }
+public class Chapter implements Parcelable{
+    public static final Parcelable.Creator<Chapter> CREATOR = new Parcelable.Creator<Chapter>(){
 
+        @Override
+        public Chapter createFromParcel(Parcel source) {
+            return new Chapter(source);
+        }
+
+        @Override
+        public Chapter[] newArray(int size) {
+            return new Chapter[size];
+        }
+    };
     private String url;
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
     private String title;
     private String bookName;
     private int index;
     private boolean isLocal = false;
+
+    public Chapter(Parcel source) {
+
+    }
 
     public String getContent() {
         return content;
@@ -33,6 +43,14 @@ public class Chapter {
 
     public String getUrl() {
         return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getTitle() {
@@ -61,14 +79,43 @@ public class Chapter {
         this.bookName = bookName;
 
     }
-    public Chapter (String title,String bookName,int index,String url){
+
+    public Chapter(String title, String bookName, int index, String url) {
         this.title = title;
         this.bookName = bookName;
         this.index = index;
         isLocal = true;
         this.url = url;
     }
-    public Chapter(String url){
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) return false;
+        if (this == obj) return true;
+        if (obj instanceof Chapter) {
+            Chapter chapter = (Chapter) obj;
+            if (chapter.url.equals(this.url) && chapter.title.equals(this.title))
+                return true;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return url.hashCode()*title.hashCode();
+    }
+
+    public Chapter(String url) {
         this.url = url;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+
     }
 }

@@ -131,7 +131,8 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
         ButterKnife.inject(this);
         mIdToolBar.setTitle("");
         setSupportActionBar(mIdToolBar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         getSupportActionBar().setShowHideAnimationEnabled(true);
         mIdToolBar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -740,27 +741,28 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
                                     int viewPagerBackgroundId = 0;
                                     int textColorId = 0;
                                     switch (checkedId) {
-                                        case 1:
+                                        case R.id.id_set_reader_config_rbtn_01:
                                             viewPagerBackgroundId = R.drawable.read_default_background;
                                             textColorId = R.color.colorDefaultBackgroundText;
+
                                             ApplicationLoader.save(ApplicationLoader.READER_BACK_GROUND, BACKGROUNT_DEFAULT);
                                             break;
-                                        case 2:
+                                        case R.id.id_set_reader_config_rbtn_02:
                                             viewPagerBackgroundId = R.color.colorNovelReadBackgroundBlue;
                                             textColorId = R.color.colorNovelReadBackgroundBlueText;
                                             ApplicationLoader.save(ApplicationLoader.READER_BACK_GROUND, ApplicationLoader.BACKGROUNT_BLUE);
                                             break;
-                                        case 3:
+                                        case R.id.id_set_reader_config_rbtn_03:
                                             viewPagerBackgroundId = R.color.colorNovelReadBackgroundgray;
                                             textColorId = R.color.colorNovelReadBackgroundgrayText;
                                             ApplicationLoader.save(ApplicationLoader.READER_BACK_GROUND, ApplicationLoader.BACKGROUNT_NIGHT);
                                             break;
-                                        case 4:
+                                        case R.id.id_set_reader_config_rbtn_04:
                                             viewPagerBackgroundId = R.color.colorNovelReadBackgroundGraygreen;
                                             textColorId = R.color.colorNovelReadBackgroundGraygreenText;
                                             ApplicationLoader.save(ApplicationLoader.READER_BACK_GROUND, ApplicationLoader.BACKGROUNT_GRAY_GREEN);
                                             break;
-                                        case 5:
+                                        case R.id.id_set_reader_config_rbtn_05:
                                             viewPagerBackgroundId = R.color.colorNovelReadBackgroundgreen1;
                                             textColorId = R.color.colorNovelReadBackgroundgreen1Text;
                                             ApplicationLoader.save(ApplicationLoader.READER_BACK_GROUND, ApplicationLoader.BACKGROUNT_GREEN1);
@@ -913,7 +915,7 @@ public class JieReader extends AppCompatActivity implements OnDataModelListener 
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("加载中...请稍后");
         progressDialog.setCanceledOnTouchOutside(false);
-        ;
+
     }
 
     class CustomFragmentPagerAdapter extends FragmentPagerAdapter {

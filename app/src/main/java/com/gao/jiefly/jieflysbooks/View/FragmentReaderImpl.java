@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,6 +26,7 @@ import rx.android.schedulers.AndroidSchedulers;
  * Fighting_jiiiiie
  */
 public class FragmentReaderImpl extends Fragment implements FragmentReader {
+
     private TextView tvShowContent;
     private TextView tvShowTitle;
     private TextView tvShowTime;
@@ -111,6 +111,16 @@ public class FragmentReaderImpl extends Fragment implements FragmentReader {
             tvShowPersent.setTextColor(color);
             tvShowTime.setTextColor(color);
         }
+    }
+
+    @Override
+    public void setTime(String time) {
+
+    }
+
+    @Override
+    public void setTextSize(int textSize) {
+
     }
 
     Date mDate = new Date();

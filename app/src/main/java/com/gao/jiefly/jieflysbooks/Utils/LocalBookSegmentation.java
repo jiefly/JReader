@@ -113,7 +113,7 @@ public class LocalBookSegmentation {
                         chapter.setContent(sb.toString());
                         mChapterList.add(chapter);
                         mChapterLoader.addChapterToDiskCache(chapter.getUrl(), chapter);
-//                    Log.e("getBookChapterPosition", sb.toString());
+                        Log.e("getBookChapterPosition", sb.toString());
                         sb.delete(0, sb.length());
                     }
                     title = line;

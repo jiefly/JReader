@@ -144,7 +144,7 @@ public class BookLoader {
         }*/
     }
 
-    public void setBookIsCached(Book book){
+    public void setBookIsCached(Book book) {
         SQLiteDatabase db = mBookDatabaseHelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put("isCached", book.isCached() ? 0x10 : 0x01);
@@ -400,7 +400,9 @@ public class BookLoader {
                 e.printStackTrace();
             }
         }
-        int result = db.update("Book", contentValues, "name=?", new String[]{updateBook.getBookName()});
+        int result = 0;
+        if (db.isOpen())
+            result = db.update("Book", contentValues, "name=?", new String[]{updateBook.getBookName()});
         return result > 0;
     }
 

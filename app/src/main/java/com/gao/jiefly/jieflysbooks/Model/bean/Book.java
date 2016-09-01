@@ -31,6 +31,7 @@ public class Book implements Serializable {
     private boolean isCached = false;
     private boolean isLocal = false;
 
+
     public boolean isHasUpdate() {
         return hasUpdate;
     }
@@ -54,22 +55,19 @@ public class Book implements Serializable {
 
     @Override
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder
-                .append("类型：").append(bookStyle).append("\n")
-                .append("作者：").append(bookAuthor).append("\n")
-                .append("书名：").append(bookName).append("\n")
-                .append("本书地址：").append(bookUrl).append("\n")
-                .append("最新章节：").append(bookNewTopicTitle).append("\n")
-                .append("最新章节地址：").append(bookNewTopicUrl).append("\n")
-                .append("最后更新时间：").append(bookLastUpdate).append("\n")
-                .append("总字数：").append(bookTotalWords).append("\n")
-                .append("更新状态：").append(bookStatu).append("\n")
-                .append("更新时间地址：").append(bookUpdateTimeUrl).append("\n")
-                .append("封面图片：").append(bookCover).append("\n")
-                .append("数据来源：").append(bookResource).append("\n")
-                .append("小说状态：").append(isLocal ? "本地" : "在线");
-        return stringBuilder.toString();
+        return "类型：" + bookStyle + "\n" +
+                "作者：" + bookAuthor + "\n" +
+                "书名：" + bookName + "\n" +
+                "本书地址：" + bookUrl + "\n" +
+                "最新章节：" + bookNewTopicTitle + "\n" +
+                "最新章节地址：" + bookNewTopicUrl + "\n" +
+                "最后更新时间：" + bookLastUpdate + "\n" +
+                "总字数：" + bookTotalWords + "\n" +
+                "更新状态：" + bookStatu + "\n" +
+                "更新时间地址：" + bookUpdateTimeUrl + "\n" +
+                "封面图片：" + bookCover + "\n" +
+                "数据来源：" + bookResource + "\n" +
+                "小说状态：" + (isLocal ? "本地" : "在线");
     }
 
     public int getReadChapterIndex() {

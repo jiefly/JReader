@@ -13,4 +13,6 @@ public interface FragmentReader {
     void addTextSize();
     void reduceTextSize();
     void setTextColor(int color);
+    void setTime(String time);
+    void setTextSize(int textSize);
 }

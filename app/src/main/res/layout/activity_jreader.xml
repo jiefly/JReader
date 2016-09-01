@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout
+	android:id="@+id/id_jie_reader_drawer_layout"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent" xmlns:app="http://schemas.android.com/apk/res-auto">
+
+	<RelativeLayout android:layout_width="match_parent"
+	                android:layout_height="match_parent">
+		<com.gao.jiefly.jieflysbooks.View.CustomViewPager
+			android:id="@+id/id_jie_reader_content_vp"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:background="@drawable/read_default_background"
+			android:layout_alignParentTop="true" android:layout_alignParentLeft="true"
+			android:layout_alignParentStart="true">
+		</com.gao.jiefly.jieflysbooks.View.CustomViewPager>
+		<include
+			layout="@layout/reader_bottom_bar"
+			android:layout_width="match_parent"
+			android:layout_height="100dp" android:layout_alignParentBottom="true"
+			android:layout_centerHorizontal="true"/>
+	</RelativeLayout>
+
+	<include
+		layout="@layout/include_reader_left_menu"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:layout_gravity="start"/>
+
+</android.support.v4.widget.DrawerLayout>

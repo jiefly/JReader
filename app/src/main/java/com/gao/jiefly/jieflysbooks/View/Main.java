@@ -33,12 +33,16 @@ import android.widget.Toast;
 
 import com.daimajia.numberprogressbar.NumberProgressBar;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
+import com.gao.jiefly.jieflysbooks.Model.bean.BookManager;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnBookAddListener;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnDataStateListener;
+import com.gao.jiefly.jieflysbooks.Model.loader.BaseBookFactory;
 import com.gao.jiefly.jieflysbooks.Present.PresentMain;
 import com.gao.jiefly.jieflysbooks.R;
 import com.gao.jiefly.jieflysbooks.Service.UpdateBookService;
 import com.gao.jiefly.jieflysbooks.Utils.AndroidUtilities;
 import com.gao.jiefly.jieflysbooks.Utils.ApplicationLoader;
+import com.google.gson.Gson;
 import com.melnykov.fab.FloatingActionButton;
 import com.squareup.picasso.Picasso;
 
@@ -118,6 +122,34 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
 
 //        加载本地书籍
 //        LocalBookSegmentation.getInstance();
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                long time = System.currentTimeMillis();
+//                BookManager manager = new BaseBookFactory().setBookSearchUrl("http://www.soduso.com/search/index.aspx?key=").getBookByName("寒门状元");
+//                Log.e("manger",new Gson().toJson(manager));
+//                Log.e("花费时间",System.currentTimeMillis() - time+"ms");
+//            }
+//        }).start();
+        final long time = System.currentTimeMillis();
+        new BaseBookFactory().setBookSearchUrl("http://www.soduso.com/search/index.aspx?key=").getBookByName("完美世界", new OnBookAddListener() {
+            @Override
+            public void onBookBaseInfoGetSuccess(BookManager book) {
+                Log.e("manger",new Gson().toJson(book));
+                Log.e("花费时间Base",System.currentTimeMillis() - time+"ms");
+            }
+
+            @Override
+            public void onBookCompleteInfoGetSuccess(BookManager book) {
+                Log.e("manger",new Gson().toJson(book));
+                Log.e("花费时间Complete",System.currentTimeMillis() - time+"ms");
+            }
+
+            @Override
+            public void onBookAddFailed(Exception e) {
+
+            }
+        });
         mPresentMain = PresentMain.getInstance(getApplicationContext(), this);
 //        mPresentMain.bindUpdateBookService(Main.this);
         if (mPresentMain.isNeedUpdateBackgrond) {
@@ -570,7 +602,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     @Override
     public void readBook(Book book) {
         Intent intent = new Intent();
-        intent.setClass(Main.this, JieReader.class);
+        intent.setClass(Main.this, JReader.class);
         Bundle bundle = new Bundle();
         bundle.putSerializable("book", book);
         intent.putExtra("bookbundle", bundle);
@@ -811,7 +843,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                 } else {
                     itemViewHolder.tvBookAuthor.setText(data.get(position).getBookAuthor());
                     itemViewHolder.ivBookUpdateFlag.setVisibility(data.get(position).isHasUpdate() ? android.view.View.VISIBLE : android.view.View.INVISIBLE);
-//                    itemViewHolder.ivBook.setImageResource(R.drawable.nocover);
+//                  itemViewHolder.ivBook.setImageResource(R.drawable.nocover);
                     Picasso.with(getApplicationContext())
                             .load(data.get(position).getBookCover()).error(R.drawable.nocover).into(itemViewHolder.ivBook);
                     itemViewHolder.tvRecentUpdateTopicTitle.setText("最近更新：");
