@@ -40,8 +40,10 @@ import com.gao.jiefly.jieflysbooks.Animation.DepthPageTransformer;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnItemClickListener;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnMoveNextChapterListener;
 import com.gao.jiefly.jieflysbooks.Present.PresentReader;
 import com.gao.jiefly.jieflysbooks.R;
+import com.orhanobut.logger.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +55,7 @@ import butterknife.OnClick;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class JReader extends AppCompatActivity {
@@ -138,12 +141,29 @@ public class JReader extends AppCompatActivity {
         initpop();
     }
 
+    public void vpToNextPage() {
+        Logger.i("toNextPage");
+        Observable.just(getCurrentFragmentIndex()+1)
+                .filter(new Func1<Integer, Boolean>() {
+                    @Override
+                    public Boolean call(Integer integer) {
+                        return integer<=mFragmentReaders.size() - 1;
+                    }
+                }).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Integer>() {
+            @Override
+            public void call(Integer integer) {
+                mIdJieReaderContentVp.setCurrentItem(getCurrentFragmentIndex() + 1, true);
+            }
+        });
+
+    }
+
     public int getCurrentFragmentIndex() {
         return mIdJieReaderContentVp.getCurrentItem();
     }
 
-    public void scrollDownToNextPage() {
-        mFragmentReaders.get(getCurrentFragmentIndex()).scrollDownToNextPage();
+    public void scrollDownToNextPage(OnMoveNextChapterListener listener) {
+        mFragmentReaders.get(getCurrentFragmentIndex()).scrollDownToNextPage(listener);
     }
 
     private void initpop() {

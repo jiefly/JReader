@@ -12,6 +12,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnMoveNextChapterListener;
 import com.gao.jiefly.jieflysbooks.R;
 
 import java.util.Date;
@@ -124,7 +125,7 @@ public class FragmentReaderImpl extends Fragment implements FragmentReader {
     }
 
     @Override
-    public void scrollDownToNextPage() {
+    public void scrollDownToNextPage(OnMoveNextChapterListener listener) {
 
     }
 

@@ -1,6 +1,7 @@
 package com.gao.jiefly.jieflysbooks.View;
 
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnMoveNextChapterListener;
 
 /**
  * Created by jiefly on 2016/6/23.
@@ -15,5 +16,5 @@ public interface FragmentReader {
     void setTextColor(int color);
     void setTime(String time);
     void setTextSize(int textSize);
-    void scrollDownToNextPage();
+    void scrollDownToNextPage(OnMoveNextChapterListener listener);
 }

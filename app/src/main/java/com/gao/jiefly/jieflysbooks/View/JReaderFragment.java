@@ -12,8 +12,10 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnMoveNextChapterListener;
 import com.gao.jiefly.jieflysbooks.Present.PresentReader;
 import com.gao.jiefly.jieflysbooks.R;
+import com.orhanobut.logger.Logger;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -38,6 +40,7 @@ public class JReaderFragment extends Fragment implements FragmentReader {
     private float present;
     private int textSize;
     private ScrollView mScrollView;
+    int mTextViewHeight;
     java.text.DecimalFormat df = new java.text.DecimalFormat("#.00");
 
     public JReaderFragment() {
@@ -149,10 +152,11 @@ public class JReaderFragment extends Fragment implements FragmentReader {
     }
 
     @Override
-    public void scrollDownToNextPage() {
+    public void scrollDownToNextPage(final OnMoveNextChapterListener listener) {
         int currentY = mScrollView.getScrollY();
-        final int height = mScrollView.getHeight() * 19 / 20;
+        final int height = mScrollView.getHeight() - 20;
         final int toY = currentY + height;
+        mTextViewHeight = mScrollView.getChildAt(0).getHeight();
         Observable.just(toY)
                 .filter(new Func1<Integer, Boolean>() {
                     @Override
@@ -165,6 +169,10 @@ public class JReaderFragment extends Fragment implements FragmentReader {
                     @Override
                     public void call(Integer integer) {
                         mScrollView.scrollTo(0, integer);
+                        if (integer + 20 >= mTextViewHeight)
+                            listener.onNextChapter();
+                        Logger.e("scrollY", integer + "");
+                        Logger.e("height", mTextViewHeight + "");
                     }
                 });
     }
