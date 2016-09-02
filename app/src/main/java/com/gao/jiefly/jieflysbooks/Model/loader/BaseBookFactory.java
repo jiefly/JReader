@@ -578,10 +578,12 @@ public class BaseBookFactory extends BookFactory {
         try {
             long time = System.currentTimeMillis();
             Document document = Jsoup.connect(url).get();
-            Logger.i("download time",System.currentTimeMillis() - time+"ms");
+            Logger.i("download time", System.currentTimeMillis() - time + "ms");
             time = System.currentTimeMillis();
             Chapter chapter = parserChapterFromDocument(contentFeature, titleFeature, document);
-            Logger.i("parser time",System.currentTimeMillis() - time+"ms");
+            if (chapter != null)
+                chapter.setIndex(index);
+            Logger.i("parser time", System.currentTimeMillis() - time + "ms");
             return chapter;
         } catch (HttpStatusException e) {
 //            爬虫被网站禁止，需要模拟真实环境

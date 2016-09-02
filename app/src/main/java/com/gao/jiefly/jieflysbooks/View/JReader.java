@@ -138,6 +138,14 @@ public class JReader extends AppCompatActivity {
         initpop();
     }
 
+    public int getCurrentFragmentIndex() {
+        return mIdJieReaderContentVp.getCurrentItem();
+    }
+
+    public void scrollDownToNextPage() {
+        mFragmentReaders.get(getCurrentFragmentIndex()).scrollDownToNextPage();
+    }
+
     private void initpop() {
         View popupWindowView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.set_reader_config_popup, null, false);
         setPopupWindow = new PopupWindow(popupWindowView
@@ -408,7 +416,7 @@ public class JReader extends AppCompatActivity {
                 .subscribe(new Action1<Integer>() {
                     @Override
                     public void call(Integer integer) {
-                            mIdJieReaderContentVp.setCurrentItem(integer);
+                        mIdJieReaderContentVp.setCurrentItem(integer);
                     }
                 });
 
@@ -493,7 +501,10 @@ public class JReader extends AppCompatActivity {
                     if (mDrawerLayout.isDrawerOpen(Gravity.LEFT))
                         return super.dispatchTouchEvent(ev);
                     return toogleScreenState();
+                } else if (ev.getX() > mScreenWidth * 5 / 6 && ev.getY() > mScreenHeight * 5 / 6) {
+                    mPresentReader.scrollDownToNextPage();
                 }
+
         }
         return super.dispatchTouchEvent(ev);
     }

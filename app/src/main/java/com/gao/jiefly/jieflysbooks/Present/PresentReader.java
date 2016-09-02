@@ -92,7 +92,12 @@ public class PresentReader implements  OnChapterCacheListener {
         return result;
     }
 
-
+    /*
+    * 点击右下角向下滑动一页的距离
+    * */
+    public void scrollDownToNextPage(){
+        view.scrollDownToNextPage();
+    }
     /*
     * 退出全屏模式
     * */

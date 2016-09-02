@@ -123,6 +123,11 @@ public class FragmentReaderImpl extends Fragment implements FragmentReader {
 
     }
 
+    @Override
+    public void scrollDownToNextPage() {
+
+    }
+
     Date mDate = new Date();
     Handler handler = new Handler();
     Runnable runnable = new Runnable() {

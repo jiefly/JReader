@@ -8,6 +8,7 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
@@ -17,6 +18,7 @@ import com.gao.jiefly.jieflysbooks.R;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.functions.Func1;
 
 /**
  * Created by jiefly on 2016/8/25.
@@ -35,9 +37,10 @@ public class JReaderFragment extends Fragment implements FragmentReader {
     private TextView tvShowTime;
     private float present;
     private int textSize;
+    private ScrollView mScrollView;
     java.text.DecimalFormat df = new java.text.DecimalFormat("#.00");
 
-    public JReaderFragment(){
+    public JReaderFragment() {
     }
 
     public JReaderFragment(Chapter chapter, PresentReader reader, int textColor, float present) {
@@ -56,6 +59,7 @@ public class JReaderFragment extends Fragment implements FragmentReader {
         tvShowTitle = (TextView) view.findViewById(R.id.id_fragment_title_tv);
         tvShowTime = (TextView) view.findViewById(R.id.id_fragment_time_tv);
         tvShowPresent = (TextView) view.findViewById(R.id.id_fragment_persent_tv);
+        mScrollView = (ScrollView) view.findViewById(R.id.id_fragment_sv);
         return view;
     }
 
@@ -136,6 +140,7 @@ public class JReaderFragment extends Fragment implements FragmentReader {
     public Chapter getChapter() {
         return null;
     }
+
     @Override
     public void setTextSize(int size) {
         textSize = size;
@@ -143,6 +148,26 @@ public class JReaderFragment extends Fragment implements FragmentReader {
             tvShowContent.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
     }
 
+    @Override
+    public void scrollDownToNextPage() {
+        int currentY = mScrollView.getScrollY();
+        final int height = mScrollView.getHeight() * 19 / 20;
+        final int toY = currentY + height;
+        Observable.just(toY)
+                .filter(new Func1<Integer, Boolean>() {
+                    @Override
+                    public Boolean call(Integer integer) {
+                        return toY >= height;
+                    }
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Integer>() {
+                    @Override
+                    public void call(Integer integer) {
+                        mScrollView.scrollTo(0, integer);
+                    }
+                });
+    }
 
 
     @Override
@@ -159,7 +184,7 @@ public class JReaderFragment extends Fragment implements FragmentReader {
         textSize--;
         if (tvShowContent != null) {
             float size = tvShowContent.getTextSize();
-            tvShowContent.setTextSize(TypedValue.COMPLEX_UNIT_SP,textSize);
+            tvShowContent.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
             tvShowContent.setTextSize(TypedValue.COMPLEX_UNIT_PX, tvShowContent.getTextSize() - 1);
             size = tvShowContent.getTextSize();
         }

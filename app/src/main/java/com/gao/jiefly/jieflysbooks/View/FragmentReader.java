@@ -15,4 +15,5 @@ public interface FragmentReader {
     void setTextColor(int color);
     void setTime(String time);
     void setTextSize(int textSize);
+    void scrollDownToNextPage();
 }

@@ -33,10 +33,7 @@ import android.widget.Toast;
 
 import com.daimajia.numberprogressbar.NumberProgressBar;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
-import com.gao.jiefly.jieflysbooks.Model.bean.BookManager;
-import com.gao.jiefly.jieflysbooks.Model.listener.OnBookAddListener;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnDataStateListener;
-import com.gao.jiefly.jieflysbooks.Model.loader.BaseBookFactory;
 import com.gao.jiefly.jieflysbooks.Present.PresentMain;
 import com.gao.jiefly.jieflysbooks.R;
 import com.gao.jiefly.jieflysbooks.Service.UpdateBookService;
@@ -131,7 +128,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
 //                Log.e("花费时间",System.currentTimeMillis() - time+"ms");
 //            }
 //        }).start();
-        final long time = System.currentTimeMillis();
+        /*final long time = System.currentTimeMillis();
         new BaseBookFactory().setBookSearchUrl("http://www.soduso.com/search/index.aspx?key=").getBookByName("五行天", new OnBookAddListener() {
             @Override
             public void onBookBaseInfoGetSuccess(BookManager book) {
@@ -149,7 +146,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
             public void onBookAddFailed(Exception e) {
 
             }
-        });
+        });*/
         mPresentMain = PresentMain.getInstance(getApplicationContext(), this);
 //        mPresentMain.bindUpdateBookService(Main.this);
         if (mPresentMain.isNeedUpdateBackgrond) {
