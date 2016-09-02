@@ -18,6 +18,7 @@ public class BookFactoryConfiguration {
     public static final String SUBSCRICE = "subscribe";
     public static final String NEW_CHAPTER = "newChapter";
     public static final String WEB_NAME = "webName";
+    public static final String WEB_URL = "webUrl";
 
     Map<String, String> webName;
     Map<String, String> title;
@@ -28,11 +29,14 @@ public class BookFactoryConfiguration {
     Map<String, String> statu;
     Map<String, String> subscribe;
     Map<String, String> newChapter;
+    Map<String, String> webUrl;
     static Map<String, Map<String, String>> config;
 
     public BookFactoryConfiguration() {
         config = new HashMap<>();
         title = new HashMap<>();
+        title.put("tag","h1");
+        webUrl = new HashMap<>();
         author = new HashMap<>();
         chapterList = new HashMap<>();
         chapter = new HashMap<>();
@@ -42,10 +46,17 @@ public class BookFactoryConfiguration {
         newChapter = new HashMap<>();
         webName = new HashMap<>();
     }
-    public BookFactoryConfiguration setWebName(String webName){
-        this.webName.put(WEB_NAME,webName);
+
+    public BookFactoryConfiguration setWebName(String webName) {
+        this.webName.put(WEB_NAME, webName);
         return this;
     }
+
+    public BookFactoryConfiguration setWebUrl(String webUrl) {
+        this.webUrl.put(WEB_URL, webUrl);
+        return this;
+    }
+
     public Map<String, Map<String, String>> getConfig() {
         if (webName.isEmpty())
             return null;
@@ -70,6 +81,17 @@ public class BookFactoryConfiguration {
 
 
     public BookFactoryConfiguration setTitle(String key, String value) {
+        title.put(key, value);
+        return this;
+    }
+
+    public String getWebUrl() {
+        if (webUrl.isEmpty())
+            return null;
+        return webUrl.get(WEB_URL);
+    }
+
+    public BookFactoryConfiguration setSuscribe(String key, String value) {
         title.put(key, value);
         return this;
     }
@@ -104,5 +126,39 @@ public class BookFactoryConfiguration {
         return this;
     }
 
+    public Map<String, String> getWebName() {
+        return webName;
+    }
 
+    public Map<String, String> getTitle() {
+        return title;
+    }
+
+    public Map<String, String> getAuthor() {
+        return author;
+    }
+
+    public Map<String, String> getChapterList() {
+        return chapterList;
+    }
+
+    public Map<String, String> getChapter() {
+        return chapter;
+    }
+
+    public Map<String, String> getType() {
+        return type;
+    }
+
+    public Map<String, String> getStatu() {
+        return statu;
+    }
+
+    public Map<String, String> getSubscribe() {
+        return subscribe;
+    }
+
+    public Map<String, String> getNewChapter() {
+        return newChapter;
+    }
 }

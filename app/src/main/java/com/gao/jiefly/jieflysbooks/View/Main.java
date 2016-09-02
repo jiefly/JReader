@@ -42,8 +42,8 @@ import com.gao.jiefly.jieflysbooks.R;
 import com.gao.jiefly.jieflysbooks.Service.UpdateBookService;
 import com.gao.jiefly.jieflysbooks.Utils.AndroidUtilities;
 import com.gao.jiefly.jieflysbooks.Utils.ApplicationLoader;
-import com.google.gson.Gson;
 import com.melnykov.fab.FloatingActionButton;
+import com.orhanobut.logger.Logger;
 import com.squareup.picasso.Picasso;
 
 import java.net.MalformedURLException;
@@ -87,11 +87,11 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     public static final int SCAN_FLAG = 1;
     CheckBox checkBox;
     TextView mTextView;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        Logger.init("main");
 //        new GetBookFromSoDu().getBookCoverUrl("寒门状元", "秋水轩", new OnBookImageGetListener() {
 //            @Override
 //            public void onSuccess(String url) {
@@ -132,17 +132,17 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
 //            }
 //        }).start();
         final long time = System.currentTimeMillis();
-        new BaseBookFactory().setBookSearchUrl("http://www.soduso.com/search/index.aspx?key=").getBookByName("完美世界", new OnBookAddListener() {
+        new BaseBookFactory().setBookSearchUrl("http://www.soduso.com/search/index.aspx?key=").getBookByName("五行天", new OnBookAddListener() {
             @Override
             public void onBookBaseInfoGetSuccess(BookManager book) {
-                Log.e("manger",new Gson().toJson(book));
-                Log.e("花费时间Base",System.currentTimeMillis() - time+"ms");
+//                Logger.json(new Gson().toJson(book));
+//                Logger.e("花费时间Base",System.currentTimeMillis() - time+"ms");
             }
 
             @Override
             public void onBookCompleteInfoGetSuccess(BookManager book) {
-                Log.e("manger",new Gson().toJson(book));
-                Log.e("花费时间Complete",System.currentTimeMillis() - time+"ms");
+//                Logger.json(new Gson().toJson(book));
+//                Logger.e("花费时间Complete",System.currentTimeMillis() - time+"ms");
             }
 
             @Override

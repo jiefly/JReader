@@ -7,6 +7,7 @@ import com.gao.jiefly.jieflysbooks.Model.bean.BookManager;
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnBookAddListener;
 import com.google.gson.Gson;
+import com.orhanobut.logger.Logger;
 
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -52,21 +54,11 @@ public class BaseBookFactory extends BookFactory {
     private Document mDocument;
     private String bookName;
     private BookManager mBookManager;
-    BookFactoryConfiguration aszw;
+    Map<String, BookFactoryConfiguration> configManager = new HashMap<>();
 
     public BaseBookFactory() {
-        aszw = new BookFactoryConfiguration()
-                .setWebName("爱上中文")
-                .setAuthor("tag", "i")
-                .setAuthor("text", "作者")
-                .setStatu("tag", "i")
-                .setStatu("text", "作品进度")
-                .setType("tag", "i")
-                .setType("text", "类别")
-                .setNewChapter("class", "fl")
-                .setNewChapter("text", "最新章节")
-                .setChapterList("id", "at")
-                .setChapter("id", "contents");
+        initConfig();
+
         webNoCoverList.add("http://www.shuqi6.com/");
         webNoCoverList.add("http://www.baoliny.com/");
         webNoCoverList.add("http://www.shuqu8.com/");
@@ -79,6 +71,101 @@ public class BaseBookFactory extends BookFactory {
 //        获取chapterlist的定位点
         chapterFeature.put("id", new String[]{"list", "xiaoshuolist", "xslist"});
         chapterFeature.put("class", new String[]{"chapterlist"});
+    }
+
+    protected void initConfig() {
+        configManager.put("爱上中文", new BookFactoryConfiguration()
+                .setWebName("爱上中文")
+                .setWebUrl("http://www.aszw520.com")
+                .setAuthor("tag", "i")
+                .setAuthor("text", "作者")
+                .setStatu("tag", "i")
+                .setStatu("text", "作品进度")
+                .setType("tag", "i")
+                .setType("text", "类别")
+                .setNewChapter("class", "fl")
+                .setNewChapter("text", "最新章节")
+                .setChapterList("id", "at")
+                .setChapter("id", "contents"));
+        configManager.put("VIVI小说网", new BookFactoryConfiguration()
+                .setWebName("VIVI小说网")
+                .setWebUrl("http://www.zkvivi.com")
+                .setChapterList("class", "main")
+                .setChapter("class", "centent"));
+        configManager.put("少年文学", new BookFactoryConfiguration()
+                .setWebName("少年文学").setWebUrl("http://www.snwx.com")
+                .setAuthor("tag", "i")
+                .setAuthor("text", "作者")
+                .setStatu("tag", "i")
+                .setStatu("text", "状态")
+                .setType("tag", "i")
+                .setType("text", "类别")
+                .setNewChapter("class", "bookurl")
+                .setNewChapter("tag", "a")
+                .setSuscribe("class", "intro")
+                .setChapterList("id", "list")
+                .setChapter("id", "BookText"));
+        configManager.put("无弹窗小说网", new BookFactoryConfiguration()
+                .setWebName("无弹窗小说网").setWebUrl("http://www.baoliny.com")
+                .setChapterList("class", "readerListShow")
+                .setChapter("id", "content"));
+        configManager.put("七度书屋", new BookFactoryConfiguration()
+                .setWebName("七度书屋").setWebUrl("http://www.7dsw.com")
+                .setAuthor("tag", "i")
+                .setAuthor("text", "作者")
+                .setStatu("tag", "i")
+                .setStatu("text", "状态")
+                .setNewChapter("class", "bookurl")
+                .setNewChapter("tag", "p")
+                .setChapterList("id", "list")
+                .setChapter("id", "BookText"));
+        configManager.put("大海中文", new BookFactoryConfiguration()
+                .setWebName("大海中文").setWebUrl("http://www.dhzw.com")
+                .setAuthor("tag", "i")
+                .setAuthor("text", "作者")
+                .setStatu("tag", "i")
+                .setStatu("text", "状态")
+                .setType("tag", "i")
+                .setType("text", "类别")
+                .setNewChapter("class", "bookurl")
+                .setNewChapter("tag", "p")
+                .setSuscribe("class", "intro")
+                .setChapterList("id", "list")
+                .setChapter("id", "BookText"));
+        configManager.put("书旗小说", new BookFactoryConfiguration()
+                .setWebName("书旗小说").setWebUrl("http://www.shuqi6.com")
+                .setAuthor("tag", "b")
+                .setAuthor("text", "作者")
+                .setStatu("tag", "b")
+                .setStatu("text", "本书状态")
+                .setType("tag", "i")
+                .setType("text", "类别")
+                .setChapterList("id", "xslist")
+                .setChapter("id", "booktext"));
+        configManager.put("手牵手小说网", new BookFactoryConfiguration()
+                .setWebName("手牵手小说网").setWebUrl("http://www.sqsxs.com")
+                .setNewChapter("id", "info")
+                .setAuthor("tag", "p")
+                .setAuthor("text", "作者")
+                .setNewChapter("id", "info")
+                .setStatu("tag", "p")
+                .setStatu("text", "状态")
+                .setNewChapter("id", "info")
+                .setNewChapter("tag", "p")
+                .setNewChapter("text", "最新章节")
+                .setSuscribe("class", "intro")
+                .setChapterList("id", "list")
+                .setChapter("id", "content"));
+        configManager.put("木鱼哥", new BookFactoryConfiguration()
+                .setWebName("木鱼哥").setWebUrl("http://www.muyuge.com")
+                .setChapterList("id", "xslist")
+                .setChapter("id", "content"));
+
+        configManager.put("奇书网", new BookFactoryConfiguration()
+                .setWebName("奇书网").setWebUrl("http://www.55xs.com")
+                .setChapterList("class", "list")
+                .setChapter("id", "contents"));
+
     }
 
     @Override
@@ -118,6 +205,45 @@ public class BaseBookFactory extends BookFactory {
         return mBookManager;
     }
 
+    public BookManager downLoadAll(BookManager src) {
+        if (src == null)
+            return null;
+        ExecutorService service = Executors.newFixedThreadPool(10);
+        List<Chapter> oldChapter = src.getChapters();
+//        通过chapter的index作为键值存储chapter，之后便于对下载好的chapter重新排序
+//        hashMap 不是线程安全的，currentHashMap才是
+        final Map<Integer, Chapter> newChapter = new ConcurrentHashMap<>();
+        for (final Chapter chapter : oldChapter) {
+            if ((chapter.getContent() == null || chapter.getContent().isEmpty()) && chapter.getUrl() != null) {
+                service.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        long time = System.currentTimeMillis();
+                        Chapter c = getChapterDirect(chapter.getUrl(), chapter.getIndex(), configManager);
+                        Logger.i(c.getTitle(), System.currentTimeMillis() - time + "ms");
+                        newChapter.put(c.getIndex(), c);
+                    }
+                });
+            } else {
+                newChapter.put(chapter.getIndex(), chapter);
+            }
+        }
+        service.shutdown();
+        try {
+            service.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        int chapterCount = oldChapter.size();
+        oldChapter.clear();
+        for (int i = 0; i < chapterCount; i++) {
+            if (newChapter.containsKey(i) && newChapter.get(i) != null) {
+                oldChapter.add(newChapter.get(i));
+            }
+        }
+        mBookManager.setChapters(oldChapter);
+        return mBookManager;
+    }
 
     /*
     * 测试url地址能否到达
@@ -216,9 +342,12 @@ public class BaseBookFactory extends BookFactory {
                 public void run() {
                     BookInfo info = getBookUrlBySodu(finalInfo);
                     Document bookDocument = getDocumentByUrl(info.getBookUrl());
-                    List<Chapter> c = getChapterList(bookDocument, aszw.getConfig().get(BookFactoryConfiguration.CHAPTER_LIST));
+//                    如果有该网站的匹配配置文件则用该网站的匹配配置文件
+//                    否则用通配文件
                     String cover = findBookCover(bookDocument, info.getBookSourceWebUrl());
                     synchronized (BookManager.class) {
+                        if (mBookManager.getChapters().isEmpty())
+                            setChapterList(bookDocument, info);
                         mBookManager.addResourse(info.bookSourceWebName, info.bookUrl);
                         mBookManager.addCover(cover);
                         mBookManager.setLastUpdateDate(info.bookLastUpdateTime);
@@ -226,8 +355,10 @@ public class BaseBookFactory extends BookFactory {
                             listener.onBookBaseInfoGetSuccess(mBookManager);
                         }
 
-                        if (mBookManager.getResourse().size() == infos.size())
+                        if (mBookManager.getResourse().size() == infos.size()) {
                             listener.onBookCompleteInfoGetSuccess(mBookManager);
+                            mBookManager = downLoadAll(mBookManager);
+                        }
                     }
 
 
@@ -235,6 +366,19 @@ public class BaseBookFactory extends BookFactory {
             });
         }
         executor.shutdown();
+    }
+
+    private void setChapterList(Document bookDocument, BookInfo info) {
+        List<Chapter> chapters;
+        if (configManager.containsKey(info.bookSourceWebName)) {
+            chapters = getChapterListDirect(bookDocument
+                    , configManager.get(info.bookSourceWebName).getConfig().get(BookFactoryConfiguration.CHAPTER_LIST));
+
+        } else {
+            chapters = getChapterList(bookDocument, chapterFeature);
+        }
+        if (chapters != null && !chapters.isEmpty())
+            mBookManager.setChapters(chapters);
     }
 
     private Set<BookInfo> getBookInfoListFromLastUpdateList(String url) {
@@ -332,11 +476,30 @@ public class BaseBookFactory extends BookFactory {
     private Elements getConnectionATag(Element e) {
         return e.select("a[href]");
     }
+
+    private List<Chapter> getChapterListDirect(Document d, Map<String, String> chapterFeature) {
+        if (chapterFeature == null)
+            return null;
+        Map<String, String[]> result = mapString2StringArry(chapterFeature);
+        return getChapterList(d, result);
+    }
+
+    private Map<String, String[]> mapString2StringArry(Map<String, String> src) {
+        if (src == null)
+            return null;
+        Map<String, String[]> dst = new HashMap<>();
+        for (Map.Entry<String, String> entry : src.entrySet()) {
+            dst.put(entry.getKey(), new String[]{entry.getValue()});
+        }
+        return dst;
+    }
+
     private List<Chapter> getChapterList(Document d, Map<String, String[]> chapterFeature) {
         if (d == null || chapterFeature == null)
             return null;
 //        判断id
         List<Chapter> chapterList = new ArrayList<>();
+        int currentcount = 0;
         if (chapterFeature.containsKey("id") && chapterFeature.get("id") != null) {
             for (String id : chapterFeature.get("id")) {
                 Element e = d.body().getElementById(id);
@@ -346,8 +509,9 @@ public class BaseBookFactory extends BookFactory {
                 if (chapters == null)
                     continue;
                 for (Element chapter : chapters) {
-                    Chapter c = new Chapter(chapter.attr("href"));
+                    Chapter c = new Chapter(chapter.baseUri() + chapter.attr("href"));
                     c.setTitle(chapter.text());
+                    c.setIndex(currentcount++);
                     chapterList.add(c);
                 }
                 return chapterList;
@@ -364,8 +528,9 @@ public class BaseBookFactory extends BookFactory {
                     if (chapters == null)
                         continue;
                     for (Element chapter : chapters) {
-                        Chapter c = new Chapter(chapter.attr("href"));
+                        Chapter c = new Chapter(chapter.baseUri() + chapter.attr("href"));
                         c.setTitle(chapter.text());
+                        c.setIndex(currentcount++);
                         chapterList.add(c);
                     }
                     return chapterList;
@@ -377,22 +542,47 @@ public class BaseBookFactory extends BookFactory {
         if (results == null)
             return null;
         for (Element chapter : results) {
-            Chapter c = new Chapter(chapter.attr("href"));
+            Chapter c = new Chapter(chapter.baseUri() + chapter.attr("href"));
             c.setTitle(chapter.text());
+            c.setIndex(currentcount++);
             chapterList.add(c);
         }
         return chapterList;
 
     }
 
-    private Chapter getChapter(String url
+    private Chapter getChapterDirect(String url, int index, Map<String, BookFactoryConfiguration> config) {
+        if (config == null)
+            return null;
+        for (Map.Entry<String, BookFactoryConfiguration> entry : config.entrySet()) {
+            if (entry == null)
+                continue;
+            String webUrl = entry.getValue().getWebUrl();
+            if (webUrl != null && url.contains(webUrl)) {
+                return getChapter(url, index, mapString2StringArry(entry.getValue().getChapter()), mapString2StringArry(entry.getValue().getTitle()));
+            }
+        }
+        return null;
+    }
+
+    private Chapter getChapter(String url, int index
             , Map<String, String[]> contentFeature
             , Map<String, String[]> titleFeature) {
-        if (url == null || !url.startsWith("http://"))
+        if (url == null
+                || !url.startsWith("http://")
+                || contentFeature == null
+                || contentFeature.isEmpty()
+                || titleFeature == null
+                || titleFeature.isEmpty())
             return null;
         try {
+            long time = System.currentTimeMillis();
             Document document = Jsoup.connect(url).get();
-            return parserChapterFromDocument(contentFeature, titleFeature, document);
+            Logger.i("download time",System.currentTimeMillis() - time+"ms");
+            time = System.currentTimeMillis();
+            Chapter chapter = parserChapterFromDocument(contentFeature, titleFeature, document);
+            Logger.i("parser time",System.currentTimeMillis() - time+"ms");
+            return chapter;
         } catch (HttpStatusException e) {
 //            爬虫被网站禁止，需要模拟真实环境
             if (e.getStatusCode() == 403) {
@@ -400,7 +590,10 @@ public class BaseBookFactory extends BookFactory {
                 System.out.printf("\nusing user-agent to cheat webservice");
                 try {
                     Document document = getDocumentWhen403(url);
-                    return parserChapterFromDocument(contentFeature, titleFeature, document);
+                    Chapter c = parserChapterFromDocument(contentFeature, titleFeature, document);
+                    if (c != null)
+                        c.setIndex(index);
+                    return c;
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 }
