@@ -1,1 +1,1 @@
-include ':app', ':readerview', ':JArcProgressBarLibrary', ':Jlibrary'
+include ':app', ':readerview',':Jlibrary'

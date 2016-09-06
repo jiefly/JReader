@@ -47,7 +47,7 @@ public class BaseBookFactory extends BookFactory {
     private static final String SODU_PREFIX = "http://www.soduso.com";
     public Set<String> resourceIgnore = new HashSet<>();
     public Set<String> webNoCoverList = new HashSet<>();
-    private final int cpuNum = Runtime.getRuntime().availableProcessors();
+    private final int cpuNum = 10;
     final Map<String, String[]> contentFeature = new HashMap<>();
     final Map<String, String[]> titleFeature = new HashMap<>();
     final Map<String, String[]> chapterFeature = new HashMap<>();
@@ -55,6 +55,10 @@ public class BaseBookFactory extends BookFactory {
     private String bookName;
     private BookManager mBookManager;
     Map<String, BookFactoryConfiguration> configManager = new HashMap<>();
+//    下载线程池，下载一个网页花费6s左右
+    private ExecutorService downloaderService = Executors.newFixedThreadPool(cpuNum);
+//    解析线程池，解析花费1s左右
+    private ExecutorService parserService = Executors.newFixedThreadPool(cpuNum/5);
 
     public BaseBookFactory() {
         initConfig();
@@ -661,7 +665,7 @@ public class BaseBookFactory extends BookFactory {
         return chapter;
     }
 
-    private String getRedirctsUrl(String url) throws IOException {
+    private String getDirectUrl(String url) throws IOException {
         String redirctUrl = null;
         HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
         connection.setInstanceFollowRedirects(false);
@@ -674,7 +678,7 @@ public class BaseBookFactory extends BookFactory {
 
     private BookInfo getBookUrlBySodu(BookInfo bookInfo) {
         try {
-            String redirctUrl = getRedirctsUrl(bookInfo.getBookLastUpdateUrl());
+            String redirctUrl = getDirectUrl(bookInfo.getBookLastUpdateUrl());
             if (redirctUrl != null && !" ".equals(redirctUrl)) {
                 if (!" ".equals(redirctUrl)) {
                     bookInfo.setBookLastUpdateUrl(redirctUrl);

@@ -143,11 +143,14 @@ public class JReader extends AppCompatActivity {
 
     public void vpToNextPage() {
         Logger.i("toNextPage");
-        Observable.just(getCurrentFragmentIndex()+1)
+        Observable.just(getCurrentFragmentIndex() + 1)
                 .filter(new Func1<Integer, Boolean>() {
                     @Override
                     public Boolean call(Integer integer) {
-                        return integer<=mFragmentReaders.size() - 1;
+                        if (integer <= mFragmentReaders.size() - 1)
+                            return true;
+                        showSnackbar("已经是最后一章了");
+                        return false;
                     }
                 }).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Integer>() {
             @Override
@@ -358,7 +361,7 @@ public class JReader extends AppCompatActivity {
     }
 
     private void initViewPager() {
-//        新建一本书章节的数的三分之一数量的fragment
+//        新建一本书章节的数大小数量的fragment
         int chapterNum = urlList.size();
 
         for (int i = 0; i < titleList.size(); i++) {
@@ -367,7 +370,6 @@ public class JReader extends AppCompatActivity {
             FragmentReader fragmentReader = new JReaderFragment(chapter, mPresentReader, textColor, 100.0f * (i + 1) / chapterNum);
             mFragmentReaders.add(fragmentReader);
         }
-
         FragmentPagerAdapter pagerAdapter = new JReaderFragmentPagerAdapter(getSupportFragmentManager());
         mIdJieReaderContentVp.setAdapter(pagerAdapter);
         mIdJieReaderContentVp.setOffscreenPageLimit(3);
@@ -521,8 +523,12 @@ public class JReader extends AppCompatActivity {
                     if (mDrawerLayout.isDrawerOpen(Gravity.LEFT))
                         return super.dispatchTouchEvent(ev);
                     return toogleScreenState();
-                } else if (ev.getX() > mScreenWidth * 5 / 6 && ev.getY() > mScreenHeight * 5 / 6) {
-                    mPresentReader.scrollDownToNextPage();
+                } else if (ev.getX() > mScreenWidth * 4 / 5 && ev.getY() > mScreenHeight * 4 / 5) {
+                    if (!mDrawerLayout.isDrawerOpen(Gravity.LEFT) && !mIdReaderBottomBar.isShown()) {
+                        mPresentReader.scrollDownToNextPage();
+                        return false;
+                    }
+
                 }
 
         }
@@ -707,6 +713,7 @@ public class JReader extends AppCompatActivity {
 
         @Override
         public Fragment getItem(int position) {
+
             return (Fragment) mFragmentReaders.get(position);
         }
 

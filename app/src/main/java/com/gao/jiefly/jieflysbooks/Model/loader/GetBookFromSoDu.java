@@ -3,7 +3,7 @@ package com.gao.jiefly.jieflysbooks.Model.loader;
 import android.util.Log;
 
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
-import com.gao.jiefly.jieflysbooks.Model.download.VolleyClient;
+import com.gao.jiefly.jieflysbooks.Model.downloader.VolleyClient;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnBookAddFromSoDuListener;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnBookImageGetListener;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnBookUpdateFromSoDuListener;

@@ -4,7 +4,7 @@ import android.app.Application;
 import android.test.ApplicationTestCase;
 import android.util.Log;
 
-import com.gao.jiefly.jieflysbooks.Model.download.VolleyClient;
+import com.gao.jiefly.jieflysbooks.Model.downloader.VolleyClient;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnDataStateListener;
 
 /**
