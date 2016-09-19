@@ -9,28 +9,28 @@ import java.util.Map;
  * Fighting_jiiiiie
  */
 public class BookFactoryConfiguration {
-    public static final String TITLE = "title";
-    public static final String AUTHOR = "author";
-    public static final String CHAPTER_LIST = "chapterList";
-    public static final String CHAPTER = "chapter";
-    public static final String TYPE = "type";
-    public static final String STATU = "statu";
-    public static final String SUBSCRICE = "subscribe";
-    public static final String NEW_CHAPTER = "newChapter";
-    public static final String WEB_NAME = "webName";
-    public static final String WEB_URL = "webUrl";
+    private static final String TITLE = "title";
+    private static final String AUTHOR = "author";
+    static final String CHAPTER_LIST = "chapterList";
+    private static final String CHAPTER = "chapter";
+    private static final String TYPE = "type";
+    private static final String STATU = "statu";
+    private static final String SUBSCRICE = "subscribe";
+    private static final String NEW_CHAPTER = "newChapter";
+    private static final String WEB_NAME = "webName";
+    private static final String WEB_URL = "webUrl";
 
-    Map<String, String> webName;
-    Map<String, String> title;
-    Map<String, String> author;
-    Map<String, String> chapterList;
-    Map<String, String> chapter;
-    Map<String, String> type;
-    Map<String, String> statu;
-    Map<String, String> subscribe;
-    Map<String, String> newChapter;
-    Map<String, String> webUrl;
-    static Map<String, Map<String, String>> config;
+    private Map<String, String> webName;
+    private Map<String, String> title;
+    private Map<String, String> author;
+    private Map<String, String> chapterList;
+    private Map<String, String> chapter;
+    private Map<String, String> type;
+    private Map<String, String> statu;
+    private Map<String, String> subscribe;
+    private Map<String, String> newChapter;
+    private Map<String, String> webUrl;
+    private static Map<String, Map<String, String>> config;
 
     public BookFactoryConfiguration() {
         config = new HashMap<>();

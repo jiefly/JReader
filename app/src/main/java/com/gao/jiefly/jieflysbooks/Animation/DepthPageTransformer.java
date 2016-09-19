@@ -6,7 +6,7 @@ import android.util.Log;
 import android.view.View;
 
 public class DepthPageTransformer implements ViewPager.PageTransformer {
-    private static float MIN_SCALE = 0.9f;
+    private static float MIN_SCALE = 0.8f;
 
     public void setNeedTransformer(boolean needTransformer) {
         isNeedTransformer = needTransformer;
@@ -18,7 +18,7 @@ public class DepthPageTransformer implements ViewPager.PageTransformer {
     @SuppressLint("NewApi")
     @Override
     public void transformPage(View view, float position) {
-        Log.e("transformPage","is nees transformer:"+isNeedTransformer);
+//        Log.e("transformPage","is nees transformer:"+isNeedTransformer);
         if (isNeedTransformer){
             int pageWidth = view.getWidth();
             if (position < -1) { // [-Infinity,-1)

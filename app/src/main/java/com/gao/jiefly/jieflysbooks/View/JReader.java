@@ -17,6 +17,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -373,7 +374,7 @@ public class JReader extends AppCompatActivity {
         FragmentPagerAdapter pagerAdapter = new JReaderFragmentPagerAdapter(getSupportFragmentManager());
         mIdJieReaderContentVp.setAdapter(pagerAdapter);
         mIdJieReaderContentVp.setOffscreenPageLimit(3);
-
+        mIdJieReaderContentVp.setPageTransformer(false,new DepthPageTransformer());
         if (mPresentReader.getBackgroundColor() != 0)
             mIdJieReaderContentVp.setBackgroundResource(mPresentReader.getBackgroundColor());
 
@@ -472,6 +473,17 @@ public class JReader extends AppCompatActivity {
             cancelFullScreen();
         }
         return false;
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+        // 音量减小
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+                mPresentReader.scrollDownToNextPage();
+                return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     private void getScreenSize() {

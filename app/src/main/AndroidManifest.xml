@@ -16,6 +16,7 @@
 		android:theme="@style/AppTheme">
 		<activity
 			android:name=".View.Main"
+			android:launchMode="singleInstance"
 			android:screenOrientation="portrait"
 			android:theme="@style/ImageTranslucentTheme">
 			<intent-filter>

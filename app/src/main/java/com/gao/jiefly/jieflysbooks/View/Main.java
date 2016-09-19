@@ -89,6 +89,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         Logger.init("main");
+        Logger.d("onCreatTime:"+System.currentTimeMillis());
 //        new GetBookFromSoDu().getBookCoverUrl("寒门状元", "秋水轩", new OnBookImageGetListener() {
 //            @Override
 //            public void onSuccess(String url) {
@@ -153,7 +154,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
             startBackGroundUpdateService();
         }
         Calendar cal = Calendar.getInstance();
-        if (ApplicationLoader.getIntValue(ApplicationLoader.CURRENT_DAY) != cal.get(Calendar.DATE))
+        if (ApplicationLoader.getIntValue(ApplicationLoader.CURRENT_DAY) != (int) cal.get(Calendar.DATE))
             ApplicationLoader.save(ApplicationLoader.DAILY_READ_TIME, 0);
         ApplicationLoader.save(ApplicationLoader.CURRENT_DAY, cal.get(Calendar.DATE));
         ButterKnife.inject(this);
@@ -339,8 +340,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
             mIdMainAddBookFab.setColorPressedResId(R.color.theme_green1);
             mIdMainAddBookFab.setImageResource(R.drawable.plus_icon);
         }
-
-
+        Logger.e("onCreate endTime:"+System.currentTimeMillis());
     }
 
     private void startBackGroundUpdateService() {

@@ -45,8 +45,8 @@ import java.util.concurrent.TimeUnit;
 public class BaseBookFactory extends BookFactory {
     private static final String TAG = BaseBookFactory.class.getSimpleName();
     private static final String SODU_PREFIX = "http://www.soduso.com";
-    public Set<String> resourceIgnore = new HashSet<>();
-    public Set<String> webNoCoverList = new HashSet<>();
+    private Set<String> resourceIgnore = new HashSet<>();
+    private Set<String> webNoCoverList = new HashSet<>();
     private final int cpuNum = 10;
     final Map<String, String[]> contentFeature = new HashMap<>();
     final Map<String, String[]> titleFeature = new HashMap<>();
@@ -77,7 +77,7 @@ public class BaseBookFactory extends BookFactory {
         chapterFeature.put("class", new String[]{"chapterlist"});
     }
 
-    protected void initConfig() {
+    private void initConfig() {
         configManager.put("爱上中文", new BookFactoryConfiguration()
                 .setWebName("爱上中文")
                 .setWebUrl("http://www.aszw520.com")
@@ -755,7 +755,7 @@ public class BaseBookFactory extends BookFactory {
     }
 
     //    将文字转码
-    public String UrlEncoder(String value, String charsetName) {
+    private String UrlEncoder(String value, String charsetName) {
         String reslut = null;
         try {
             reslut = URLEncoder.encode(value, charsetName);
