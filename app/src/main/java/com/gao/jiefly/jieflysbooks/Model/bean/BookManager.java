@@ -41,6 +41,7 @@ public class BookManager implements Parcelable {
     private boolean hasUpdate;
     private int lastReadIndex;
     private String userChooseResourse;
+    private String userChooseResourseName;
     private int[] userMarkers;
     private List<Chapter> chapters = new ArrayList<>();
     private Map<String, String> resourse = new HashMap<>();
@@ -57,6 +58,7 @@ public class BookManager implements Parcelable {
         hasUpdate = in.readInt() == 1;
         lastReadIndex = in.readInt();
         userChooseResourse = in.readString();
+        userChooseResourseName = in.readString();
         in.readIntArray(userMarkers);
         in.readList(chapters, Chapter.class.getClassLoader());
         in.readMap(resourse, String.class.getClassLoader());
@@ -82,6 +84,7 @@ public class BookManager implements Parcelable {
         dest.writeInt(isLocal ? 1 : 0);
         dest.writeInt(hasUpdate ? 1 : 0);
         dest.writeInt(lastReadIndex);
+        dest.writeString(userChooseResourseName);
         dest.writeString(userChooseResourse);
         dest.writeIntArray(userMarkers);
         dest.writeList(chapters);
@@ -194,12 +197,41 @@ public class BookManager implements Parcelable {
     }
 
     public String getUserChooseResourse() {
+        if (userChooseResourseName != null && userChooseResourse != null) {
+            return userChooseResourse;
+        }
+        if (userChooseResourse == null && userChooseResourseName != null) {
+            userChooseResourse = resourse.get(userChooseResourseName);
+        } else if (userChooseResourse == null) {
+            Map.Entry<String, String> value = resourse.entrySet().iterator().next();
+            userChooseResourseName = value.getKey();
+            userChooseResourse = value.getValue();
+        }
         return userChooseResourse;
     }
 
     public void setUserChooseResourse(String userChooseResourse) {
         this.userChooseResourse = userChooseResourse;
     }
+
+    public String getUserChooseResourseName() {
+        if (userChooseResourseName != null && userChooseResourse != null) {
+            return userChooseResourseName;
+        }
+        if (userChooseResourse == null && userChooseResourseName != null) {
+            userChooseResourse = resourse.get(userChooseResourseName);
+        } else if (userChooseResourse == null) {
+            Map.Entry<String, String> value = resourse.entrySet().iterator().next();
+            userChooseResourseName = value.getKey();
+            userChooseResourse = value.getValue();
+        }
+        return userChooseResourseName;
+    }
+
+    public void setUserChooseResourseName(String userChooseResourseName) {
+        this.userChooseResourseName = userChooseResourseName;
+    }
+
     public int[] getUserMarkers() {
         return userMarkers;
     }

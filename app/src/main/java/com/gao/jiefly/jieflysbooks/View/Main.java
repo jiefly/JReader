@@ -33,7 +33,12 @@ import android.widget.Toast;
 
 import com.daimajia.numberprogressbar.NumberProgressBar;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
+import com.gao.jiefly.jieflysbooks.Model.bean.BookManager;
+import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnBookListener;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnDataStateListener;
+import com.gao.jiefly.jieflysbooks.Model.loader.BaseBookFactory;
+import com.gao.jiefly.jieflysbooks.Model.loader.BookFactory;
 import com.gao.jiefly.jieflysbooks.Present.PresentMain;
 import com.gao.jiefly.jieflysbooks.R;
 import com.gao.jiefly.jieflysbooks.Service.UpdateBookService;
@@ -130,7 +135,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
 //            }
 //        }).start();
         /*final long time = System.currentTimeMillis();
-        new BaseBookFactory().setBookSearchUrl("http://www.soduso.com/search/index.aspx?key=").getBookByName("五行天", new OnBookAddListener() {
+        new BaseBookFactory().setBookSearchUrl("http://www.soduso.com/search/index.aspx?key=").getBookByName("五行天", new OnBookListener() {
             @Override
             public void onBookBaseInfoGetSuccess(BookManager book) {
 //                Logger.json(new Gson().toJson(book));
@@ -148,6 +153,58 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
 
             }
         });*/
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                BookFactory factory = new BaseBookFactory()
+                        .setBookSearchUrl("http://www.soduso.com/search/index.aspx?key=");
+                BookManager m = factory.getBookByName("飞天");
+                Chapter chapter = factory.getChapter(m.getChapters().get(1));
+                final long time = System.currentTimeMillis();
+                factory.updateBook(m, new OnBookListener() {
+                    @Override
+                    public void onBookBaseInfoGetSuccess(BookManager book) {
+
+                    }
+
+                    @Override
+                    public void onBookCompleteInfoGetSuccess(BookManager book) {
+
+                    }
+
+                    @Override
+                    public void onBookAddFailed(Exception e) {
+
+                    }
+
+                    @Override
+                    public void onBookUpdateSuccess(BookManager book) {
+                        Logger.e("updateTime:"+(System.currentTimeMillis() - time)+"ms");
+                    }
+
+                    @Override
+                    public void onBookUpdateFailed(Exception e) {
+
+                    }
+
+                    @Override
+                    public void onBookDownloadSuccess(BookManager book) {
+
+                    }
+
+                    @Override
+                    public void onBookDownloadUpdate(int count) {
+
+                    }
+
+                    @Override
+                    public void onBookDownloadFailed(Exception e) {
+
+                    }
+                });
+                Logger.e(chapter.getContent());
+            }
+        }).start();
         mPresentMain = PresentMain.getInstance(getApplicationContext(), this);
 //        mPresentMain.bindUpdateBookService(Main.this);
         if (mPresentMain.isNeedUpdateBackgrond) {
