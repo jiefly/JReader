@@ -6,7 +6,7 @@ import android.util.Log;
 import android.util.LruCache;
 
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
-import com.gao.jiefly.jieflysbooks.Model.download.VolleyClient;
+import com.gao.jiefly.jieflysbooks.Model.downloader.VolleyClient;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnChapterCacheListener;
 import com.gao.jiefly.jieflysbooks.Utils.Utils;
 

@@ -3,6 +3,7 @@ package com.gao.jiefly.jieflysbooks.Utils;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 public class ApplicationLoader extends Application {
 
@@ -57,12 +58,13 @@ public class ApplicationLoader extends Application {
 
     @Override
     public void onCreate() {
+        long time = System.currentTimeMillis();
         super.onCreate();
         //        初始化SharedPrefereces
         mSharedPreferences = getSharedPreferences("localConfig", Context.MODE_PRIVATE);
         mEditor = mSharedPreferences.edit();
         applicationContext = getApplicationContext();
-
+        Log.e("Application","create time:"+(System.currentTimeMillis() - time)+"ms");
     }
 
     public static void save(String key, String value) {

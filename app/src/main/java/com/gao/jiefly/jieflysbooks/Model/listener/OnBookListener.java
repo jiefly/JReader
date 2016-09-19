@@ -7,8 +7,13 @@ import com.gao.jiefly.jieflysbooks.Model.bean.BookManager;
  * Email:jiefly1993@gmail.com
  * Fighting_jiiiiie
  */
-public interface OnBookAddListener {
+public interface OnBookListener {
     void onBookBaseInfoGetSuccess(BookManager book);
     void onBookCompleteInfoGetSuccess(BookManager book);
     void onBookAddFailed(Exception e);
+    void onBookUpdateSuccess(BookManager book);
+    void onBookUpdateFailed(Exception e);
+    void onBookDownloadSuccess(BookManager book);
+    void onBookDownloadUpdate(int count);
+    void onBookDownloadFailed(Exception e);
 }

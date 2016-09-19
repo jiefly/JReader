@@ -1,4 +1,4 @@
-package com.gao.jiefly.jieflysbooks.Model.download;
+package com.gao.jiefly.jieflysbooks.Model.downloader;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.Response;

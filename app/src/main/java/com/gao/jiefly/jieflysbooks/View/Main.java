@@ -34,16 +34,18 @@ import android.widget.Toast;
 import com.daimajia.numberprogressbar.NumberProgressBar;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.bean.BookManager;
-import com.gao.jiefly.jieflysbooks.Model.listener.OnBookAddListener;
+import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnBookListener;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnDataStateListener;
 import com.gao.jiefly.jieflysbooks.Model.loader.BaseBookFactory;
+import com.gao.jiefly.jieflysbooks.Model.loader.BookFactory;
 import com.gao.jiefly.jieflysbooks.Present.PresentMain;
 import com.gao.jiefly.jieflysbooks.R;
 import com.gao.jiefly.jieflysbooks.Service.UpdateBookService;
 import com.gao.jiefly.jieflysbooks.Utils.AndroidUtilities;
 import com.gao.jiefly.jieflysbooks.Utils.ApplicationLoader;
-import com.google.gson.Gson;
 import com.melnykov.fab.FloatingActionButton;
+import com.orhanobut.logger.Logger;
 import com.squareup.picasso.Picasso;
 
 import java.net.MalformedURLException;
@@ -87,11 +89,12 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
     public static final int SCAN_FLAG = 1;
     CheckBox checkBox;
     TextView mTextView;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        Logger.init("main");
+        Logger.d("onCreatTime:"+System.currentTimeMillis());
 //        new GetBookFromSoDu().getBookCoverUrl("寒门状元", "秋水轩", new OnBookImageGetListener() {
 //            @Override
 //            public void onSuccess(String url) {
@@ -131,32 +134,84 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
 //                Log.e("花费时间",System.currentTimeMillis() - time+"ms");
 //            }
 //        }).start();
-        final long time = System.currentTimeMillis();
-        new BaseBookFactory().setBookSearchUrl("http://www.soduso.com/search/index.aspx?key=").getBookByName("完美世界", new OnBookAddListener() {
+        /*final long time = System.currentTimeMillis();
+        new BaseBookFactory().setBookSearchUrl("http://www.soduso.com/search/index.aspx?key=").getBookByName("五行天", new OnBookListener() {
             @Override
             public void onBookBaseInfoGetSuccess(BookManager book) {
-                Log.e("manger",new Gson().toJson(book));
-                Log.e("花费时间Base",System.currentTimeMillis() - time+"ms");
+//                Logger.json(new Gson().toJson(book));
+//                Logger.e("花费时间Base",System.currentTimeMillis() - time+"ms");
             }
 
             @Override
             public void onBookCompleteInfoGetSuccess(BookManager book) {
-                Log.e("manger",new Gson().toJson(book));
-                Log.e("花费时间Complete",System.currentTimeMillis() - time+"ms");
+//                Logger.json(new Gson().toJson(book));
+//                Logger.e("花费时间Complete",System.currentTimeMillis() - time+"ms");
             }
 
             @Override
             public void onBookAddFailed(Exception e) {
 
             }
-        });
+        });*/
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                BookFactory factory = new BaseBookFactory()
+                        .setBookSearchUrl("http://www.soduso.com/search/index.aspx?key=");
+                BookManager m = factory.getBookByName("飞天");
+                Chapter chapter = factory.getChapter(m.getChapters().get(1));
+                final long time = System.currentTimeMillis();
+                factory.updateBook(m, new OnBookListener() {
+                    @Override
+                    public void onBookBaseInfoGetSuccess(BookManager book) {
+
+                    }
+
+                    @Override
+                    public void onBookCompleteInfoGetSuccess(BookManager book) {
+
+                    }
+
+                    @Override
+                    public void onBookAddFailed(Exception e) {
+
+                    }
+
+                    @Override
+                    public void onBookUpdateSuccess(BookManager book) {
+                        Logger.e("updateTime:"+(System.currentTimeMillis() - time)+"ms");
+                    }
+
+                    @Override
+                    public void onBookUpdateFailed(Exception e) {
+
+                    }
+
+                    @Override
+                    public void onBookDownloadSuccess(BookManager book) {
+
+                    }
+
+                    @Override
+                    public void onBookDownloadUpdate(int count) {
+
+                    }
+
+                    @Override
+                    public void onBookDownloadFailed(Exception e) {
+
+                    }
+                });
+                Logger.e(chapter.getContent());
+            }
+        }).start();
         mPresentMain = PresentMain.getInstance(getApplicationContext(), this);
 //        mPresentMain.bindUpdateBookService(Main.this);
         if (mPresentMain.isNeedUpdateBackgrond) {
             startBackGroundUpdateService();
         }
         Calendar cal = Calendar.getInstance();
-        if (ApplicationLoader.getIntValue(ApplicationLoader.CURRENT_DAY) != cal.get(Calendar.DATE))
+        if (ApplicationLoader.getIntValue(ApplicationLoader.CURRENT_DAY) != (int) cal.get(Calendar.DATE))
             ApplicationLoader.save(ApplicationLoader.DAILY_READ_TIME, 0);
         ApplicationLoader.save(ApplicationLoader.CURRENT_DAY, cal.get(Calendar.DATE));
         ButterKnife.inject(this);
@@ -342,8 +397,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
             mIdMainAddBookFab.setColorPressedResId(R.color.theme_green1);
             mIdMainAddBookFab.setImageResource(R.drawable.plus_icon);
         }
-
-
+        Logger.e("onCreate endTime:"+System.currentTimeMillis());
     }
 
     private void startBackGroundUpdateService() {

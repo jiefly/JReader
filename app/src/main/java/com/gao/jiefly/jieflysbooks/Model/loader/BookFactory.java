@@ -2,7 +2,8 @@ package com.gao.jiefly.jieflysbooks.Model.loader;
 
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.bean.BookManager;
-import com.gao.jiefly.jieflysbooks.Model.listener.OnBookAddListener;
+import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnBookListener;
 
 import java.util.List;
 
@@ -12,12 +13,21 @@ import java.util.List;
  * Fighting_jiiiiie
  */
 public abstract class BookFactory {
-    protected String webUrl;
-    protected String searchUrl;
-    public OnBookAddListener mListener;
+    private String webUrl;
+    String searchUrl;
+    OnBookListener mListener;
 
     public abstract BookManager getBookByName(String bookName);
-    public abstract void getBookByName(String bookName,OnBookAddListener listener);
+
+    public abstract Chapter getChapter(Chapter chapter);
+
+    public abstract Chapter getChapter(String url);
+
+    public abstract void updateBook(BookManager bookManager,OnBookListener listener);
+
+    public abstract void getBookByName(String bookName, OnBookListener listener);
+
+    public abstract void downloadAll(String bookName, OnBookListener listener);
 
     public abstract List<Book> getBooksByAuthor(String author);
 
@@ -28,12 +38,12 @@ public abstract class BookFactory {
         return this;
     }
 
-    public BookFactory setBookAddListener(OnBookAddListener mListener){
+    public BookFactory setBookAddListener(OnBookListener mListener) {
         this.mListener = mListener;
         return this;
     }
 
-    public BookFactory setBookSearchUrl(String searchUrl){
+    public BookFactory setBookSearchUrl(String searchUrl) {
         this.searchUrl = searchUrl;
         return this;
     }

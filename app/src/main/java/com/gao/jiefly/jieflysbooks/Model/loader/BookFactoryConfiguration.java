@@ -9,30 +9,34 @@ import java.util.Map;
  * Fighting_jiiiiie
  */
 public class BookFactoryConfiguration {
-    public static final String TITLE = "title";
-    public static final String AUTHOR = "author";
-    public static final String CHAPTER_LIST = "chapterList";
-    public static final String CHAPTER = "chapter";
-    public static final String TYPE = "type";
-    public static final String STATU = "statu";
-    public static final String SUBSCRICE = "subscribe";
-    public static final String NEW_CHAPTER = "newChapter";
-    public static final String WEB_NAME = "webName";
+    private static final String TITLE = "title";
+    private static final String AUTHOR = "author";
+    static final String CHAPTER_LIST = "chapterList";
+    private static final String CHAPTER = "chapter";
+    private static final String TYPE = "type";
+    private static final String STATU = "statu";
+    private static final String SUBSCRICE = "subscribe";
+    private static final String NEW_CHAPTER = "newChapter";
+    private static final String WEB_NAME = "webName";
+    private static final String WEB_URL = "webUrl";
 
-    Map<String, String> webName;
-    Map<String, String> title;
-    Map<String, String> author;
-    Map<String, String> chapterList;
-    Map<String, String> chapter;
-    Map<String, String> type;
-    Map<String, String> statu;
-    Map<String, String> subscribe;
-    Map<String, String> newChapter;
-    static Map<String, Map<String, String>> config;
+    private Map<String, String> webName;
+    private Map<String, String> title;
+    private Map<String, String> author;
+    private Map<String, String> chapterList;
+    private Map<String, String> chapter;
+    private Map<String, String> type;
+    private Map<String, String> statu;
+    private Map<String, String> subscribe;
+    private Map<String, String> newChapter;
+    private Map<String, String> webUrl;
+    private static Map<String, Map<String, String>> config;
 
     public BookFactoryConfiguration() {
         config = new HashMap<>();
         title = new HashMap<>();
+        title.put("tag","h1");
+        webUrl = new HashMap<>();
         author = new HashMap<>();
         chapterList = new HashMap<>();
         chapter = new HashMap<>();
@@ -42,10 +46,17 @@ public class BookFactoryConfiguration {
         newChapter = new HashMap<>();
         webName = new HashMap<>();
     }
-    public BookFactoryConfiguration setWebName(String webName){
-        this.webName.put(WEB_NAME,webName);
+
+    public BookFactoryConfiguration setWebName(String webName) {
+        this.webName.put(WEB_NAME, webName);
         return this;
     }
+
+    public BookFactoryConfiguration setWebUrl(String webUrl) {
+        this.webUrl.put(WEB_URL, webUrl);
+        return this;
+    }
+
     public Map<String, Map<String, String>> getConfig() {
         if (webName.isEmpty())
             return null;
@@ -70,6 +81,17 @@ public class BookFactoryConfiguration {
 
 
     public BookFactoryConfiguration setTitle(String key, String value) {
+        title.put(key, value);
+        return this;
+    }
+
+    public String getWebUrl() {
+        if (webUrl.isEmpty())
+            return null;
+        return webUrl.get(WEB_URL);
+    }
+
+    public BookFactoryConfiguration setSuscribe(String key, String value) {
         title.put(key, value);
         return this;
     }
@@ -104,5 +126,39 @@ public class BookFactoryConfiguration {
         return this;
     }
 
+    public Map<String, String> getWebName() {
+        return webName;
+    }
 
+    public Map<String, String> getTitle() {
+        return title;
+    }
+
+    public Map<String, String> getAuthor() {
+        return author;
+    }
+
+    public Map<String, String> getChapterList() {
+        return chapterList;
+    }
+
+    public Map<String, String> getChapter() {
+        return chapter;
+    }
+
+    public Map<String, String> getType() {
+        return type;
+    }
+
+    public Map<String, String> getStatu() {
+        return statu;
+    }
+
+    public Map<String, String> getSubscribe() {
+        return subscribe;
+    }
+
+    public Map<String, String> getNewChapter() {
+        return newChapter;
+    }
 }

@@ -44,13 +44,12 @@ public class PresentMain implements OnDataModelListener {
     private List<Book> mOnLineBookList;
     private static PresentMain instance = null;
     private AdvanceDataModel mAdvanceDataModel;
-    private Service mService;
+//    private Service mService;
     private boolean isBound = false;
     public boolean isNeedUpdateBackgrond = true;
-    View mView;
-    private Context mContext;
+    private View mView;
     private UpdateBookService.UpdateBookBinder mBookBinder;
-    public ServiceConnection mServiceConnection = new ServiceConnection() {
+    private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mBookBinder = (UpdateBookService.UpdateBookBinder) service;
@@ -64,16 +63,13 @@ public class PresentMain implements OnDataModelListener {
     };
 
     private PresentMain(Context context, View view) {
-        mContext = context;
         mAdvanceDataModel = AdvanceDataModel.build(context, this, OnDataModelListener.TYPE_ACTIVIT_LISTENER);
         mView = view;
         if (mAdvanceDataModel.getBookList() != null)
             mBookList.addAll(mAdvanceDataModel.getBookList());
         if (ApplicationLoader.getIntValue(ApplicationLoader.BOOK_ORDER) == ApplicationLoader.SORT_BY_UPDATE_TIME)
             sortListByUpdateTime(mBookList);
-        else {
-//            DONothing
-        }
+
         isNeedUpdateBackgrond = ApplicationLoader.getBooleanValue(ApplicationLoader.IS_NEED_UPDATE_BG);
     }
 
@@ -117,7 +113,7 @@ public class PresentMain implements OnDataModelListener {
             return;
         Intent intent = new Intent(context, UpdateBookService.class);
         isBound = context.bindService(intent, mServiceConnection, Service.BIND_AUTO_CREATE);
-        if (isBound) Log.e("bind", "bind success:" + isBound);
+//        if (isBound) Log.e("bind", "bind success:" + isBound);
     }
 
     //    在前台不可见的时候取消绑定
@@ -207,7 +203,9 @@ public class PresentMain implements OnDataModelListener {
                     } catch (MalformedURLException e) {
                         e.printStackTrace();
                     }
-                    mAdvanceDataModel.updateBookHasUpdate(book.getBookName(), false);
+                    if (book != null) {
+                        mAdvanceDataModel.updateBookHasUpdate(book.getBookName(), false);
+                    }
                     mView.readBook(book);
                     setUpdateFlag(false);
                 }
@@ -215,7 +213,7 @@ public class PresentMain implements OnDataModelListener {
         }
     }
 
-    Map<Integer, Integer> cacheCountMap = new HashMap<>();
+    private Map<Integer, Integer> cacheCountMap = new HashMap<>();
 
     //    缓存所有章节
     public void cacheAllChapter(final int position) {
@@ -230,36 +228,6 @@ public class PresentMain implements OnDataModelListener {
         }
         mView.showSnackbar("后台缓存中...");
         cacheCountMap.put(position, 0);
-        /*new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Book book = mBookList.get(position);
-                try {
-                    List<String> urls = Utils.list2ChapterList(mAdvanceDataModel.getChapterList(book.getBookName())).getChapterUrlList();
-                    if (urls != null) {
-                        final int finalTotle = urls.size();
-                        mAdvanceDataModel.cacheChapterFromList(urls, new OnChapterCacheListener() {
-                            @Override
-                            public void onSuccess() {
-                                int i = cacheCountMap.get(position);
-                                cacheCountMap.put(position, i++);
-                                if (i > finalTotle - 2) {
-                                    mBookList.get(position).setCached(true);
-
-                                }
-                            }
-
-                            @Override
-                            public void onFailed(String url) {
-                                mView.showSnackbar("缓存失败");
-                            }
-                        });
-                    }
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();*/
         Observable.just(position)
                 .observeOn(Schedulers.io())
                 .map(new Func1<Integer, List<String>>() {
@@ -285,36 +253,34 @@ public class PresentMain implements OnDataModelListener {
                         final NumberProgressBar numberProgressBar = mView.getViewHolder(position).getNumberProgressBar();
                         numberProgressBar.setMax(chaptersUrlList.size() - 1);
                         numberProgressBar.setProgress(0);
-                        if (chaptersUrlList != null) {
-                            final List<String> finalChaptersUrlList = chaptersUrlList;
-                            mAdvanceDataModel.cacheChapterFromList(chaptersUrlList, new OnChapterCacheListener() {
-                                @Override
-                                public void onSuccess() {
-                                    Observable.just(cacheCountMap.get(position))
-                                            .subscribeOn(AndroidSchedulers.mainThread())
-                                            .subscribe(new Action1<Integer>() {
-                                                @Override
-                                                public void call(Integer integer) {
-                                                    cacheCountMap.put(position, integer + 1);
-                                                    numberProgressBar.setProgress(integer + 1);
-                                                    if (!numberProgressBar.isShown())
-                                                        numberProgressBar.setVisibility(android.view.View.VISIBLE);
-                                                }
-                                            });
-                                    if (cacheCountMap.get(position) >= finalChaptersUrlList.size() - 1) {
-                                        mBookList.get(position).setCached(true);
-                                        numberProgressBar.setVisibility(android.view.View.INVISIBLE);
-                                        mAdvanceDataModel.setBookIsCached(mBookList.get(position));
-                                        mView.showSnackbar("缓存完毕");
-                                    }
+                        final List<String> finalChaptersUrlList = chaptersUrlList;
+                        mAdvanceDataModel.cacheChapterFromList(chaptersUrlList, new OnChapterCacheListener() {
+                            @Override
+                            public void onSuccess() {
+                                Observable.just(cacheCountMap.get(position))
+                                        .subscribeOn(AndroidSchedulers.mainThread())
+                                        .subscribe(new Action1<Integer>() {
+                                            @Override
+                                            public void call(Integer integer) {
+                                                cacheCountMap.put(position, integer + 1);
+                                                numberProgressBar.setProgress(integer + 1);
+                                                if (!numberProgressBar.isShown())
+                                                    numberProgressBar.setVisibility(android.view.View.VISIBLE);
+                                            }
+                                        });
+                                if (cacheCountMap.get(position) >= finalChaptersUrlList.size() - 1) {
+                                    mBookList.get(position).setCached(true);
+                                    numberProgressBar.setVisibility(android.view.View.INVISIBLE);
+                                    mAdvanceDataModel.setBookIsCached(mBookList.get(position));
+                                    mView.showSnackbar("缓存完毕");
                                 }
+                            }
 
-                                @Override
-                                public void onFailed(String url) {
+                            @Override
+                            public void onFailed(String url) {
 
-                                }
-                            });
-                        }
+                            }
+                        });
                     }
                 });
     }
@@ -354,7 +320,7 @@ public class PresentMain implements OnDataModelListener {
         Log.e("updateBook", "更新书籍完毕");
     }
 
-    int countUpdate = 0;
+    private int countUpdate = 0;
 
     @Override
     public void onBookUpdateFailed() {

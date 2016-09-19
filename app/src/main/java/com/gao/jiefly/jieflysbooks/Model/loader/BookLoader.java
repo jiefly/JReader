@@ -9,7 +9,7 @@ import android.util.Log;
 import com.gao.jiefly.jieflysbooks.Model.CustomDatabaseHelper;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
-import com.gao.jiefly.jieflysbooks.Model.download.BaseHttpURLClient;
+import com.gao.jiefly.jieflysbooks.Model.downloader.BaseHttpURLClient;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnBookImageGetListener;
 import com.gao.jiefly.jieflysbooks.Utils.ApplicationLoader;
 import com.gao.jiefly.jieflysbooks.Utils.Utils;

@@ -6,6 +6,7 @@ import com.gao.jiefly.jieflysbooks.Model.AdvanceDataModel;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnChapterCacheListener;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnMoveNextChapterListener;
 import com.gao.jiefly.jieflysbooks.R;
 import com.gao.jiefly.jieflysbooks.Utils.ApplicationLoader;
 import com.gao.jiefly.jieflysbooks.View.JReader;
@@ -20,7 +21,7 @@ import java.util.TimerTask;
  * Email:jiefly1993@gmail.com
  * Fighting_jiiiiie
  */
-public class PresentReader implements  OnChapterCacheListener {
+public class PresentReader implements  OnChapterCacheListener, OnMoveNextChapterListener {
     private static final String TAG = "PresentReader";
     public static final int NULL_BOOK_ERROR = 0x001;
     public static final int NULL_CHAPTER_LIST_ERROR = 0x010;
@@ -92,7 +93,12 @@ public class PresentReader implements  OnChapterCacheListener {
         return result;
     }
 
-
+    /*
+    * 点击右下角向下滑动一页的距离
+    * */
+    public void scrollDownToNextPage(){
+        view.scrollDownToNextPage(this);
+    }
     /*
     * 退出全屏模式
     * */
@@ -314,4 +320,8 @@ public class PresentReader implements  OnChapterCacheListener {
         return mHour + ":" + mMinutes;
     }
 
+    @Override
+    public void onNextChapter() {
+        view.vpToNextPage();
+    }
 }

@@ -34,13 +34,14 @@ public class BookManager implements Parcelable {
     private String lastUpdateStr;
     private Date lastUpdateDate;
     private String type;
-    private List<String > covers = new ArrayList<>();
+    private List<String> covers = new ArrayList<>();
     private String statu;
     private boolean isLocal;
     private boolean isCached;
     private boolean hasUpdate;
     private int lastReadIndex;
     private String userChooseResourse;
+    private String userChooseResourseName;
     private int[] userMarkers;
     private List<Chapter> chapters = new ArrayList<>();
     private Map<String, String> resourse = new HashMap<>();
@@ -50,13 +51,14 @@ public class BookManager implements Parcelable {
         author = in.readString();
         lastUpdateStr = in.readString();
         type = in.readString();
-        in.readList(covers,String.class.getClassLoader());
+        in.readList(covers, String.class.getClassLoader());
         statu = in.readString();
         isCached = in.readInt() == 1;
         isLocal = in.readInt() == 1;
         hasUpdate = in.readInt() == 1;
         lastReadIndex = in.readInt();
         userChooseResourse = in.readString();
+        userChooseResourseName = in.readString();
         in.readIntArray(userMarkers);
         in.readList(chapters, Chapter.class.getClassLoader());
         in.readMap(resourse, String.class.getClassLoader());
@@ -82,6 +84,7 @@ public class BookManager implements Parcelable {
         dest.writeInt(isLocal ? 1 : 0);
         dest.writeInt(hasUpdate ? 1 : 0);
         dest.writeInt(lastReadIndex);
+        dest.writeString(userChooseResourseName);
         dest.writeString(userChooseResourse);
         dest.writeIntArray(userMarkers);
         dest.writeList(chapters);
@@ -194,11 +197,39 @@ public class BookManager implements Parcelable {
     }
 
     public String getUserChooseResourse() {
+        if (userChooseResourseName != null && userChooseResourse != null) {
+            return userChooseResourse;
+        }
+        if (userChooseResourse == null && userChooseResourseName != null) {
+            userChooseResourse = resourse.get(userChooseResourseName);
+        } else if (userChooseResourse == null) {
+            Map.Entry<String, String> value = resourse.entrySet().iterator().next();
+            userChooseResourseName = value.getKey();
+            userChooseResourse = value.getValue();
+        }
         return userChooseResourse;
     }
 
     public void setUserChooseResourse(String userChooseResourse) {
         this.userChooseResourse = userChooseResourse;
+    }
+
+    public String getUserChooseResourseName() {
+        if (userChooseResourseName != null && userChooseResourse != null) {
+            return userChooseResourseName;
+        }
+        if (userChooseResourse == null && userChooseResourseName != null) {
+            userChooseResourse = resourse.get(userChooseResourseName);
+        } else if (userChooseResourse == null) {
+            Map.Entry<String, String> value = resourse.entrySet().iterator().next();
+            userChooseResourseName = value.getKey();
+            userChooseResourse = value.getValue();
+        }
+        return userChooseResourseName;
+    }
+
+    public void setUserChooseResourseName(String userChooseResourseName) {
+        this.userChooseResourseName = userChooseResourseName;
     }
 
     public int[] getUserMarkers() {
@@ -215,6 +246,14 @@ public class BookManager implements Parcelable {
 
     public void setChapters(List<Chapter> chapters) {
         this.chapters = chapters;
+    }
+
+    public void addChapter(Chapter c) {
+        if (c != null) {
+
+            chapters.add(c);
+        }
+
     }
 
     public Map<String, String> getResourse() {

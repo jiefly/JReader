@@ -17,6 +17,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -40,8 +41,10 @@ import com.gao.jiefly.jieflysbooks.Animation.DepthPageTransformer;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
 import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnItemClickListener;
+import com.gao.jiefly.jieflysbooks.Model.listener.OnMoveNextChapterListener;
 import com.gao.jiefly.jieflysbooks.Present.PresentReader;
 import com.gao.jiefly.jieflysbooks.R;
+import com.orhanobut.logger.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +56,7 @@ import butterknife.OnClick;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class JReader extends AppCompatActivity {
@@ -136,6 +140,34 @@ public class JReader extends AppCompatActivity {
         initLeftMenuContent();
         initAnimation();
         initpop();
+    }
+
+    public void vpToNextPage() {
+        Logger.i("toNextPage");
+        Observable.just(getCurrentFragmentIndex() + 1)
+                .filter(new Func1<Integer, Boolean>() {
+                    @Override
+                    public Boolean call(Integer integer) {
+                        if (integer <= mFragmentReaders.size() - 1)
+                            return true;
+                        showSnackbar("已经是最后一章了");
+                        return false;
+                    }
+                }).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Integer>() {
+            @Override
+            public void call(Integer integer) {
+                mIdJieReaderContentVp.setCurrentItem(getCurrentFragmentIndex() + 1, true);
+            }
+        });
+
+    }
+
+    public int getCurrentFragmentIndex() {
+        return mIdJieReaderContentVp.getCurrentItem();
+    }
+
+    public void scrollDownToNextPage(OnMoveNextChapterListener listener) {
+        mFragmentReaders.get(getCurrentFragmentIndex()).scrollDownToNextPage(listener);
     }
 
     private void initpop() {
@@ -330,7 +362,7 @@ public class JReader extends AppCompatActivity {
     }
 
     private void initViewPager() {
-//        新建一本书章节的数的三分之一数量的fragment
+//        新建一本书章节的数大小数量的fragment
         int chapterNum = urlList.size();
 
         for (int i = 0; i < titleList.size(); i++) {
@@ -339,11 +371,10 @@ public class JReader extends AppCompatActivity {
             FragmentReader fragmentReader = new JReaderFragment(chapter, mPresentReader, textColor, 100.0f * (i + 1) / chapterNum);
             mFragmentReaders.add(fragmentReader);
         }
-
         FragmentPagerAdapter pagerAdapter = new JReaderFragmentPagerAdapter(getSupportFragmentManager());
         mIdJieReaderContentVp.setAdapter(pagerAdapter);
         mIdJieReaderContentVp.setOffscreenPageLimit(3);
-
+        mIdJieReaderContentVp.setPageTransformer(false,new DepthPageTransformer());
         if (mPresentReader.getBackgroundColor() != 0)
             mIdJieReaderContentVp.setBackgroundResource(mPresentReader.getBackgroundColor());
 
@@ -408,7 +439,7 @@ public class JReader extends AppCompatActivity {
                 .subscribe(new Action1<Integer>() {
                     @Override
                     public void call(Integer integer) {
-                            mIdJieReaderContentVp.setCurrentItem(integer);
+                        mIdJieReaderContentVp.setCurrentItem(integer);
                     }
                 });
 
@@ -442,6 +473,17 @@ public class JReader extends AppCompatActivity {
             cancelFullScreen();
         }
         return false;
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+        // 音量减小
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+                mPresentReader.scrollDownToNextPage();
+                return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     private void getScreenSize() {
@@ -493,7 +535,14 @@ public class JReader extends AppCompatActivity {
                     if (mDrawerLayout.isDrawerOpen(Gravity.LEFT))
                         return super.dispatchTouchEvent(ev);
                     return toogleScreenState();
+                } else if (ev.getX() > mScreenWidth * 4 / 5 && ev.getY() > mScreenHeight * 4 / 5) {
+                    if (!mDrawerLayout.isDrawerOpen(Gravity.LEFT) && !mIdReaderBottomBar.isShown()) {
+                        mPresentReader.scrollDownToNextPage();
+                        return false;
+                    }
+
                 }
+
         }
         return super.dispatchTouchEvent(ev);
     }
@@ -676,6 +725,7 @@ public class JReader extends AppCompatActivity {
 
         @Override
         public Fragment getItem(int position) {
+
             return (Fragment) mFragmentReaders.get(position);
         }
 
