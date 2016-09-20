@@ -374,7 +374,7 @@ public class JReader extends AppCompatActivity {
         FragmentPagerAdapter pagerAdapter = new JReaderFragmentPagerAdapter(getSupportFragmentManager());
         mIdJieReaderContentVp.setAdapter(pagerAdapter);
         mIdJieReaderContentVp.setOffscreenPageLimit(3);
-        mIdJieReaderContentVp.setPageTransformer(false,new DepthPageTransformer());
+        mIdJieReaderContentVp.setPageTransformer(true,new DepthPageTransformer());
         if (mPresentReader.getBackgroundColor() != 0)
             mIdJieReaderContentVp.setBackgroundResource(mPresentReader.getBackgroundColor());
 

@@ -33,12 +33,7 @@ import android.widget.Toast;
 
 import com.daimajia.numberprogressbar.NumberProgressBar;
 import com.gao.jiefly.jieflysbooks.Model.bean.Book;
-import com.gao.jiefly.jieflysbooks.Model.bean.BookManager;
-import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
-import com.gao.jiefly.jieflysbooks.Model.listener.OnBookListener;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnDataStateListener;
-import com.gao.jiefly.jieflysbooks.Model.loader.BaseBookFactory;
-import com.gao.jiefly.jieflysbooks.Model.loader.BookFactory;
 import com.gao.jiefly.jieflysbooks.Present.PresentMain;
 import com.gao.jiefly.jieflysbooks.R;
 import com.gao.jiefly.jieflysbooks.Service.UpdateBookService;
@@ -153,7 +148,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
 
             }
         });*/
-        new Thread(new Runnable() {
+        /*new Thread(new Runnable() {
             @Override
             public void run() {
                 BookFactory factory = new BaseBookFactory()
@@ -204,7 +199,7 @@ public class Main extends AppCompatActivity implements View, OnDataStateListener
                 });
                 Logger.e(chapter.getContent());
             }
-        }).start();
+        }).start();*/
         mPresentMain = PresentMain.getInstance(getApplicationContext(), this);
 //        mPresentMain.bindUpdateBookService(Main.this);
         if (mPresentMain.isNeedUpdateBackgrond) {

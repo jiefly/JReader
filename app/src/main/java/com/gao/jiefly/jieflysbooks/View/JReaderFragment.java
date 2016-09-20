@@ -15,7 +15,6 @@ import com.gao.jiefly.jieflysbooks.Model.bean.Chapter;
 import com.gao.jiefly.jieflysbooks.Model.listener.OnMoveNextChapterListener;
 import com.gao.jiefly.jieflysbooks.Present.PresentReader;
 import com.gao.jiefly.jieflysbooks.R;
-import com.orhanobut.logger.Logger;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -171,8 +170,8 @@ public class JReaderFragment extends Fragment implements FragmentReader {
                         mScrollView.scrollTo(0, integer);
                         if (integer + 20 >= mTextViewHeight)
                             listener.onNextChapter();
-                        Logger.e("scrollY", integer + "");
-                        Logger.e("height", mTextViewHeight + "");
+//                        Logger.e("scrollY", integer + "");
+//                        Logger.e("height", mTextViewHeight + "");
                     }
                 });
     }
